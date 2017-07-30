@@ -10,6 +10,9 @@ namespace Brite
 {
     public abstract class Animation
     {
+        // Get logger
+        private static readonly Log log = Logger.GetLog<Animation>();
+
         private TypedStream _stream;
         private Mutex _streamLock;
         private int _retries;
@@ -101,8 +104,8 @@ namespace Brite
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn<Animation>($"SendCommand failed on try {i}");
-                    Log.Warn<Animation>($"\tError: {ex}");
+                    log.Warn($"SendCommand failed on try {i}");
+                    log.Warn($"\tError: {ex}");
                 }
             }
 

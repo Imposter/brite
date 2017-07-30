@@ -17,12 +17,34 @@ namespace Brite.UWP.Core
         private DeviceInformation _deviceInformation;
         private SerialStream _stream;
 
+        private bool _dtrEnable;
+        private bool _rtsEnable;
+
         public string PortName { get; set; }
         public uint BaudRate { get; set; }
         public int Timeout { get; set; }
 
         public bool IsOpen => _device != null;
-        public bool DtrEnable { get; set; }
+        public bool DtrEnable
+        {
+            get => _dtrEnable;
+            set
+            {
+                _dtrEnable = value;
+                if (_device != null)
+                    _device.IsDataTerminalReadyEnabled = value;
+            }
+        }
+        public bool RtsEnable
+        {
+            get => _rtsEnable;
+            set
+            {
+                _rtsEnable = value;
+                if (_device != null)
+                    _device.IsRequestToSendEnabled = value;
+            }
+        }
         public ushort DataBits { get; set; }
         public SerialStopBits StopBits { get; set; }
         public SerialParity Parity { get; set; }
@@ -33,6 +55,7 @@ namespace Brite.UWP.Core
             BaudRate = 4800;
             Timeout = DefaultTimeout;
             DtrEnable = false;
+            RtsEnable = false;
             DataBits = 8;
             StopBits = SerialStopBits.One;
             Parity = SerialParity.None;
@@ -45,6 +68,7 @@ namespace Brite.UWP.Core
             Timeout = timeout;
 
             DtrEnable = false;
+            RtsEnable = false;
             DataBits = 8;
             StopBits = SerialStopBits.One;
             Parity = SerialParity.None;
@@ -67,6 +91,7 @@ namespace Brite.UWP.Core
             _device.StopBits = (WinSerialStopBits)StopBits;
             _device.Parity = (WinSerialParity)Parity;
             _device.IsDataTerminalReadyEnabled = DtrEnable;
+            _device.IsRequestToSendEnabled = RtsEnable;
             _device.Handshake = SerialHandshake.None;
             _device.ReadTimeout = TimeSpan.FromMilliseconds(Timeout);
             _device.WriteTimeout = TimeSpan.FromMilliseconds(Timeout);

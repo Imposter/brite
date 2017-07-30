@@ -181,6 +181,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Brite.Micro\Brite.Micro.csproj">
+      <Project>{fce966c1-0c86-45d6-a42e-b318f10c27cb}</Project>
+      <Name>Brite.Micro</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
       <Project>{6e94bbf0-86c6-43e0-9b47-595d2e67bc3f}</Project>
       <Name>Brite.Utility</Name>

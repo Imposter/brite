@@ -110,7 +110,6 @@
     <Compile Include="SerialConnection.cs" />
     <Compile Include="SerialDeviceSearcher.cs" />
     <Compile Include="SerialStream.cs" />
-    <Compile Include="Updater.cs" />
     <EmbeddedResource Include="Properties\Brite.UWP.Core.rd.xml" />
   </ItemGroup>
   <ItemGroup>

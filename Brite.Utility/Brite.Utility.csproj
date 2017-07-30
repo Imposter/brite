@@ -45,6 +45,7 @@
     <Compile Include="IO\IStream.cs" />
     <Compile Include="IO\ITimedStream.cs" />
     <Compile Include="IO\Log.cs" />
+    <Compile Include="IO\Logger.cs" />
     <Compile Include="IO\SerialParity.cs" />
     <Compile Include="IO\SerialStopBits.cs" />
     <Compile Include="IO\TypedStream.cs" />

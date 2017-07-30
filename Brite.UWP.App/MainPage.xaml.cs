@@ -26,5 +26,10 @@ namespace Brite.UWP.App
         {
             this.InitializeComponent();
         }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            await Entrypoint.TMain();
+        }
     }
 }

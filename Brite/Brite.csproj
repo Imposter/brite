@@ -56,10 +56,8 @@
     <Compile Include="Color.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Device.cs" />
-    <Compile Include="IUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Result.cs" />
-    <Compile Include="UpdaterChipset.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

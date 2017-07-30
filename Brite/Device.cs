@@ -9,6 +9,9 @@ namespace Brite
 {
     public class Device
     {
+        // Get logger
+        private static readonly Log log = Logger.GetLog<Device>();
+
         // USB Device Info
         private readonly DeviceInfo _deviceInfo;
 
@@ -248,8 +251,8 @@ namespace Brite
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn<Device>($"SendCommand failed on try {i}");
-                    Log.Warn<Device>($"\tError: {ex}");
+                    log.Warn($"SendCommand failed on try {i}");
+                    log.Warn($"\tError: {ex}");
                 }
             }
 

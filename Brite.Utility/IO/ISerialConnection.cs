@@ -9,6 +9,7 @@ namespace Brite.Utility.IO
         uint BaudRate { get; set; }
         int Timeout { get; set; }
         bool DtrEnable { get; set; }
+        bool RtsEnable { get; set; }
         ushort DataBits { get; set; }
         SerialStopBits StopBits { get; set; }
         SerialParity Parity { get; set; }

@@ -8,6 +8,9 @@ namespace Brite
 {
     public class Channel
     {
+        // Get logger
+        private static readonly Log log = Logger.GetLog<Channel>();
+
         private readonly byte _index;
         private readonly ushort _maxSize;
         private readonly byte _maxBrightness;
@@ -213,8 +216,8 @@ namespace Brite
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn<Channel>($"SendCommand failed on try {i}");
-                    Log.Warn<Channel>($"\tError: {ex}");
+                    log.Warn($"SendCommand failed on try {i}");
+                    log.Warn($"\tError: {ex}");
                 }
             }
 
