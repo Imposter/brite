@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Brite.Micro.Programmers.StkV1;
 using Brite.Micro.Programmers.StkV1.Protocol;
 using Brite.Utility.IO;
 using DeviceInfo = Brite.Micro.Programmers.StkV1.DeviceInfo;
 
 namespace Brite.Micro.Programmers
 {
+    // For more documentation, see: http://www.atmel.com/images/doc2525.pdf
     public class StkV1Programmer : SerialProgrammer
     {
         public const int DefaultSyncRetries = 5;
@@ -19,7 +21,7 @@ namespace Brite.Micro.Programmers
         private readonly bool _reset;
         private readonly int _retries;
 
-        public StkV1Programmer(SerialChannel channel, DeviceInfo info, bool reset = true, int retries = DefaultSyncRetries)
+        public StkV1Programmer(StkV1Channel channel, DeviceInfo info, bool reset = true, int retries = DefaultSyncRetries)
             : base(channel)
         {
             _info = info;

@@ -51,7 +51,7 @@ namespace Brite.Micro
                 case SerialPinType.Dtr:
                     _serial.DtrEnable = reset ^ _invert;
                     break;
-                case SerialPinType.TxD:
+                case SerialPinType.Txd:
                     await _stream.WriteUInt8((byte)(reset ^ _invert ? 0xff : 0x00));
                     break;
                 default:

@@ -5,9 +5,9 @@
         None,
         Rts,
         Cts,
-        CD,
+        Cd,
         Dsr,
         Dtr,
-        TxD
+        Txd // Data transfer
     }
 }

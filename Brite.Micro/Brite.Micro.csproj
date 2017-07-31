@@ -53,6 +53,7 @@
     <Compile Include="Programmers\StkV1\Protocol\DeviceParametersExt.cs" />
     <Compile Include="Programmers\StkV1\Protocol\Parameter.cs" />
     <Compile Include="Programmers\StkV1\Protocol\Result.cs" />
+    <Compile Include="Programmers\StkV1\StkV1Channel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolException.cs" />
     <Compile Include="SerialChannel.cs" />
