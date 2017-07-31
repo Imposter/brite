@@ -45,6 +45,11 @@ namespace Brite.UWP.Core
                     _device.IsRequestToSendEnabled = value;
             }
         }
+
+        public bool CtsHolding => _device.ClearToSendState;
+        public bool CdHolding => _device.CarrierDetectState;
+        public bool DsrHolding => _device.DataSetReadyState;
+
         public ushort DataBits { get; set; }
         public SerialStopBits StopBits { get; set; }
         public SerialParity Parity { get; set; }
@@ -101,20 +106,26 @@ namespace Brite.UWP.Core
 
         public async Task Close()
         {
-            _device.Dispose();
+            if (_device != null)
+            {
+                _device.Dispose();
 
-            _device = null;
-            _deviceInformation = null;
-            _stream = null;
+                _device = null;
+                _deviceInformation = null;
+                _stream = null;
+            }
         }
 
         public void Dispose()
         {
-            _device.Dispose();
+            if (_device != null)
+            {
+                _device.Dispose();
 
-            _device = null;
-            _deviceInformation = null;
-            _stream = null;
+                _device = null;
+                _deviceInformation = null;
+                _stream = null;
+            }
         }
     }
 }
