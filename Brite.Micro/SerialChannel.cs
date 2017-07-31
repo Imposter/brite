@@ -6,7 +6,7 @@ namespace Brite.Micro
 {
     public class SerialChannel : IChannel
     {
-        public const int DefaultTimeout = 1000;
+        public const int DefaultTimeout = 2000;
 
         private readonly ISerialConnection _serial;
         private readonly SerialPinType _pin;

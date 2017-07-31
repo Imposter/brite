@@ -4,7 +4,7 @@
     {
         public static Log GetLog<T>()
         {
-            return new Log(typeof(T).Name);
+            return new Log(typeof(T).GetFriendlyName());
         }
 
         public static Log GetLog()

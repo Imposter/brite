@@ -2,34 +2,22 @@
 {
     public class DeviceInfo
     {
-        private DeviceMemoryInfo _ram;
-        private DeviceMemoryInfo _flash;
-        private DeviceMemoryInfo _eeprom;
-        private DeviceBits _lockBits;
-        private DeviceBits _fuseBits;
+        public DeviceType Type { get; }
+        public DeviceMemoryInfo Ram { get; }
+        public DeviceMemoryInfo Flash { get; }
+        public DeviceMemoryInfo Eeprom { get; }
+        public DeviceMemoryInfo LockBits { get; }
+        public DeviceMemoryInfo FuseBits { get; }
 
-        private DeviceType _type;
-        private int _signature;
-
-        public DeviceType Type => _type;
-        public int Signature => _signature;
-
-        public DeviceMemoryInfo Ram => _ram;
-        public DeviceMemoryInfo Flash => _flash;
-        public DeviceMemoryInfo Eeprom => _eeprom;
-        public DeviceBits LockBits => _lockBits;
-        public DeviceBits FuseBits => _fuseBits;
-
-        public DeviceInfo(DeviceType type, int signature)
+        public DeviceInfo(DeviceType type)
         {
-            _type = type;
-            _signature = signature;
+            Type = type;
 
-            _ram = new DeviceMemoryInfo(MemoryType.Ram);
-            _flash = new DeviceMemoryInfo(MemoryType.Flash);
-            _eeprom = new DeviceMemoryInfo(MemoryType.Eeprom);
-            _lockBits = new DeviceBits(MemoryType.LockBits);
-            _fuseBits = new DeviceBits(MemoryType.FuseBits);
+            Ram = new DeviceMemoryInfo(MemoryType.Ram);
+            Flash = new DeviceMemoryInfo(MemoryType.Flash);
+            Eeprom = new DeviceMemoryInfo(MemoryType.Eeprom);
+            LockBits = new DeviceMemoryInfo(MemoryType.LockBits);
+            FuseBits = new DeviceMemoryInfo(MemoryType.FuseBits);
         }
     }
 }

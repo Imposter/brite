@@ -20,7 +20,6 @@ namespace Brite.UWP.App
 
         public static async Task TMain()
         {
-#if TRUE
             var picker = new FileOpenPicker();
             picker.ViewMode = PickerViewMode.List;
             picker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
@@ -36,7 +35,6 @@ namespace Brite.UWP.App
                     // TODO: ...
                 }
             }
-#endif
 
 #if FALSE
             var searcher = new SerialDeviceSearcher();

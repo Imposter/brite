@@ -1,11 +1,10 @@
-﻿using Brite.Utility.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Brite.Micro
 {
     public abstract class SerialProgrammer : IProgrammer
     {
-        private SerialChannel _channel;
+        private readonly SerialChannel _channel;
 
         public SerialChannel Channel => _channel;
 
@@ -31,8 +30,8 @@ namespace Brite.Micro
             return operation;
         }
 
-        public abstract Task ReadPage(int address, MemoryType type, byte[] data, int offset, int length);
-        public abstract Task WritePage(int address, MemoryType type, byte[] data, int offset, int length);
+        public abstract Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length);
+        public abstract Task WritePage(MemoryType type, int address, byte[] data, int offset, int length);
 
         public virtual void Dispose()
         {
