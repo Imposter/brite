@@ -1,10 +1,13 @@
-﻿namespace Brite.Micro.STKv1
-{
-    public enum StkDeviceCode : byte
-    {
-        None = 0xff,
-        Pic16F628 = 1,
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
+namespace Brite.Micro.Programmers.StkV1
+{
+    public enum DeviceType
+    {
         ATtiny11 = 0x11,
         ATtiny12 = 0x12,
         ATtiny15 = 0x13,

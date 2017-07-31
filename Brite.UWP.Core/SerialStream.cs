@@ -19,6 +19,9 @@ namespace Brite.UWP.Core
 
         public async Task<int> ReadAsync(byte[] buffer, int offset, int length)
         {
+            if (length <= 0)
+                return 0;
+
             var readCount = await _reader.LoadAsync((uint)length);
             if (offset > 0 || readCount < length)
             {
@@ -36,6 +39,9 @@ namespace Brite.UWP.Core
 
         public async Task WriteAsync(byte[] buffer, int offset, int length)
         {
+            if (length <= 0)
+                return;
+
             _writer.WriteBytes(offset > 0 ? buffer.Skip(offset).ToArray() : buffer);
             await _writer.StoreAsync();
         }

@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Crypto\Hash.cs" />
+    <Compile Include="IO\BinaryStream.cs" />
     <Compile Include="IO\DeviceInfo.cs" />
     <Compile Include="IO\IDeviceSearcher.cs" />
     <Compile Include="IO\ISerialConnection.cs" />

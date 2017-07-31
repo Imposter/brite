@@ -5,12 +5,12 @@ namespace Brite.Micro
 {
     public interface IProgrammer : IDisposable
     {
-        Task<ProgrammingSession> Start();
-        Task Stop();
+        Task Open();
+        Task Close();
 
-        Task ReadPage(int address, MemoryType memType, byte[] data, int dataStart, int dataLength);
-        Task WritePage(int address, MemoryType memType, byte[] data, int dataStart, int dataLength);
+        Task ReadPage(int address, MemoryType type, byte[] data, int offset, int length);
+        Task WritePage(int address, MemoryType type, byte[] data, int offset, int length);
 
-        Task EraseDevice();
+        TOperation BeginOperation<TOperation>() where TOperation : ProgrammerOperation, new();
     }
 }

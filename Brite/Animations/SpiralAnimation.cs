@@ -32,21 +32,21 @@ namespace Brite.Animations
 
         public async Task SetAsForward(bool forward)
         {
-            await SendRequest(stream =>
+            await SendRequest(async stream =>
             {
                 // Write request
-                stream.WriteUInt8((byte)Command.SetForwardEnabled);
-                stream.WriteBoolean(forward);
+                await stream.WriteUInt8((byte)Command.SetForwardEnabled);
+                await stream.WriteBoolean(forward);
             });
         }
 
         public async Task SetGroupSize(ushort size)
         {
-            await SendRequest(stream =>
+            await SendRequest(async stream =>
             {
                 // Write request
-                stream.WriteUInt8((byte)Command.SetGroupSize);
-                stream.WriteUInt16(size);
+                await stream.WriteUInt8((byte)Command.SetGroupSize);
+                await stream.WriteUInt16(size);
             });
         }
     }

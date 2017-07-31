@@ -240,7 +240,7 @@ namespace Brite
                 try
                 {
                     _stream.TypesEnabled = false;
-                    _stream.WriteUInt8((byte)command);
+                    await _stream.WriteUInt8((byte)command);
 
                     var response = await _stream.ReadUInt8();
                     if (response == (byte)command)

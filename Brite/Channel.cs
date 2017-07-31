@@ -67,8 +67,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_index);
-                _stream.WriteUInt16(size);
+                await _stream.WriteUInt8(_index);
+                await _stream.WriteUInt16(size);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -101,8 +101,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_index);
-                _stream.WriteUInt8(brightness);
+                await _stream.WriteUInt8(_index);
+                await _stream.WriteUInt8(brightness);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -143,8 +143,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_index);
-                _stream.WriteUInt32(animId);
+                await _stream.WriteUInt8(_index);
+                await _stream.WriteUInt32(animId);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -180,8 +180,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_index);
-                _stream.WriteUInt32(0);
+                await _stream.WriteUInt8(_index);
+                await _stream.WriteUInt32(0);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -205,7 +205,7 @@ namespace Brite
                 try
                 {
                     _stream.TypesEnabled = false;
-                    _stream.WriteUInt8((byte) command);
+                    await _stream.WriteUInt8((byte) command);
 
                     var response = await _stream.ReadUInt8();
                     if (response == (byte) command)

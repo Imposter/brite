@@ -93,7 +93,7 @@ namespace Brite
                 try
                 {
                     _stream.TypesEnabled = false;
-                    _stream.WriteUInt8((byte)command);
+                    await _stream.WriteUInt8((byte)command);
 
                     var response = await _stream.ReadUInt8();
                     if (response == (byte)command)
@@ -139,8 +139,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_channel);
-                _stream.WriteUInt8(colorCount);
+                await _stream.WriteUInt8(_channel);
+                await _stream.WriteUInt8(colorCount);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -173,11 +173,11 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_channel);
-                _stream.WriteUInt8(index);
-                _stream.WriteUInt8(color.R);
-                _stream.WriteUInt8(color.G);
-                _stream.WriteUInt8(color.B);
+                await _stream.WriteUInt8(_channel);
+                await _stream.WriteUInt8(index);
+                await _stream.WriteUInt8(color.R);
+                await _stream.WriteUInt8(color.G);
+                await _stream.WriteUInt8(color.B);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -210,8 +210,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_channel);
-                _stream.WriteFloat(speed);
+                await _stream.WriteUInt8(_channel);
+                await _stream.WriteFloat(speed);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -244,8 +244,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_channel);
-                _stream.WriteBoolean(enabled);
+                await _stream.WriteUInt8(_channel);
+                await _stream.WriteBoolean(enabled);
 
                 // Read response
                 _stream.TypesEnabled = true;
@@ -259,7 +259,7 @@ namespace Brite
             }
         }
 
-        internal delegate void RequestCallback(TypedStream stream);
+        internal delegate Task RequestCallback(TypedStream stream);
         internal async Task SendRequest(RequestCallback callback)
         {
             if (_stream == null)
@@ -276,8 +276,8 @@ namespace Brite
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                _stream.WriteUInt8(_channel);
-                _stream.WriteUInt32(GetId());
+                await _stream.WriteUInt8(_channel);
+                await _stream.WriteUInt32(GetId());
 
                 // Read response
                 var result = await _stream.ReadUInt8();
@@ -285,7 +285,7 @@ namespace Brite
                     throw new Exception("Unable to send animation request");
 
                 _stream.TypesEnabled = false;
-                callback(_stream);
+                await callback(_stream);
             }
             finally
             {

@@ -2,9 +2,10 @@
 {
     public enum MemoryType
     {
+        Ram,
         Flash,
         Eeprom,
         LockBits,
-        FuseBits
+        FuseBits,
     }
 }

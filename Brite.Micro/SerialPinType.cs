@@ -1,6 +1,6 @@
-﻿namespace Brite.Micro.IO
+﻿namespace Brite.Micro
 {
-    public enum ComPinType
+    public enum  SerialPinType
     {
         None,
         Rts,

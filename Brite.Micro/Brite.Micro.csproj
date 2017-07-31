@@ -38,51 +38,31 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MemoryType.cs" />
-    <Compile Include="Signature.cs" />
-    <Compile Include="DeviceOperationStatus.cs" />
-    <Compile Include="Devices\DeviceBit.cs" />
-    <Compile Include="Devices\DeviceBits.cs" />
-    <Compile Include="Devices\DeviceBitsGroup.cs" />
-    <Compile Include="Devices\DeviceByte.cs" />
-    <Compile Include="Devices\DeviceByteBits.cs" />
-    <Compile Include="Devices\DeviceEepromParameters.cs" />
-    <Compile Include="Devices\DeviceFlashParameters.cs" />
-    <Compile Include="Devices\DeviceInfo.cs" />
-    <Compile Include="Devices\DeviceInfoUtils.cs" />
-    <Compile Include="Devices\MemoryMask.cs" />
-    <Compile Include="Hex\HexFile.cs" />
-    <Compile Include="Hex\HexFileBuilder.cs" />
-    <Compile Include="Hex\HexFileException.cs" />
-    <Compile Include="Hex\HexFileLine.cs" />
-    <Compile Include="Hex\HexFileLineType.cs" />
-    <Compile Include="IO\ComPin.cs" />
-    <Compile Include="IO\ComPinType.cs" />
-    <Compile Include="IO\IChannel.cs" />
-    <Compile Include="IO\SerialChannel.cs" />
+    <Compile Include="Hex\IHexFile.cs" />
+    <Compile Include="IChannel.cs" />
     <Compile Include="IProgrammer.cs" />
-    <Compile Include="Programmer.cs" />
-    <Compile Include="ProgrammingSession.cs" />
+    <Compile Include="IProgrammerOperation.cs" />
+    <Compile Include="MemoryType.cs" />
+    <Compile Include="ProgrammerOperation.cs" />
+    <Compile Include="Programmers\StkV1Programmer.cs" />
+    <Compile Include="Programmers\StkV1\DeviceBit.cs" />
+    <Compile Include="Programmers\StkV1\DeviceBits.cs" />
+    <Compile Include="Programmers\StkV1\DeviceInfo.cs" />
+    <Compile Include="Programmers\StkV1\DeviceMemoryInfo.cs" />
+    <Compile Include="Programmers\StkV1\DeviceType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StkV1Programmer.cs" />
-    <Compile Include="STKv1\StkDeviceCode.cs" />
-    <Compile Include="STKv1\StkFailedException.cs" />
-    <Compile Include="STKv1\StkFuseBits.cs" />
-    <Compile Include="STKv1\StkFuseBitsExt.cs" />
-    <Compile Include="STKv1\StkNoSyncException.cs" />
-    <Compile Include="STKv1\StkV1Client.cs" />
-    <Compile Include="STKv1\StkV1Command.cs" />
-    <Compile Include="STKv1\StkV1DeviceParameters.cs" />
-    <Compile Include="STKv1\StkV1DeviceParametersExt.cs" />
-    <Compile Include="STKv1\StkV1Parameter.cs" />
-    <Compile Include="STKv1\StkV1Response.cs" />
-    <Compile Include="STKv1\StkVersion.cs" />
+    <Compile Include="SerialChannel.cs" />
+    <Compile Include="SerialPinType.cs" />
+    <Compile Include="SerialProgrammer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
       <Project>{6E94BBF0-86C6-43E0-9B47-595D2E67BC3F}</Project>
       <Name>Brite.Utility</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Operations\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

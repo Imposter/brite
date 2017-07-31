@@ -1,37 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Brite.Utility.IO
 {
-    public class TypedStream
+    public class BinaryStream
     {
-        private enum DataType : byte
-        {
-            Boolean,
-            Int8,
-            UInt8,
-            Int16,
-            UInt16,
-            Int32,
-            UInt32,
-            Float,
-            String,
-            Blob,
-            Max
-        }
-
         private readonly IStream _stream;
-        private bool _typesEnabled;
         private int _peekByte;
 
         public IStream Stream => _stream;
-
-        public bool TypesEnabled
-        {
-            get => _typesEnabled;
-            set => _typesEnabled = value;
-        }
 
         private async Task<int> ReadBytes(byte[] buffer, int length)
         {
@@ -88,29 +68,7 @@ namespace Brite.Utility.IO
             await _stream.WriteAsync(bytes, 0, bytes.Length);
         }
 
-        private async Task<bool> ReadDataType(DataType type)
-        {
-            if (!_typesEnabled)
-                return true;
-
-            var b = await Peek();
-            if (b < 0)
-                return false;
-
-            if (b >= (int)DataType.Max)
-                return false;
-
-            b = await Read();
-            return b == (int)type;
-        }
-
-        private async Task WriteDataType(DataType type)
-        {
-            if (_typesEnabled)
-                await Write((byte)type);
-        }
-
-        public TypedStream(IStream stream)
+        public BinaryStream(IStream stream)
         {
             _stream = stream;
             _peekByte = -1;
@@ -118,9 +76,6 @@ namespace Brite.Utility.IO
 
         public async Task<bool> ReadBoolean()
         {
-            if (!await ReadDataType(DataType.Boolean))
-                throw new Exception("Unable to read data type");
-
             var b = await Read();
             if (b < 0)
                 return false;
@@ -130,17 +85,11 @@ namespace Brite.Utility.IO
 
         public async Task<sbyte> ReadInt8()
         {
-            if (!await ReadDataType(DataType.Int8))
-                throw new Exception("Unable to read data type");
-
             return (sbyte)await Read();
         }
 
         public async Task<byte> ReadUInt8()
         {
-            if (!await ReadDataType(DataType.UInt8))
-                throw new Exception("Unable to read data type");
-
             var b = await Read();
             if (b < 0)
                 throw new Exception("Unable to read data");
@@ -150,9 +99,6 @@ namespace Brite.Utility.IO
 
         public async Task<short> ReadInt16()
         {
-            if (!await ReadDataType(DataType.Int16))
-                throw new Exception("Unable to read data type");
-
             var buffer = new byte[sizeof(short)];
             if (!await Read(buffer, buffer.Length))
                 throw new Exception("Unable to read data");
@@ -162,9 +108,6 @@ namespace Brite.Utility.IO
 
         public async Task<ushort> ReadUInt16()
         {
-            if (!await ReadDataType(DataType.UInt16))
-                throw new Exception("Unable to read data type");
-
             var buffer = new byte[sizeof(ushort)];
             if (!await Read(buffer, buffer.Length))
                 throw new Exception("Unable to read data");
@@ -174,9 +117,6 @@ namespace Brite.Utility.IO
 
         public async Task<int> ReadInt32()
         {
-            if (!await ReadDataType(DataType.Int32))
-                throw new Exception("Unable to read data type");
-
             var buffer = new byte[sizeof(int)];
             if (!await Read(buffer, buffer.Length))
                 throw new Exception("Unable to read data");
@@ -186,9 +126,6 @@ namespace Brite.Utility.IO
 
         public async Task<uint> ReadUInt32()
         {
-            if (!await ReadDataType(DataType.UInt32))
-                throw new Exception("Unable to read data type");
-
             var buffer = new byte[sizeof(uint)];
             if (!await Read(buffer, buffer.Length))
                 throw new Exception("Unable to read data");
@@ -198,9 +135,6 @@ namespace Brite.Utility.IO
 
         public async Task<float> ReadFloat()
         {
-            if (!await ReadDataType(DataType.Float))
-                throw new Exception("Unable to read data type");
-
             var buffer = new byte[sizeof(float)];
             if (!await Read(buffer, buffer.Length))
                 throw new Exception("Unable to read data");
@@ -208,16 +142,15 @@ namespace Brite.Utility.IO
             return BitConverter.ToSingle(buffer, 0);
         }
 
-        public async Task<string> ReadString(string encoding = "UTF-8")
+        public async Task<string> ReadString(int length, string encoding = "UTF-8")
         {
-            if (!await ReadDataType(DataType.String))
-                throw new Exception("Unable to read data type");
+            // Get encoding
+            var encoder = Encoding.GetEncoding(encoding);
 
-            var lengthBuffer = new byte[sizeof(int)];
-            if (!await Read(lengthBuffer, lengthBuffer.Length))
-                throw new Exception("Unable to read length");
+            // Calculate length
+            var tempBuffer = encoder.GetBytes("A");
+            length *= tempBuffer.Length;
 
-            var length = BitConverter.ToInt32(lengthBuffer, 0);
             var buffer = new byte[length];
             if (!await Read(buffer, length))
                 throw new Exception("Unable to read data");
@@ -225,17 +158,9 @@ namespace Brite.Utility.IO
             return Encoding.GetEncoding(encoding).GetString(buffer);
         }
 
-        public async Task<byte[]> ReadBlob()
+        public async Task<byte[]> ReadBlob(int length)
         {
-            if (!await ReadDataType(DataType.Blob))
-                throw new Exception("Unable to read data type");
-
-            var lengthBuffer = new byte[sizeof(int)];
-            if (!await Read(lengthBuffer, lengthBuffer.Length))
-                throw new Exception("Unable to read length");
-
-            var length = BitConverter.ToInt32(lengthBuffer, 0);
-            var obj = new byte[length];
+           var obj = new byte[length];
             if (!await Read(obj, length))
                 throw new Exception("Unable to read data");
 
@@ -244,70 +169,51 @@ namespace Brite.Utility.IO
 
         public async Task WriteBoolean(bool obj)
         {
-            await WriteDataType(DataType.Boolean);
             await Write((byte)(obj ? 1 : 0));
         }
 
         public async Task WriteInt8(sbyte obj)
         {
-            await WriteDataType(DataType.Int8);
             await Write((byte)obj);
         }
 
         public async Task WriteUInt8(byte obj)
         {
-            await WriteDataType(DataType.UInt8);
             await Write(obj);
         }
 
         public async Task WriteInt16(short obj)
         {
-            await WriteDataType(DataType.Int16);
             await Write(BitConverter.GetBytes(obj), sizeof(short));
         }
 
         public async Task WriteUInt16(ushort obj)
         {
-            await WriteDataType(DataType.UInt16);
             await Write(BitConverter.GetBytes(obj), sizeof(ushort));
         }
 
         public async Task WriteInt32(int obj)
         {
-            await WriteDataType(DataType.Int32);
             await Write(BitConverter.GetBytes(obj), sizeof(int));
         }
 
         public async Task WriteUInt32(uint obj)
         {
-            await WriteDataType(DataType.UInt32);
             await Write(BitConverter.GetBytes(obj), sizeof(uint));
         }
 
         public async Task WriteFloat(float obj)
         {
-            await WriteDataType(DataType.Float);
             await Write(BitConverter.GetBytes(obj), sizeof(float));
         }
 
         public async Task WriteString(string obj, string encoding = "UTF-8")
         {
-            // Get encoding
-            var encoder = Encoding.GetEncoding(encoding);
-
-            // Calculate length
-            var tempBuffer = encoder.GetBytes("A");
-            var bytes = encoder.GetBytes(obj);
-
-            await WriteDataType(DataType.String);
-            await Write(BitConverter.GetBytes(bytes.Length * tempBuffer.Length), sizeof(uint));
-            await Write(bytes, bytes.Length);
+            await Write(obj, encoding);
         }
 
         public async Task WriteBlob(byte[] obj)
         {
-            await WriteDataType(DataType.Blob);
-            await Write(BitConverter.GetBytes(obj.Length), sizeof(uint));
             await Write(obj, obj.Length);
         }
     }
