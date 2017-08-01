@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Brite.Micro.Programmers.StkV1
+﻿namespace Brite.Micro.Programmers.StkV1
 {
     public enum DeviceType
     {
@@ -32,7 +26,7 @@ namespace Brite.Micro.Programmers.StkV1
         ATmega16 = 0x82,
         ATmega162 = 0x83,
         ATmega169 = 0x84,
-        Atmega328 = 0x86,
+        ATmega328 = 0x86,
         ATmega323 = 0x90,
         ATmega32 = 0x91,
         ATmega64 = 0xA0,

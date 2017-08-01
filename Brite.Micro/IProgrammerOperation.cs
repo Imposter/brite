@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Brite.Micro
 {
-    public interface IProgrammerOperation
+    public interface IProgrammerOperation : IDisposable
     {
-        void Initialize(IProgrammer programmer);
         Task Execute();
     }
 }

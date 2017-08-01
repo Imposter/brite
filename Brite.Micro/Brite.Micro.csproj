@@ -43,6 +43,8 @@
     <Compile Include="IProgrammer.cs" />
     <Compile Include="IProgrammerOperation.cs" />
     <Compile Include="MemoryType.cs" />
+    <Compile Include="Operations\DumpToStream.cs" />
+    <Compile Include="Programmer.cs" />
     <Compile Include="ProgrammerOperation.cs" />
     <Compile Include="Programmers\StkV1Programmer.cs" />
     <Compile Include="Programmers\StkV1\DeviceInfo.cs" />
@@ -51,7 +53,6 @@
     <Compile Include="Programmers\StkV1\Protocol\Command.cs" />
     <Compile Include="Programmers\StkV1\Protocol\DeviceParameters.cs" />
     <Compile Include="Programmers\StkV1\Protocol\DeviceParametersExt.cs" />
-    <Compile Include="Programmers\StkV1\Protocol\Parameter.cs" />
     <Compile Include="Programmers\StkV1\Protocol\Result.cs" />
     <Compile Include="Programmers\StkV1\StkV1Channel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -66,8 +67,6 @@
       <Name>Brite.Utility</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Operations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Brite.Micro.Programmers.StkV1;
 using Brite.Micro.Programmers.StkV1.Protocol;
@@ -69,42 +66,76 @@ namespace Brite.Micro.Programmers
             await LeaveProgramMode();
             await base.Close();
         }
-
-        // TODO: Implement
+        
         public override async Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length)
         {
             switch (type)
             {
                 case MemoryType.Flash:
-                    break;
                 case MemoryType.Eeprom:
+                    var position = address;
+                    var end = address + length;
+                    while (position < end)
+                    {
+                        await LoadAddress((ushort)(position >> 1));
+                        var count = Math.Min(end - position, BlockSize);
+                        await ReadPage(type, data, position - address + offset, count);
+                        position += count;
+                    }
                     break;
                 case MemoryType.LockBits:
+                    for (var i = 0; i < length; i++)
+                        data[i + offset] = await ReadLockByte(address + i);
                     break;
                 case MemoryType.FuseBits:
+                    for (var i = 0; i < length; i++)
+                        data[i + offset] = await ReadFuseByte(address + i);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
+        
+        public override async Task WritePage(MemoryType type, int address, byte[] data, int offset, int length)
+        {
+            switch (type)
+            {
+                case MemoryType.Flash:
+                case MemoryType.Eeprom:
+                    var position = address;
+                    var end = address + length;
+                    while (position < end)
+                    {
+                        await LoadAddress((ushort)(position >> 1));
+                        var count = Math.Min(end - position, BlockSize);
+                        await ProgramPage(type, data, position - address + offset, count);
+                        position += count;
+                    }
+                    break;
+                case MemoryType.LockBits:
+                    for (var i = 0; i < length; i++)
+                        await WriteLockByte(address + i, data[i + offset]);
+                    break;
+                case MemoryType.FuseBits:
+                    for (var i = 0; i < length; i++)
+                        await WriteFuseByte(address + i, data[i + offset]);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
-        // TODO: Implement
-        public override async Task WritePage(MemoryType type, int address, byte[] data, int offset, int length)
+        private async Task ResetDevice()
         {
-            switch (type)
-            {
-                case MemoryType.Flash:
-                    break;
-                case MemoryType.Eeprom:
-                    break;
-                case MemoryType.LockBits:
-                    break;
-                case MemoryType.FuseBits:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            await Channel.ToggleReset(true);
+            await Task.Delay(200);
+            await Channel.ToggleReset(false);
+            await Task.Delay(200);
+            await Channel.ToggleReset(true);
+            await Task.Delay(200);
         }
+
+        #region Protocol
 
         private async Task WaitForSync()
         {
@@ -122,39 +153,9 @@ namespace Brite.Micro.Programmers
             }
         }
 
-        private async Task ResetDevice()
-        {
-            await Channel.ToggleReset(true);
-            await Task.Delay(200);
-            await Channel.ToggleReset(false);
-            await Task.Delay(200);
-            await Channel.ToggleReset(true);
-            await Task.Delay(200);
-        }
-
         private async Task GetSync()
         {
             await SendRequest(Command.GetSync);
-        }
-
-        private async Task<byte> GetParameterValue(Parameter parameter)
-        {
-            byte value = 0;
-            await SendRequest(Command.GetParameterValue, async (channel, stream) =>
-            {
-                value = await stream.ReadUInt8();
-            });
-
-            return value;
-        }
-
-        private async Task SetParameterValue(Parameter parameter, byte value)
-        {
-            await SendRequest(Command.SetParameterValue, async stream =>
-            {
-                await stream.WriteUInt8((byte)parameter);
-                await stream.WriteUInt8(value);
-            });
         }
 
         private async Task SetDeviceParameters(DeviceParameters parameters)
@@ -183,7 +184,7 @@ namespace Brite.Micro.Programmers
 
         private async Task SetDeviceParametersExt(DeviceParametersExt parameters)
         {
-            await SendRequest(Command.SetDeviceParameters, async stream =>
+            await SendRequest(Command.SetDeviceParametersExt, async stream =>
             {
                 // Amount of parameters
                 await stream.WriteUInt8(4);
@@ -276,6 +277,50 @@ namespace Brite.Micro.Programmers
             });
         }
 
+        private async Task<byte> ReadLockByte(int address)
+        {
+            if (address == 0)
+                return await Universal(0x58, 0x00, 0x00, 0x00);
+            return 0;
+        }
+
+        private async Task WriteLockByte(int address, byte value)
+        {
+            if (address == 0)
+                await Universal(0xAC, 0xE0, 0x00, value);
+        }
+
+        private async Task<byte> ReadFuseByte(int address)
+        {
+            switch (address)
+            {
+                case 0:
+                    return await Universal(0x50, 0x00, 0x00, 0x00);
+                case 1:
+                    return await Universal(0x58, 0x08, 0x00, 0x00);
+                case 2:
+                    return await Universal(0x50, 0x08, 0x00, 0x00);
+                default:
+                    return 0;
+            }
+        }
+
+        private async Task WriteFuseByte(int address, byte value)
+        {
+            switch (address)
+            {
+                case 0:
+                    await Universal(0xAC, 0xA0, 0x00, value);
+                    break;
+                case 1:
+                    await Universal(0xAC, 0xA8, 0x00, value);
+                    break;
+                case 2:
+                    await Universal(0xAC, 0xA4, 0x00, value);
+                    break;
+            }
+        }
+
         private delegate Task RequestCallback(BinaryStream stream);
         private delegate Task ResponseCallback(SerialChannel channel, BinaryStream stream);
         private async Task SendRequest(Command command, RequestCallback requestCallback, ResponseCallback responseCallback)
@@ -316,5 +361,7 @@ namespace Brite.Micro.Programmers
         {
             await SendRequest(command, null, null);
         }
+
+        #endregion
     }
 }

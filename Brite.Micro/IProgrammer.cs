@@ -10,7 +10,5 @@ namespace Brite.Micro
 
         Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length);
         Task WritePage(MemoryType type, int address, byte[] data, int offset, int length);
-
-        TOperation BeginOperation<TOperation>() where TOperation : ProgrammerOperation, new();
     }
 }

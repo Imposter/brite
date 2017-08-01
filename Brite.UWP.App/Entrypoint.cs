@@ -11,6 +11,9 @@ using Windows.Storage.Streams;
 using System.IO;
 using Windows.Storage.Pickers;
 using Windows.Storage;
+using Brite.Micro.Programmers;
+using Brite.Micro.Programmers.StkV1;
+using DeviceInfo = Brite.Micro.Programmers.StkV1.DeviceInfo;
 
 namespace Brite.UWP.App
 {
@@ -20,19 +23,34 @@ namespace Brite.UWP.App
 
         public static async Task TMain()
         {
-            var picker = new FileOpenPicker();
-            picker.ViewMode = PickerViewMode.List;
+            var picker = new FileSavePicker();
+            picker.FileTypeChoices.Add("Intel HEX File", new List<string> { ".hex" });
             picker.SuggestedStartLocation = PickerLocationId.ComputerFolder;
-            picker.FileTypeFilter.Add(".hex");
 
-            var file = await picker.PickSingleFileAsync();
+            var file = await picker.PickSaveFileAsync();
             if (file != null)
             {
-                var fileProperties = await file.GetBasicPropertiesAsync();
-
-                using (var reader = new StreamReader(await file.OpenStreamForReadAsync()))
+                using (var reader = new StreamReader(await file.OpenStreamForWriteAsync()))
                 {
-                    // TODO: ...
+                    using (var serial = new SerialConnection("COM3", 115200))
+                    {
+                        using (var channel = new StkV1Channel(serial))
+                        {
+                            var info = new DeviceInfo(DeviceType.ATmega328);
+                            info.Ram.Size = 2048;
+                            info.Flash.Size = 32768;
+                            info.Flash.PageSize = 128;
+                            info.Eeprom.Size = 1024;
+                            info.Eeprom.PageSize = 1;
+                            info.LockBits.Size = 6;
+                            info.FuseBits.Size = 5;
+
+                            using (var programmer = new StkV1Programmer(channel, info))
+                            {
+                                await programmer.Open();
+                            }
+                        }
+                    }
                 }
             }
 

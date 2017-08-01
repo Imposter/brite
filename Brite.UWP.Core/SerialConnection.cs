@@ -15,7 +15,7 @@ namespace Brite.UWP.Core
 
         private SerialDevice _device;
         private DeviceInformation _deviceInformation;
-        private SerialStream _stream;
+        private Stream _stream;
 
         private bool _dtrEnable;
         private bool _rtsEnable;
@@ -101,7 +101,7 @@ namespace Brite.UWP.Core
             _device.ReadTimeout = TimeSpan.FromMilliseconds(Timeout);
             _device.WriteTimeout = TimeSpan.FromMilliseconds(Timeout);
 
-            _stream = new SerialStream(_device.InputStream, _device.OutputStream);
+            _stream = new Stream(_device.InputStream, _device.OutputStream);
         }
 
         public async Task Close()

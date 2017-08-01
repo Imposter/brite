@@ -6,12 +6,12 @@ using Brite.Utility.IO;
 
 namespace Brite.UWP.Core
 {
-    public class SerialStream : IStream
+    public class Stream : IStream
     {
         private readonly DataReader _reader;
         private readonly DataWriter _writer;
 
-        public SerialStream(IInputStream input, IOutputStream output)
+        public Stream(IInputStream input, IOutputStream output)
         {
             _reader = new DataReader(input);
             _writer = new DataWriter(output);

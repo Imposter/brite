@@ -2,7 +2,7 @@
 {
     public class DeviceMemoryInfo
     {
-        public MemoryType MemoryType { get; private set; }
+        public MemoryType MemoryType { get; }
         public int Size { get; set; }
         public int PageSize { get; set; }
 

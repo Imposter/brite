@@ -52,8 +52,7 @@ namespace Brite.Micro
                     _serial.DtrEnable = reset ^ _invert;
                     break;
                 case SerialPinType.Txd:
-                    await _stream.WriteUInt8((byte)(reset ^ _invert ? 0xff : 0x00));
-                    break;
+                    throw new NotImplementedException();
                 default:
                     throw new NotSupportedException();
             }

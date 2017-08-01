@@ -2,7 +2,7 @@
 
 namespace Brite.Micro
 {
-    public abstract class SerialProgrammer : IProgrammer
+    public abstract class SerialProgrammer : Programmer
     {
         private readonly SerialChannel _channel;
 
@@ -13,28 +13,25 @@ namespace Brite.Micro
             _channel = channel;
         }
 
-        public virtual async Task Open()
+        public override async Task Open()
         {
             await _channel.Open();
         }
 
-        public virtual async Task Close()
+        public override async Task Close()
         {
             await _channel.Close();
         }
 
-        public T BeginOperation<T>() where T : ProgrammerOperation, new()
+        public override void Dispose()
+        {
+        }
+
+        public T BeginOperation<T>(params object[] obj) where T : ProgrammerOperation, new()
         {
             var operation = new T();
             operation.Initialize(this);
             return operation;
-        }
-
-        public abstract Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length);
-        public abstract Task WritePage(MemoryType type, int address, byte[] data, int offset, int length);
-
-        public virtual void Dispose()
-        {
         }
     }
 }

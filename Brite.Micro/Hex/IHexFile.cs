@@ -8,5 +8,6 @@ namespace Brite.Micro.Hex
 {
     public interface IHexFile
     {
+        // TODO: IFile in Brite.Utility.IO
     }
 }

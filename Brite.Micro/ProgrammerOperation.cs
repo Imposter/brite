@@ -4,13 +4,17 @@ namespace Brite.Micro
 {
     public abstract class ProgrammerOperation : IProgrammerOperation
     {
-        private IProgrammer _programmer;
+        protected IProgrammer Programmer { get; }
 
-        public void Initialize(IProgrammer programmer)
+        public ProgrammerOperation(IProgrammer programmer)
         {
-            _programmer = programmer;
+            Programmer = programmer;
         }
 
         public abstract Task Execute();
+
+        public virtual void Dispose()
+        {
+        }
     }
 }
