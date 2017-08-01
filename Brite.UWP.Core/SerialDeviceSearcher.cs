@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
-using Brite.Utility.IO;
+using Brite.Utility.Hardware;
+using Brite.Utility.Hardware.Serial;
 
 namespace Brite.UWP.Core
 {
@@ -25,7 +26,7 @@ namespace Brite.UWP.Core
                 var pnpId = device.Id.Substring(device.Id.LastIndexOf('\\') + 1);
                 var pnpIdSplit = pnpId.Split('#');
 
-                // Ensure it is a USB device (TODO: Add support for Bluetooth)
+                // Ensure it is a USB device (TODO: Remove bluetooth from Brite)
                 if (pnpIdSplit[0] == "USB")
                 {
                     // Parse vendor id and product id
@@ -33,7 +34,7 @@ namespace Brite.UWP.Core
                     var vendor = idSplit[0].Split('_')[1];
                     var product = idSplit[1].Split('_')[1];
 
-                    result.Add(new DeviceInfo(device.Name, string.Empty, portName, device.Id, vendor, product));
+                    result.Add(new SerialDeviceInfo(device.Name, string.Empty, portName, device.Id, vendor, product));
                 }
             }
 

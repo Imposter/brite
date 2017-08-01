@@ -1,4 +1,4 @@
-﻿namespace Brite
+﻿namespace Brite.Device
 {
     public class Color
     {

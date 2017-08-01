@@ -1,10 +1,11 @@
 ﻿using Brite.Utility.IO;
+using Brite.Utility.IO.Serial;
 
 namespace Brite.Micro.Programmers.StkV1
 {
-    public class StkV1Channel : SerialChannel
+    public class Channel : SerialChannel
     {
-        public StkV1Channel(ISerialConnection serial) 
+        public Channel(ISerialConnection serial) 
             : base(serial, SerialPinType.Dtr)
         {
         }

@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
 using Brite.Utility.IO;
-using SerialParity = Brite.Utility.IO.SerialParity;
+using Brite.Utility.IO.Serial;
+using SerialParity = Brite.Utility.IO.Serial.SerialParity;
 using WinSerialStopBits = Windows.Devices.SerialCommunication.SerialStopBitCount;
 using WinSerialParity = Windows.Devices.SerialCommunication.SerialParity;
 

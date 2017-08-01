@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brite.Utility;
+using Brite.Utility.Hardware;
+using Brite.Utility.Hardware.Serial;
 using Brite.Utility.IO;
+using Brite.Utility.IO.Serial;
 
-namespace Brite
+namespace Brite.Device
 {
     public class Device
     {
         // Get logger
         private static readonly Log log = Logger.GetLog<Device>();
 
-        // USB Device Info
-        private readonly DeviceInfo _deviceInfo;
+        // Serial Device Info
+        private readonly SerialDeviceInfo _deviceInfo;
 
         // Serial Port
         private uint _baudRate;
@@ -66,10 +69,10 @@ namespace Brite
         public Channel[] Channels => _channels.ToArray();
 
         // Constructor
-        public Device(ISerialConnection serial, DeviceInfo usbDeviceInfo)
+        public Device(ISerialConnection serial, SerialDeviceInfo deviceInfo)
         {
             _serial = serial;
-            _deviceInfo = usbDeviceInfo;
+            _deviceInfo = deviceInfo;
             _supportedAnimations = new List<uint>();
             _channels = new List<Channel>();
         }
@@ -264,7 +267,7 @@ namespace Brite
 
         public static async Task<List<Device>> GetDevices<TSerial>(IDeviceSearcher searcher) where TSerial : ISerialConnection, new()
         {
-            return (await searcher.GetDevices()).Select(deviceInfo => new Device(new TSerial(), deviceInfo)).ToList();
+            return (await searcher.GetDevices()).Select(deviceInfo => new Device(new TSerial(), deviceInfo as SerialDeviceInfo)).ToList();
         }
     }
 }

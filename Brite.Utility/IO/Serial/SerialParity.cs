@@ -1,4 +1,4 @@
-﻿namespace Brite.Utility.IO
+﻿namespace Brite.Utility.IO.Serial
 {
     public enum SerialParity
     {

@@ -1,4 +1,4 @@
-﻿namespace Brite.Animations
+﻿namespace Brite.Device.Animations
 {
     public class BreatheAnimation : Animation
     {

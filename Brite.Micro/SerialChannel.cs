@@ -1,6 +1,7 @@
 ﻿using Brite.Utility.IO;
 using System;
 using System.Threading.Tasks;
+using Brite.Utility.IO.Serial;
 
 namespace Brite.Micro
 {

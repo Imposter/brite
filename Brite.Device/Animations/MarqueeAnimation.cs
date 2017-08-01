@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Brite.Animations
+namespace Brite.Device.Animations
 {
     public class MarqueeAnimation : Animation
     {

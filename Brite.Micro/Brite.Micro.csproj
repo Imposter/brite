@@ -54,7 +54,7 @@
     <Compile Include="Programmers\StkV1\Protocol\DeviceParameters.cs" />
     <Compile Include="Programmers\StkV1\Protocol\DeviceParametersExt.cs" />
     <Compile Include="Programmers\StkV1\Protocol\Result.cs" />
-    <Compile Include="Programmers\StkV1\StkV1Channel.cs" />
+    <Compile Include="Programmers\StkV1\Channel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ProtocolException.cs" />
     <Compile Include="SerialChannel.cs" />
@@ -67,6 +67,8 @@
       <Name>Brite.Utility</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Hex\Intel\" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

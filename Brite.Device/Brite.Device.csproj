@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{2C90A5EC-8F4F-4C34-8050-32BFCF411919}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Brite</RootNamespace>
-    <AssemblyName>Brite</AssemblyName>
+    <RootNamespace>Brite.Device</RootNamespace>
+    <AssemblyName>Brite.Device</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

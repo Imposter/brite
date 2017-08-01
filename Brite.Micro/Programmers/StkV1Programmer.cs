@@ -18,7 +18,7 @@ namespace Brite.Micro.Programmers
         private readonly bool _reset;
         private readonly int _retries;
 
-        public StkV1Programmer(StkV1Channel channel, DeviceInfo info, bool reset = true, int retries = DefaultSyncRetries)
+        public StkV1Programmer(Channel channel, DeviceInfo info, bool reset = true, int retries = DefaultSyncRetries)
             : base(channel)
         {
             _info = info;
@@ -127,10 +127,11 @@ namespace Brite.Micro.Programmers
 
         private async Task ResetDevice()
         {
-            await Channel.ToggleReset(true);
-            await Task.Delay(200);
+            // Turn off DTR
             await Channel.ToggleReset(false);
             await Task.Delay(200);
+
+            // Turn on DTR, this will cause the device to reset
             await Channel.ToggleReset(true);
             await Task.Delay(200);
         }

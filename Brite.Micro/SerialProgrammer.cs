@@ -26,12 +26,5 @@ namespace Brite.Micro
         public override void Dispose()
         {
         }
-
-        public T BeginOperation<T>(params object[] obj) where T : ProgrammerOperation, new()
-        {
-            var operation = new T();
-            operation.Initialize(this);
-            return operation;
-        }
     }
 }

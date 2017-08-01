@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brite.Animations
+namespace Brite.Device.Animations
 {
     public class ManualAnimation : Animation
     {

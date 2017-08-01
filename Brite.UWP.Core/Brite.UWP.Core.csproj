@@ -122,9 +122,9 @@
       <Project>{6E94BBF0-86C6-43E0-9B47-595D2E67BC3F}</Project>
       <Name>Brite.Utility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Brite\Brite.csproj">
+    <ProjectReference Include="..\Brite.Device\Brite.Device.csproj">
       <Project>{2C90A5EC-8F4F-4C34-8050-32BFCF411919}</Project>
-      <Name>Brite</Name>
+      <Name>Brite.Device</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

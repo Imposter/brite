@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Brite.Utility.IO
+namespace Brite.Utility.IO.Serial
 {
     public interface ISerialConnection : IDisposable
     {
