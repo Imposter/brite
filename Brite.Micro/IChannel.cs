@@ -9,9 +9,9 @@ namespace Brite.Micro
         bool IsOpen { get; }
         BinaryStream Stream { get; }
 
-        Task Open();
-        Task Close();
+        Task OpenAsync();
+        Task CloseAsync();
 
-        Task ToggleReset(bool reset);
+        Task ToggleResetAsync(bool reset);
     }
 }

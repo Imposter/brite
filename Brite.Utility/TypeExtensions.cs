@@ -10,11 +10,11 @@ namespace Brite.Utility
             if (type.IsConstructedGenericType)
             {
                 name = name.Substring(0, name.IndexOf('`')) + "<";
-                for (int i = 0; i < type.GenericTypeArguments.Length; i++)
+                for (var i = 0; i < type.GenericTypeArguments.Length; i++)
                 {
                     var genericType = type.GenericTypeArguments[i];
                     var genericTypeName = genericType.GetFriendlyName();
-                    name += (i == 0 ? genericTypeName : ", " + genericTypeName);
+                    name += i == 0 ? genericTypeName : ", " + genericTypeName;
                 }
                 name += ">";
             }

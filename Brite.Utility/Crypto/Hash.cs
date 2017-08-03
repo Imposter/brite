@@ -9,7 +9,7 @@ namespace Brite.Utility.Crypto
 
         public static uint Fnv1A32(byte[] buffer)
         {
-            uint offset = Fnv1AOffset32;
+            var offset = Fnv1AOffset32;
             foreach (var b in buffer)
             {
                 offset *= Fnv1APrime32;

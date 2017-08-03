@@ -2,7 +2,6 @@
 {
     internal enum Result : byte
     {
-        NoSync,
         InSync = 0x14,
         Ok = 0x10
     }

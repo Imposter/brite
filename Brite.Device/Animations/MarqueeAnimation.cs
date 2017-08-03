@@ -14,13 +14,13 @@ namespace Brite.Device.Animations
             return "Marquee";
         }
 
-        public async Task SetAsForward(bool forward)
+        public async Task SetAsForwardAsync(bool forward)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                // Write request
-                await stream.WriteUInt8((byte)Command.SetForwardEnabled);
-                await stream.WriteBoolean(forward);
+                // WriteAsync request
+                await stream.WriteUInt8Async((byte)Command.SetForwardEnabled);
+                await stream.WriteBooleanAsync(forward);
             });
         }
     }

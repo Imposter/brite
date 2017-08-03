@@ -31,18 +31,20 @@ namespace Brite.Micro
             _serial.Timeout = DefaultTimeout;
         }
 
-        public async Task Open()
+        public async Task OpenAsync()
         {
-            await _serial.Open();
+            await _serial.OpenAsync();
             _stream = new BinaryStream(_serial.BaseStream);
         }
 
-        public async Task Close()
+        public async Task CloseAsync()
         {
-            await _serial.Close();
+            await _serial.CloseAsync();
         }
 
-        public async Task ToggleReset(bool reset)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task ToggleResetAsync(bool reset)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             switch (_pin)
             {

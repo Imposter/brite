@@ -38,14 +38,13 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hex\IHexFile.cs" />
+    <Compile Include="Formats\IBinarySerializer.cs" />
+    <Compile Include="Formats\IntelBinarySerializer.cs" />
+    <Compile Include="Formats\RawBinarySerializer.cs" />
     <Compile Include="IChannel.cs" />
     <Compile Include="IProgrammer.cs" />
-    <Compile Include="IProgrammerOperation.cs" />
     <Compile Include="MemoryType.cs" />
-    <Compile Include="Operations\DumpToStream.cs" />
     <Compile Include="Programmer.cs" />
-    <Compile Include="ProgrammerOperation.cs" />
     <Compile Include="Programmers\StkV1Programmer.cs" />
     <Compile Include="Programmers\StkV1\DeviceInfo.cs" />
     <Compile Include="Programmers\StkV1\DeviceMemoryInfo.cs" />
@@ -67,8 +66,6 @@
       <Name>Brite.Utility</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Hex\Intel\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

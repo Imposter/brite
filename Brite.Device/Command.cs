@@ -16,12 +16,6 @@
         SetChannelAnimationSpeed,
         SetChannelAnimationColorCount,
         SetChannelAnimationColor,
-        SendChannelAnimationRequest,
-
-        BluetoothGetPassword = 50,
-        BluetoothSetPassword,
-        BluetoothUnpairAll,
-        BluetoothGetStatus,
-        BluetoothGetConnectionInfo,
+        SendChannelAnimationRequest
     }
 }

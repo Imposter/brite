@@ -19,7 +19,7 @@ namespace Brite.Utility.IO.Serial
         IStream BaseStream { get; }
         bool IsOpen { get; }
 
-        Task Open();
-        Task Close();
+        Task OpenAsync();
+        Task CloseAsync();
     }
 }

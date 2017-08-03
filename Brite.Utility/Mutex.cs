@@ -12,7 +12,7 @@ namespace Brite.Utility
             _semaphore = new SemaphoreSlim(1, 1);
         }
 
-        public async Task Lock()
+        public async Task LockAsync()
         {
             await _semaphore.WaitAsync();
         }

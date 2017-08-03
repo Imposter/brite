@@ -13,14 +13,14 @@ namespace Brite.Micro
             _channel = channel;
         }
 
-        public override async Task Open()
+        public override async Task OpenAsync()
         {
-            await _channel.Open();
+            await _channel.OpenAsync();
         }
 
-        public override async Task Close()
+        public override async Task CloseAsync()
         {
-            await _channel.Close();
+            await _channel.CloseAsync();
         }
 
         public override void Dispose()

@@ -7,11 +7,10 @@ using DeviceInfo = Brite.Micro.Programmers.StkV1.DeviceInfo;
 
 namespace Brite.Micro.Programmers
 {
-    // For more documentation, see: http://www.atmel.com/images/doc2525.pdf
+    // For more information, see: http://www.atmel.com/images/doc2525.pdf
     public class StkV1Programmer : SerialProgrammer
     {
         public const int DefaultSyncRetries = 5;
-        private const int BlockSize = 1024;
         private const byte CrcEop = 0x20;
 
         private readonly DeviceInfo _info;
@@ -26,125 +25,128 @@ namespace Brite.Micro.Programmers
             _retries = retries;
         }
 
-        public override async Task Open()
+        public override async Task OpenAsync()
         {
-            await base.Open();
+            await base.OpenAsync();
             if (_reset)
-                await ResetDevice();
+                await ResetAsync();
 
-            await WaitForSync();
-            await SetDeviceParameters(new DeviceParameters
+            await WaitAsync();
+            await SetDeviceParametersAsync(new DeviceParameters
             {
                 DeviceCode = _info.Type,
                 Revision = 0,
-                ProgType = 0,
-                ParMode = 1,
+                ProgramType = 0,
+                ParallelMode = 1,
                 Polling = 1,
                 SelfTimed = 1,
-                LockBytes = 1,
-                FuseBytes = 3,
-                FlashPollVal1 = 0xFF,
-                FlashPollVal2 = 0xFF,
-                EepromPollVal1 = 0xFF,
-                EepromPollVal2 = 0xFF,
+                LockBytes = (byte)_info.LockBits.Size,
+                FuseBytes = (byte)_info.LockBits.Size,
+                FlashPollValue = 0xFF,
+                EepromPollValue = 0xFF,
                 PageSize = (ushort)_info.Flash.PageSize,
                 EepromSize = (ushort)_info.Eeprom.Size,
                 FlashSize = (uint)_info.Flash.Size
             });
-            await SetDeviceParametersExt(new DeviceParametersExt
+            await SetDeviceParametersExtAsync(new DeviceParametersExt
             {
                 EepromPageSize = (byte)_info.Eeprom.PageSize,
                 SignalPageL = 0xD7, // Port D7
                 SignalBs2 = 0xC2, // Port C2
                 ResetDisable = 0
             });
-            await EnterProgramMode();
+            await EnterProgramModeAsync();
         }
 
-        public override async Task Close()
+        public override async Task CloseAsync()
         {
-            await LeaveProgramMode();
-            await base.Close();
+            await LeaveProgramModeAsync();
+            await base.CloseAsync();
         }
         
-        public override async Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length)
+        public override async Task ReadAsync(MemoryType type, byte[] data, int offset, int length)
         {
             switch (type)
             {
                 case MemoryType.Flash:
                 case MemoryType.Eeprom:
-                    var position = address;
-                    var end = address + length;
-                    while (position < end)
+                    var position = 0;
+                    var pageSize = type == MemoryType.Flash ? _info.Flash.PageSize : _info.Eeprom.PageSize;
+                    while (position < length)
                     {
-                        await LoadAddress((ushort)(position >> 1));
-                        var count = Math.Min(end - position, BlockSize);
-                        await ReadPage(type, data, position - address + offset, count);
+                        await LoadAddressAsync((ushort)(position / 2));
+                        var count = Math.Min(length - position, pageSize);
+                        await ReadPageAsync(type, data, position + offset, count);
                         position += count;
                     }
                     break;
                 case MemoryType.LockBits:
                     for (var i = 0; i < length; i++)
-                        data[i + offset] = await ReadLockByte(address + i);
+                        data[i + offset] = await ReadLockByteAsync(i);
                     break;
                 case MemoryType.FuseBits:
                     for (var i = 0; i < length; i++)
-                        data[i + offset] = await ReadFuseByte(address + i);
+                        data[i + offset] = await ReadFuseByteAsync(i);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
         
-        public override async Task WritePage(MemoryType type, int address, byte[] data, int offset, int length)
+        public override async Task WriteAsync(MemoryType type, byte[] data, int offset, int length)
         {
             switch (type)
             {
                 case MemoryType.Flash:
                 case MemoryType.Eeprom:
-                    var position = address;
-                    var end = address + length;
-                    while (position < end)
+                    var position = 0;
+                    var pageSize = type == MemoryType.Flash ? _info.Flash.PageSize : _info.Eeprom.PageSize;
+                    while (position < length)
                     {
-                        await LoadAddress((ushort)(position >> 1));
-                        var count = Math.Min(end - position, BlockSize);
-                        await ProgramPage(type, data, position - address + offset, count);
+                        await LoadAddressAsync((ushort)(position / 2));
+                        var count = Math.Min(length - position, pageSize);
+                        await ProgramPageAsync(type, data, position + offset, count);
                         position += count;
                     }
                     break;
                 case MemoryType.LockBits:
                     for (var i = 0; i < length; i++)
-                        await WriteLockByte(address + i, data[i + offset]);
+                        await WriteLockByteAsync(i, data[i + offset]);
                     break;
                 case MemoryType.FuseBits:
                     for (var i = 0; i < length; i++)
-                        await WriteFuseByte(address + i, data[i + offset]);
+                        await WriteFuseByteAsync(i, data[i + offset]);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
+        
+        public override async Task EraseAsync()
+        {
+            await ChipEraseAsync();
+        }
 
-        private async Task ResetDevice()
+        public override async Task ResetAsync()
         {
             // Turn off DTR
-            await Channel.ToggleReset(false);
-            await Task.Delay(200);
+            await Channel.ToggleResetAsync(false);
+            await Task.Delay(25);
 
             // Turn on DTR, this will cause the device to reset
-            await Channel.ToggleReset(true);
-            await Task.Delay(200);
+            await Channel.ToggleResetAsync(true);
+            await Task.Delay(25);
         }
 
         #region Protocol
 
-        private async Task WaitForSync()
+        private async Task WaitAsync()
         {
             for (var i = 0; i < _retries; i++)
             {
                 try
                 {
-                    await GetSync();
+                    await SynchronizeAsync();
                 }
                 catch
                 {
@@ -154,119 +156,124 @@ namespace Brite.Micro.Programmers
             }
         }
 
-        private async Task GetSync()
+        private async Task SynchronizeAsync()
         {
-            await SendRequest(Command.GetSync);
+            await SendRequestAsync(Command.GetSync);
         }
 
-        private async Task SetDeviceParameters(DeviceParameters parameters)
+        private async Task SetDeviceParametersAsync(DeviceParameters parameters)
         {
-            await SendRequest(Command.SetDeviceParameters, async stream =>
+            await SendRequestAsync(Command.SetDeviceParameters, async stream =>
             {
-                await stream.WriteUInt8((byte)parameters.DeviceCode);
-                await stream.WriteUInt8(parameters.Revision);
-                await stream.WriteUInt8(parameters.ProgType);
-                await stream.WriteUInt8(parameters.ParMode);
-                await stream.WriteUInt8(parameters.Polling);
-                await stream.WriteUInt8(parameters.SelfTimed);
-                await stream.WriteUInt8(parameters.LockBytes);
-                await stream.WriteUInt8(parameters.FuseBytes);
-                await stream.WriteUInt8(parameters.FlashPollVal1);
-                await stream.WriteUInt8(parameters.FlashPollVal2);
-                await stream.WriteUInt8(parameters.EepromPollVal1);
-                await stream.WriteUInt8(parameters.EepromPollVal2);
+                await stream.WriteUInt8Async((byte)parameters.DeviceCode);
+                await stream.WriteUInt8Async(parameters.Revision);
+                await stream.WriteUInt8Async(parameters.ProgramType);
+                await stream.WriteUInt8Async(parameters.ParallelMode);
+                await stream.WriteUInt8Async(parameters.Polling);
+                await stream.WriteUInt8Async(parameters.SelfTimed);
+                await stream.WriteUInt8Async(parameters.LockBytes);
+                await stream.WriteUInt8Async(parameters.FuseBytes);
+                await stream.WriteUInt8Async(parameters.FlashPollValue);
+                await stream.WriteUInt8Async(parameters.FlashPollValue);
+                await stream.WriteUInt8Async(parameters.EepromPollValue);
+                await stream.WriteUInt8Async(parameters.EepromPollValue);
 
                 stream.BigEndian = true;
-                await stream.WriteUInt16(parameters.PageSize);
-                await stream.WriteUInt16(parameters.EepromSize);
-                await stream.WriteUInt32(parameters.FlashSize);
+                await stream.WriteUInt16Async(parameters.PageSize);
+                await stream.WriteUInt16Async(parameters.EepromSize);
+                await stream.WriteUInt32Async(parameters.FlashSize);
             });
         }
 
-        private async Task SetDeviceParametersExt(DeviceParametersExt parameters)
+        private async Task SetDeviceParametersExtAsync(DeviceParametersExt parameters)
         {
-            await SendRequest(Command.SetDeviceParametersExt, async stream =>
+            await SendRequestAsync(Command.SetDeviceParametersExt, async stream =>
             {
                 // Amount of parameters
-                await stream.WriteUInt8(4);
+                await stream.WriteUInt8Async(4);
 
-                await stream.WriteUInt8(parameters.EepromPageSize);
-                await stream.WriteUInt8(parameters.SignalPageL);
-                await stream.WriteUInt8(parameters.SignalBs2);
-                await stream.WriteUInt8(parameters.ResetDisable);
+                await stream.WriteUInt8Async(parameters.EepromPageSize);
+                await stream.WriteUInt8Async(parameters.SignalPageL);
+                await stream.WriteUInt8Async(parameters.SignalBs2);
+                await stream.WriteUInt8Async(parameters.ResetDisable);
             });
         }
 
-        private async Task EnterProgramMode()
+        private async Task EnterProgramModeAsync()
         {
-            await SendRequest(Command.EnterProgramMode);
+            await SendRequestAsync(Command.EnterProgramMode);
         }
 
-        private async Task LeaveProgramMode()
+        private async Task LeaveProgramModeAsync()
         {
-            await SendRequest(Command.LeaveProgramMode);
+            await SendRequestAsync(Command.LeaveProgramMode);
         }
 
-        private async Task<byte> Universal(byte a, byte b, byte c, byte d)
+        private async Task ChipEraseAsync()
+        {
+            await SendRequestAsync(Command.ChipErase);
+        }
+
+        private async Task<byte> UniversalAsync(byte a, byte b, byte c, byte d)
         {
             byte value = 0;
-            await SendRequest(Command.Universal, async stream =>
+            await SendRequestAsync(Command.Universal, async stream =>
             {
-                await stream.WriteUInt8(a);
-                await stream.WriteUInt8(b);
-                await stream.WriteUInt8(c);
-                await stream.WriteUInt8(d);
+                await stream.WriteUInt8Async(a);
+                await stream.WriteUInt8Async(b);
+                await stream.WriteUInt8Async(c);
+                await stream.WriteUInt8Async(d);
             }, async (channel, stream) =>
             {
-                value = await stream.ReadUInt8();
+                value = await stream.ReadUInt8Async();
             });
             return value;
         }
 
-        private async Task LoadAddress(ushort value)
+        private async Task LoadAddressAsync(ushort value)
         {
-            await SendRequest(Command.LoadAddress, async stream =>
+            await SendRequestAsync(Command.LoadAddress, async stream =>
             {
-                await stream.WriteUInt16(value);
+                await stream.WriteUInt16Async(value);
             });
         }
 
-        private async Task ProgramPage(MemoryType memoryType, byte[] data, int offset, int length)
+        private async Task ProgramPageAsync(MemoryType memoryType, byte[] data, int offset, int length)
         {
-            await SendRequest(Command.ProgramPage, async stream =>
+            await SendRequestAsync(Command.ProgramPage, async stream =>
             {
                 stream.BigEndian = true;
-                await stream.WriteUInt16((ushort)length);
+                await stream.WriteUInt16Async((ushort)length);
                 switch (memoryType)
                 {
                     case MemoryType.Flash:
-                        await stream.WriteUInt8((byte)'F');
+                        await stream.WriteUInt8Async((byte)'F');
                         break;
                     case MemoryType.Eeprom:
-                        await stream.WriteUInt8((byte)'E');
+                        await stream.WriteUInt8Async((byte)'E');
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(memoryType), memoryType, null);
                 }
 
                 for (var i = 0; i < length; i++)
-                    await stream.WriteUInt8(data[offset + i]);
+                    await stream.WriteUInt8Async(data[offset + i]);
             });
         }
 
-        private async Task ReadPage(MemoryType memoryType, byte[] data, int offset, int length)
+        private async Task ReadPageAsync(MemoryType memoryType, byte[] data, int offset, int length)
         {
-            await SendRequest(Command.ReadPage, async stream =>
+            await SendRequestAsync(Command.ReadPage, async stream =>
             {
                 stream.BigEndian = true;
-                await stream.WriteUInt16((ushort)length);
+                await stream.WriteUInt16Async((ushort)length);
                 switch (memoryType)
                 {
                     case MemoryType.Flash:
-                        await stream.WriteUInt8((byte)'F');
+                        await stream.WriteUInt8Async((byte)'F');
                         break;
                     case MemoryType.Eeprom:
-                        await stream.WriteUInt8((byte)'E');
+                        await stream.WriteUInt8Async((byte)'E');
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(memoryType), memoryType, null);
@@ -274,93 +281,95 @@ namespace Brite.Micro.Programmers
             }, async (channel, stream) =>
             {
                 for (var i = 0; i < length; i++)
-                    data[offset + i] = await stream.ReadUInt8();
+                    data[offset + i] = await stream.ReadUInt8Async();
             });
         }
 
-        private async Task<byte> ReadLockByte(int address)
+        private async Task<byte> ReadLockByteAsync(int address)
         {
             if (address == 0)
-                return await Universal(0x58, 0x00, 0x00, 0x00);
+                return await UniversalAsync(0x58, 0x00, 0x00, 0x00);
             return 0;
         }
 
-        private async Task WriteLockByte(int address, byte value)
+        private async Task WriteLockByteAsync(int address, byte value)
         {
             if (address == 0)
-                await Universal(0xAC, 0xE0, 0x00, value);
+                await UniversalAsync(0xAC, 0xE0, 0x00, value);
         }
 
-        private async Task<byte> ReadFuseByte(int address)
+        private async Task<byte> ReadFuseByteAsync(int address)
         {
             switch (address)
             {
                 case 0:
-                    return await Universal(0x50, 0x00, 0x00, 0x00);
+                    return await UniversalAsync(0x50, 0x00, 0x00, 0x00);
                 case 1:
-                    return await Universal(0x58, 0x08, 0x00, 0x00);
+                    return await UniversalAsync(0x58, 0x08, 0x00, 0x00);
                 case 2:
-                    return await Universal(0x50, 0x08, 0x00, 0x00);
+                    return await UniversalAsync(0x50, 0x08, 0x00, 0x00);
                 default:
-                    return 0;
+                    throw new ArgumentOutOfRangeException(nameof(address), address, null);
             }
         }
 
-        private async Task WriteFuseByte(int address, byte value)
+        private async Task WriteFuseByteAsync(int address, byte value)
         {
             switch (address)
             {
                 case 0:
-                    await Universal(0xAC, 0xA0, 0x00, value);
+                    await UniversalAsync(0xAC, 0xA0, 0x00, value);
                     break;
                 case 1:
-                    await Universal(0xAC, 0xA8, 0x00, value);
+                    await UniversalAsync(0xAC, 0xA8, 0x00, value);
                     break;
                 case 2:
-                    await Universal(0xAC, 0xA4, 0x00, value);
+                    await UniversalAsync(0xAC, 0xA4, 0x00, value);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(address), address, null);
             }
         }
 
         private delegate Task RequestCallback(BinaryStream stream);
         private delegate Task ResponseCallback(SerialChannel channel, BinaryStream stream);
-        private async Task SendRequest(Command command, RequestCallback requestCallback, ResponseCallback responseCallback)
+        private async Task SendRequestAsync(Command command, RequestCallback requestCallback, ResponseCallback responseCallback)
         {
-            // Write request
+            // WriteAsync request
             Channel.Stream.BigEndian = false;
-            await Channel.Stream.WriteUInt8((byte)command);
+            await Channel.Stream.WriteUInt8Async((byte)command);
             if (requestCallback != null)
                 await requestCallback(Channel.Stream);
 
             Channel.Stream.BigEndian = false;
-            await Channel.Stream.WriteUInt8(CrcEop);
+            await Channel.Stream.WriteUInt8Async(CrcEop);
 
             // Check if synchronized
-            if (await Channel.Stream.ReadUInt8() != (byte)Result.InSync)
+            if (await Channel.Stream.ReadUInt8Async() != (byte)Result.InSync)
                 throw new ProtocolException("Not synchronized");
 
-            // Read response
+            // ReadAsync response
             if (responseCallback != null)
                 await responseCallback(Channel, Channel.Stream);
 
             Channel.Stream.BigEndian = false;
-            if (await Channel.Stream.ReadUInt8() != (byte)Result.Ok)
+            if (await Channel.Stream.ReadUInt8Async() != (byte)Result.Ok)
                 throw new ProtocolException("Request failed");
         }
 
-        private async Task SendRequest(Command command, RequestCallback requestCallback)
+        private async Task SendRequestAsync(Command command, RequestCallback requestCallback)
         {
-            await SendRequest(command, requestCallback, null);
+            await SendRequestAsync(command, requestCallback, null);
         }
 
-        private async Task SendRequest(Command command, ResponseCallback responseCallback)
+        private async Task SendRequestAsync(Command command, ResponseCallback responseCallback)
         {
-            await SendRequest(command, null, responseCallback);
+            await SendRequestAsync(command, null, responseCallback);
         }
 
-        private async Task SendRequest(Command command)
+        private async Task SendRequestAsync(Command command)
         {
-            await SendRequest(command, null, null);
+            await SendRequestAsync(command, null, null);
         }
 
         #endregion

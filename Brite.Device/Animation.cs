@@ -10,9 +10,6 @@ namespace Brite.Device
 {
     public abstract class Animation
     {
-        // Get logger
-        private static readonly Log log = Logger.GetLog<Animation>();
-
         private TypedStream _stream;
         private Mutex _streamLock;
         private int _retries;
@@ -83,36 +80,29 @@ namespace Brite.Device
             _streamLock = null;
         }
 
-        private async Task SendCommand(Command command)
+        private async Task SendCommandAsync(Command command)
         {
             var typesEnabled = _stream.TypesEnabled;
 
-            var done = false;
             for (var i = 0; i < _retries; i++)
             {
                 try
                 {
                     _stream.TypesEnabled = false;
-                    await _stream.WriteUInt8((byte)command);
+                    await _stream.WriteUInt8Async((byte)command);
 
-                    var response = await _stream.ReadUInt8();
+                    var response = await _stream.ReadUInt8Async();
                     if (response == (byte)command)
-                    {
-                        done = true;
                         break;
-                    }
                 }
                 catch (Exception ex)
                 {
-                    log.Warn($"SendCommand failed on try {i}");
-                    log.Warn($"\tError: {ex}");
+                    if (i == _retries - 1)
+                        throw new Exception("Unable to send command", ex);
                 }
             }
 
             _stream.TypesEnabled = typesEnabled;
-
-            if (!done)
-                throw new Exception("Unable to send command");
         }
 
         public uint GetId()
@@ -120,7 +110,7 @@ namespace Brite.Device
             return Hash.Fnv1A32(GetName());
         }
 
-        public virtual async Task SetColorCount(byte colorCount)
+        public virtual async Task SetColorCountAsync(byte colorCount)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -132,19 +122,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimationColorCount);
+                await SendCommandAsync(Command.SetChannelAnimationColorCount);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_channel);
-                await _stream.WriteUInt8(colorCount);
+                await _stream.WriteUInt8Async(_channel);
+                await _stream.WriteUInt8Async(colorCount);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set animation color count");
             }
@@ -154,7 +144,7 @@ namespace Brite.Device
             }
         }
 
-        public virtual async Task SetColor(byte index, Color color)
+        public virtual async Task SetColorAsync(byte index, Color color)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -166,22 +156,22 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimationColor);
+                await SendCommandAsync(Command.SetChannelAnimationColor);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_channel);
-                await _stream.WriteUInt8(index);
-                await _stream.WriteUInt8(color.R);
-                await _stream.WriteUInt8(color.G);
-                await _stream.WriteUInt8(color.B);
+                await _stream.WriteUInt8Async(_channel);
+                await _stream.WriteUInt8Async(index);
+                await _stream.WriteUInt8Async(color.R);
+                await _stream.WriteUInt8Async(color.G);
+                await _stream.WriteUInt8Async(color.B);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set animation color");
             }
@@ -191,7 +181,7 @@ namespace Brite.Device
             }
         }
 
-        public virtual async Task SetSpeed(float speed)
+        public virtual async Task SetSpeedAsync(float speed)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -203,19 +193,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimationSpeed);
+                await SendCommandAsync(Command.SetChannelAnimationSpeed);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_channel);
-                await _stream.WriteFloat(speed);
+                await _stream.WriteUInt8Async(_channel);
+                await _stream.WriteFloatAsync(speed);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set animation speed");
             }
@@ -225,7 +215,7 @@ namespace Brite.Device
             }
         }
 
-        public async Task SetEnabled(bool enabled)
+        public async Task SetEnabledAsync(bool enabled)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -237,19 +227,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimationEnabled);
+                await SendCommandAsync(Command.SetChannelAnimationEnabled);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_channel);
-                await _stream.WriteBoolean(enabled);
+                await _stream.WriteUInt8Async(_channel);
+                await _stream.WriteBooleanAsync(enabled);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set animation enabled");
             }
@@ -260,7 +250,7 @@ namespace Brite.Device
         }
 
         internal delegate Task RequestCallback(TypedStream stream);
-        internal async Task SendRequest(RequestCallback callback)
+        internal async Task SendRequestAsync(RequestCallback callback)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -269,18 +259,18 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SendChannelAnimationRequest);
+                await SendCommandAsync(Command.SendChannelAnimationRequest);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_channel);
-                await _stream.WriteUInt32(GetId());
+                await _stream.WriteUInt8Async(_channel);
+                await _stream.WriteUInt32Async(GetId());
 
-                // Read response
-                var result = await _stream.ReadUInt8();
+                // ReadAsync response
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to send animation request");
 

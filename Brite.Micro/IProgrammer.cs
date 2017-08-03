@@ -5,10 +5,13 @@ namespace Brite.Micro
 {
     public interface IProgrammer : IDisposable
     {
-        Task Open();
-        Task Close();
+        Task OpenAsync();
+        Task CloseAsync();
 
-        Task ReadPage(MemoryType type, int address, byte[] data, int offset, int length);
-        Task WritePage(MemoryType type, int address, byte[] data, int offset, int length);
+        Task ReadAsync(MemoryType type, byte[] data, int offset, int length);
+        Task WriteAsync(MemoryType type, byte[] data, int offset, int length);
+
+        Task EraseAsync();
+        Task ResetAsync();
     }
 }

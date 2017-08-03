@@ -20,69 +20,69 @@ namespace Brite.Device.Animations
         }
 
         [Obsolete]
-        public override Task SetColorCount(byte colorCount)
+        public override Task SetColorCountAsync(byte colorCount)
         {
             throw new NotSupportedException("SetColorCount is not supported by this animation");
         }
 
         [Obsolete]
-        public override Task SetColor(byte index, Color color)
+        public override Task SetColorAsync(byte index, Color color)
         {
             throw new NotSupportedException("SetColor is not supported by this animation");
         }
         
-        public async Task SetColor(ushort index, Color color)
+        public async Task SetColorAsync(ushort index, Color color)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                await stream.WriteUInt8((byte)Command.SetColor);
-                await stream.WriteUInt16(index);
-                await stream.WriteUInt8(color.R);
-                await stream.WriteUInt8(color.G);
-                await stream.WriteUInt8(color.B);
+                await stream.WriteUInt8Async((byte)Command.SetColor);
+                await stream.WriteUInt16Async(index);
+                await stream.WriteUInt8Async(color.R);
+                await stream.WriteUInt8Async(color.G);
+                await stream.WriteUInt8Async(color.B);
             });
         }
 
-        public async Task SetColor(ushort startIndex, ushort count, Color color)
+        public async Task SetColorAsync(ushort startIndex, ushort count, Color color)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                await stream.WriteUInt8((byte)Command.SetColorRange);
-                await stream.WriteUInt16(startIndex);
-                await stream.WriteUInt16(count);
-                await stream.WriteUInt8(color.R);
-                await stream.WriteUInt8(color.G);
-                await stream.WriteUInt8(color.B);
+                await stream.WriteUInt8Async((byte)Command.SetColorRange);
+                await stream.WriteUInt16Async(startIndex);
+                await stream.WriteUInt16Async(count);
+                await stream.WriteUInt8Async(color.R);
+                await stream.WriteUInt8Async(color.G);
+                await stream.WriteUInt8Async(color.B);
             });
         }
 
-        public async Task SetColors(List<Color> colors)
+        public async Task SetColorsAsync(List<Color> colors)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                await stream.WriteUInt8((byte)Command.SetColors);
-                await stream.WriteUInt16((ushort)colors.Count);
+                await stream.WriteUInt8Async((byte)Command.SetColors);
+                await stream.WriteUInt16Async((ushort)colors.Count);
                 foreach (var color in colors)
                 {
-                    await stream.WriteUInt8(color.R);
-                    await stream.WriteUInt8(color.G);
-                    await stream.WriteUInt8(color.B);
+                    await stream.WriteUInt8Async(color.R);
+                    await stream.WriteUInt8Async(color.G);
+                    await stream.WriteUInt8Async(color.B);
                 }
             });
         }
 
-        public async Task SetColors(ushort startIndex, List<Color> colors)
+        public async Task SetColorsAsync(ushort startIndex, List<Color> colors)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                await stream.WriteUInt8((byte)Command.SetColorsRange);
-                await stream.WriteUInt16(startIndex);
-                await stream.WriteUInt16((ushort)colors.Count);
+                await stream.WriteUInt8Async((byte)Command.SetColorsRange);
+                await stream.WriteUInt16Async(startIndex);
+                await stream.WriteUInt16Async((ushort)colors.Count);
                 foreach (var color in colors)
                 {
-                    await stream.WriteUInt8(color.R);
-                    await stream.WriteUInt8(color.G);
-                    await stream.WriteUInt8(color.B);
+                    await stream.WriteUInt8Async(color.R);
+                    await stream.WriteUInt8Async(color.G);
+                    await stream.WriteUInt8Async(color.B);
                 }
             });
         }

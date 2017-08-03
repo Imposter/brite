@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
-using Brite.Utility.Hardware;
 using Brite.Utility.Hardware.Serial;
 
-namespace Brite.UWP.Core
+namespace Brite.UWP.Core.Hardware.Serial
 {
-    public class SerialDeviceSearcher : IDeviceSearcher
+    public class SerialDeviceSearcher : ISerialDeviceSearcher
     {
-        public async Task<List<DeviceInfo>> GetDevices()
+        public async Task<List<SerialDeviceInfo>> GetDevicesAsync()
         {
-            var result = new List<DeviceInfo>();
+            var result = new List<SerialDeviceInfo>();
 
             var selector = SerialDevice.GetDeviceSelector();
             var devices = await DeviceInformation.FindAllAsync(selector);
@@ -26,7 +25,7 @@ namespace Brite.UWP.Core
                 var pnpId = device.Id.Substring(device.Id.LastIndexOf('\\') + 1);
                 var pnpIdSplit = pnpId.Split('#');
 
-                // Ensure it is a USB device (TODO: Remove bluetooth from Brite)
+                // Ensure it is a USB device
                 if (pnpIdSplit[0] == "USB")
                 {
                     // Parse vendor id and product id

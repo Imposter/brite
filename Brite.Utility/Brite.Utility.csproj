@@ -40,18 +40,22 @@
   <ItemGroup>
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="Crypto\Hash.cs" />
+    <Compile Include="Hardware\Serial\ISerialDeviceSearcher.cs" />
     <Compile Include="IO\BinaryStream.cs" />
     <Compile Include="Hardware\DeviceInfo.cs" />
     <Compile Include="Hardware\IDeviceSearcher.cs" />
+    <Compile Include="IO\Log.cs" />
+    <Compile Include="IO\MemoryStream.cs" />
     <Compile Include="IO\Serial\ISerialConnection.cs" />
     <Compile Include="IO\IStream.cs" />
     <Compile Include="IO\ITimedStream.cs" />
-    <Compile Include="IO\Log.cs" />
+    <Compile Include="IO\DebugLogger.cs" />
     <Compile Include="IO\Logger.cs" />
     <Compile Include="Hardware\Serial\SerialDeviceInfo.cs" />
     <Compile Include="IO\Serial\SerialParity.cs" />
     <Compile Include="IO\Serial\SerialStopBits.cs" />
     <Compile Include="IO\TypedStream.cs" />
+    <Compile Include="ISerializer.cs" />
     <Compile Include="ManualReset.cs" />
     <Compile Include="Mutex.cs" />
     <Compile Include="ObjectExtensions.cs" />

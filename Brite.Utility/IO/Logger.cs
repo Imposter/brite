@@ -1,15 +1,26 @@
-﻿namespace Brite.Utility.IO
+﻿using System.Threading.Tasks;
+
+namespace Brite.Utility.IO
 {
-    public static class Logger
+    public abstract class Logger
     {
+        private static Logger Instance = new DebugLogger();
+
+        public abstract Task WriteLineAsync(string format, params object[] args);
+
+        public static void SetInstance(Logger logger)
+        {
+            Instance = logger;
+        }
+
         public static Log GetLog<T>()
         {
-            return new Log(typeof(T).GetFriendlyName());
+            return new Log(Instance, typeof(T).GetFriendlyName());
         }
 
         public static Log GetLog()
         {
-            return new Log("Application");
+            return new Log(Instance, "Application");
         }
     }
 }

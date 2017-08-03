@@ -8,9 +8,6 @@ namespace Brite.Device
 {
     public class Channel
     {
-        // Get logger
-        private static readonly Log log = Logger.GetLog<Channel>();
-
         private readonly byte _index;
         private readonly ushort _maxSize;
         private readonly byte _maxBrightness;
@@ -48,7 +45,7 @@ namespace Brite.Device
             _supportedAnimations = supportedAnimations;
         }
 
-        public async Task SetSize(ushort size)
+        public async Task SetSizeAsync(ushort size)
         {
             // Ensure that the size is within the limit
             size = Math.Min(size, _maxSize);
@@ -60,19 +57,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelLedCount);
+                await SendCommandAsync(Command.SetChannelLedCount);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_index);
-                await _stream.WriteUInt16(size);
+                await _stream.WriteUInt8Async(_index);
+                await _stream.WriteUInt16Async(size);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set channel size");
             }
@@ -82,7 +79,7 @@ namespace Brite.Device
             }
         }
 
-        public async Task SetBrightness(byte brightness)
+        public async Task SetBrightnessAsync(byte brightness)
         {
             // Ensure that the size is within the limit
             brightness = brightness.Clamp((byte)0, _maxBrightness);
@@ -94,19 +91,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelBrightness);
+                await SendCommandAsync(Command.SetChannelBrightness);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_index);
-                await _stream.WriteUInt8(brightness);
+                await _stream.WriteUInt8Async(_index);
+                await _stream.WriteUInt8Async(brightness);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set channel brightness");
             }
@@ -116,7 +113,7 @@ namespace Brite.Device
             }
         }
 
-        public async Task SetAnimation(Animation animation, bool reset = true)
+        public async Task SetAnimationAsync(Animation animation, bool reset = true)
         {
             // Check if the animation is supported
             var animId = animation.GetId();
@@ -136,19 +133,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimation);
+                await SendCommandAsync(Command.SetChannelAnimation);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_index);
-                await _stream.WriteUInt32(animId);
+                await _stream.WriteUInt8Async(_index);
+                await _stream.WriteUInt32Async(animId);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to set channel animation");
             }
@@ -158,7 +155,7 @@ namespace Brite.Device
             }
         }
 
-        public async Task Reset()
+        public async Task ResetAsync()
         {
             if (_animation == null)
                 return;
@@ -173,19 +170,19 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Wait for device to get ready
-                await SendCommand(Command.SetChannelAnimation);
+                await SendCommandAsync(Command.SetChannelAnimation);
 
                 // Send parameters
                 _stream.TypesEnabled = true;
-                await _stream.WriteUInt8(_index);
-                await _stream.WriteUInt32(0);
+                await _stream.WriteUInt8Async(_index);
+                await _stream.WriteUInt32Async(0);
 
-                // Read response
+                // ReadAsync response
                 _stream.TypesEnabled = true;
-                var result = await _stream.ReadUInt8();
+                var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to reset channel");
             }
@@ -195,36 +192,29 @@ namespace Brite.Device
             }
         }
 
-        private async Task SendCommand(Command command)
+        private async Task SendCommandAsync(Command command)
         {
             var typesEnabled = _stream.TypesEnabled;
 
-            var done = false;
             for (var i = 0; i < _retries; i++)
             {
                 try
                 {
                     _stream.TypesEnabled = false;
-                    await _stream.WriteUInt8((byte) command);
+                    await _stream.WriteUInt8Async((byte)command);
 
-                    var response = await _stream.ReadUInt8();
-                    if (response == (byte) command)
-                    {
-                        done = true;
+                    var response = await _stream.ReadUInt8Async();
+                    if (response == (byte)command)
                         break;
-                    }
                 }
                 catch (Exception ex)
                 {
-                    log.Warn($"SendCommand failed on try {i}");
-                    log.Warn($"\tError: {ex}");
+                    if (i == _retries - 1)
+                        throw new Exception("Unable to send command", ex);
                 }
             }
 
             _stream.TypesEnabled = typesEnabled;
-
-            if (!done)
-                throw new Exception("Unable to send command");
         }
     }
 }

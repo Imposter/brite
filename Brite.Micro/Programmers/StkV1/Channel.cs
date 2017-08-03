@@ -1,5 +1,4 @@
-﻿using Brite.Utility.IO;
-using Brite.Utility.IO.Serial;
+﻿using Brite.Utility.IO.Serial;
 
 namespace Brite.Micro.Programmers.StkV1
 {

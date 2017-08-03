@@ -18,7 +18,7 @@ namespace Brite.Utility.IO
             set => _bigEndian = value;
         }
 
-        private async Task<int> ReadBytes(byte[] buffer, int length)
+        private async Task<int> ReadBytesAsync(byte[] buffer, int length)
         {
             if (_peekByte != -1)
             {
@@ -30,7 +30,7 @@ namespace Brite.Utility.IO
             return await _stream.ReadAsync(buffer, 0, length);
         }
 
-        public async Task<int> Peek()
+        public async Task<int> PeekAsync()
         {
             if (_peekByte != -1)
                 return _peekByte;
@@ -45,29 +45,29 @@ namespace Brite.Utility.IO
             return -1;
         }
 
-        public async Task<int> Read()
+        public async Task<int> ReadAsync()
         {
             var b = new byte[1];
-            return await ReadBytes(b, b.Length) <= 0 ? -1 : b[0];
+            return await ReadBytesAsync(b, b.Length) <= 0 ? -1 : b[0];
         }
 
-        public async Task Write(byte obj)
+        public async Task WriteAsync(byte obj)
         {
             byte[] b = { obj };
             await _stream.WriteAsync(b, 0, b.Length);
         }
 
-        public async Task<bool> Read(byte[] buffer, int length)
+        public async Task<bool> ReadAsync(byte[] buffer, int length)
         {
-            return await ReadBytes(buffer, length) == length;
+            return await ReadBytesAsync(buffer, length) == length;
         }
 
-        public async Task Write(byte[] buffer, int length)
+        public async Task WriteAsync(byte[] buffer, int length)
         {
             await _stream.WriteAsync(buffer, 0, length);
         }
 
-        public async Task Write(string str, string encoding = "UTF-8")
+        public async Task WriteAsync(string str, string encoding = "UTF-8")
         {
             var bytes = Encoding.GetEncoding(encoding).GetBytes(str);
             await _stream.WriteAsync(bytes, 0, bytes.Length);
@@ -80,34 +80,43 @@ namespace Brite.Utility.IO
             _peekByte = -1;
         }
 
-        public async Task<bool> ReadBoolean()
+        public async Task<bool> ReadBooleanAsync()
         {
-            var b = await Read();
+            var b = await ReadAsync();
             if (b < 0)
                 return false;
 
             return b == 1;
         }
 
-        public async Task<sbyte> ReadInt8()
+        public async Task<char> ReadCharAsync()
         {
-            return (sbyte)await Read();
+            var b = await ReadAsync();
+            if (b < 0)
+                throw new TimeoutException("Unable to read data");
+
+            return (char)b;
         }
 
-        public async Task<byte> ReadUInt8()
+        public async Task<sbyte> ReadInt8Async()
         {
-            var b = await Read();
+            return (sbyte)await ReadAsync();
+        }
+
+        public async Task<byte> ReadUInt8Async()
+        {
+            var b = await ReadAsync();
             if (b < 0)
-                throw new Exception("Unable to read data");
+                throw new TimeoutException("Unable to read data");
 
             return (byte)b;
         }
 
-        public async Task<short> ReadInt16()
+        public async Task<short> ReadInt16Async()
         {
             var buffer = new byte[sizeof(short)];
-            if (!await Read(buffer, buffer.Length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
 
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
@@ -115,11 +124,11 @@ namespace Brite.Utility.IO
             return BitConverter.ToInt16(buffer, 0);
         }
 
-        public async Task<ushort> ReadUInt16()
+        public async Task<ushort> ReadUInt16Async()
         {
             var buffer = new byte[sizeof(ushort)];
-            if (!await Read(buffer, buffer.Length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
 
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
@@ -127,11 +136,11 @@ namespace Brite.Utility.IO
             return BitConverter.ToUInt16(buffer, 0);
         }
 
-        public async Task<int> ReadInt32()
+        public async Task<int> ReadInt32Async()
         {
             var buffer = new byte[sizeof(int)];
-            if (!await Read(buffer, buffer.Length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
 
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
@@ -139,11 +148,11 @@ namespace Brite.Utility.IO
             return BitConverter.ToInt32(buffer, 0);
         }
 
-        public async Task<uint> ReadUInt32()
+        public async Task<uint> ReadUInt32Async()
         {
             var buffer = new byte[sizeof(uint)];
-            if (!await Read(buffer, buffer.Length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
 
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
@@ -151,11 +160,11 @@ namespace Brite.Utility.IO
             return BitConverter.ToUInt32(buffer, 0);
         }
 
-        public async Task<float> ReadFloat()
+        public async Task<float> ReadFloatAsync()
         {
             var buffer = new byte[sizeof(float)];
-            if (!await Read(buffer, buffer.Length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
 
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
@@ -163,7 +172,7 @@ namespace Brite.Utility.IO
             return BitConverter.ToSingle(buffer, 0);
         }
 
-        public async Task<string> ReadString(int length, string encoding = "UTF-8")
+        public async Task<string> ReadStringAsync(int length, string encoding = "UTF-8")
         {
             // Get encoding
             var encoder = Encoding.GetEncoding(encoding);
@@ -173,89 +182,94 @@ namespace Brite.Utility.IO
             length *= tempBuffer.Length;
 
             var buffer = new byte[length];
-            if (!await Read(buffer, length))
-                throw new Exception("Unable to read data");
+            if (!await ReadAsync(buffer, length))
+                throw new TimeoutException("Unable to read data");
 
             return Encoding.GetEncoding(encoding).GetString(buffer);
         }
 
-        public async Task<byte[]> ReadBlob(int length)
+        public async Task<byte[]> ReadBlobAsync(int length)
         {
-           var obj = new byte[length];
-            if (!await Read(obj, length))
-                throw new Exception("Unable to read data");
+            var obj = new byte[length];
+            if (!await ReadAsync(obj, length))
+                throw new TimeoutException("Unable to read data");
 
             return obj;
         }
 
-        public async Task WriteBoolean(bool obj)
+        public async Task WriteBooleanAsync(bool obj)
         {
-            await Write((byte)(obj ? 1 : 0));
+            await WriteAsync((byte)(obj ? 1 : 0));
         }
 
-        public async Task WriteInt8(sbyte obj)
+        public async Task WriteCharAsync(char obj)
         {
-            await Write((byte)obj);
+            await WriteAsync((byte)obj);
         }
 
-        public async Task WriteUInt8(byte obj)
+        public async Task WriteInt8Async(sbyte obj)
         {
-            await Write(obj);
+            await WriteAsync((byte)obj);
         }
 
-        public async Task WriteInt16(short obj)
+        public async Task WriteUInt8Async(byte obj)
+        {
+            await WriteAsync(obj);
+        }
+
+        public async Task WriteInt16Async(short obj)
         {
             var buffer = BitConverter.GetBytes(obj);
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
 
-            await Write(buffer, sizeof(short));
+            await WriteAsync(buffer, sizeof(short));
         }
 
-        public async Task WriteUInt16(ushort obj)
+        public async Task WriteUInt16Async(ushort obj)
         {
             var buffer = BitConverter.GetBytes(obj);
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
 
-            await Write(buffer, sizeof(ushort));
+            await WriteAsync(buffer, sizeof(ushort));
         }
 
-        public async Task WriteInt32(int obj)
+        public async Task WriteInt32Async(int obj)
         {
             var buffer = BitConverter.GetBytes(obj);
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
 
-            await Write(buffer, sizeof(int));
+            await WriteAsync(buffer, sizeof(int));
         }
 
-        public async Task WriteUInt32(uint obj)
+        public async Task WriteUInt32Async(uint obj)
         {
             var buffer = BitConverter.GetBytes(obj);
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
 
-            await Write(buffer, sizeof(uint));
+            await WriteAsync(buffer, sizeof(uint));
         }
 
-        public async Task WriteFloat(float obj)
+        public async Task WriteFloatAsync(float obj)
         {
             var buffer = BitConverter.GetBytes(obj);
             if (_bigEndian && BitConverter.IsLittleEndian || !_bigEndian && !BitConverter.IsLittleEndian)
                 buffer.Reverse();
 
-            await Write(buffer, sizeof(float));
+            await WriteAsync(buffer, sizeof(float));
         }
 
-        public async Task WriteString(string obj, string encoding = "UTF-8")
+        public async Task WriteStringAsync(string obj, string encoding = "UTF-8")
         {
-            await Write(obj, encoding);
+            await WriteAsync(obj, encoding);
         }
 
-        public async Task WriteBlob(byte[] obj)
+        public async Task WriteBlobAsync(byte[] obj)
         {
-            await Write(obj, obj.Length);
+            await WriteAsync(obj, obj.Length);
         }
     }
 }

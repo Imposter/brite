@@ -5,6 +5,6 @@ namespace Brite.Utility.Hardware
 {
     public interface IDeviceSearcher
     {
-        Task<List<DeviceInfo>> GetDevices();
+        Task<List<DeviceInfo>> GetDevicesAsync();
     }
 }

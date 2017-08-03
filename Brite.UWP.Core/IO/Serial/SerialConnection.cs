@@ -8,7 +8,7 @@ using SerialParity = Brite.Utility.IO.Serial.SerialParity;
 using WinSerialStopBits = Windows.Devices.SerialCommunication.SerialStopBitCount;
 using WinSerialParity = Windows.Devices.SerialCommunication.SerialParity;
 
-namespace Brite.UWP.Core
+namespace Brite.UWP.Core.IO.Serial
 {
     public class SerialConnection : ISerialConnection
     {
@@ -80,7 +80,7 @@ namespace Brite.UWP.Core
             Parity = SerialParity.None;
         }
 
-        public async Task Open()
+        public async Task OpenAsync()
         {
             var selector = SerialDevice.GetDeviceSelector(PortName);
             var devices = await DeviceInformation.FindAllAsync(selector);
@@ -105,7 +105,9 @@ namespace Brite.UWP.Core
             _stream = new Stream(_device.InputStream, _device.OutputStream);
         }
 
-        public async Task Close()
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task CloseAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             if (_device != null)
             {

@@ -30,7 +30,6 @@ namespace Brite.Device
         // Brite Info
         private uint _firmwareVersion;
         private uint _deviceId;
-        private bool _bluetoothEnabled;
         private byte _channelCount;
         private ushort _channelMaxSize;
         private byte _channelMaxBrightness;
@@ -58,7 +57,6 @@ namespace Brite.Device
         public bool IsOpen => _isOpen;
         public uint FirmwareVersion => _firmwareVersion;
         public uint DeviceId => _deviceId;
-        public bool BluetoothEnabled => _bluetoothEnabled;
         public byte ChannelCount => _channelCount;
         public ushort ChannelMaxSize => _channelMaxSize;
         public byte ChannelMaxBrightness => _channelMaxBrightness;
@@ -77,13 +75,13 @@ namespace Brite.Device
             _channels = new List<Channel>();
         }
 
-        public async Task Open(uint baudRate, int timeout, int retries, bool restart = false)
+        public async Task OpenAsync(uint baudRate, int timeout, int retries, bool restart = false)
         {
             if (_isOpen)
                 throw new InvalidOperationException("Port is already open");
 
             if (_serial.IsOpen)
-                await _serial.Close();
+                await _serial.CloseAsync();
 
             // Store config
             _baudRate = baudRate;
@@ -95,7 +93,7 @@ namespace Brite.Device
             _serial.BaudRate = _baudRate;
             _serial.DtrEnable = restart;
             _serial.Timeout = _timeout;
-            await _serial.Open();
+            await _serial.OpenAsync();
 
             // Create stream
             _stream = new TypedStream(_serial.BaseStream);
@@ -111,16 +109,16 @@ namespace Brite.Device
             try
             {
                 // Lock mutex
-                await _streamLock.Lock();
+                await _streamLock.LockAsync();
 
                 // Get firmware version
                 {
                     // Wait for device to get ready
-                    await SendCommand(Command.GetVersion);
+                    await SendCommandAsync(Command.GetVersion);
 
-                    // Read response
+                    // ReadAsync response
                     _stream.TypesEnabled = true;
-                    var firmwareVersion = await _stream.ReadUInt32();
+                    var firmwareVersion = await _stream.ReadUInt32Async();
 
                     // Store version
                     _firmwareVersion = firmwareVersion;
@@ -129,14 +127,14 @@ namespace Brite.Device
                 // Get device ID
                 {
                     // Wait for device to get ready
-                    await SendCommand(Command.GetId);
+                    await SendCommandAsync(Command.GetId);
 
-                    // Read response success
+                    // ReadAsync response success
                     _stream.TypesEnabled = true;
-                    var result = await _stream.ReadUInt8();
+                    var result = await _stream.ReadUInt8Async();
                     if (result == (byte)Result.Ok)
                     {
-                        var deviceId = await _stream.ReadUInt32();
+                        var deviceId = await _stream.ReadUInt32Async();
 
                         // Store device ID
                         _deviceId = deviceId;
@@ -150,20 +148,18 @@ namespace Brite.Device
                 // Get device parameters
                 {
                     // Wait for device to get ready
-                    await SendCommand(Command.GetParameters);
+                    await SendCommandAsync(Command.GetParameters);
 
-                    // Read response
+                    // ReadAsync response
                     _stream.TypesEnabled = true;
-                    var bluetoothEnabled = await _stream.ReadBoolean();
-                    var channelCount = await _stream.ReadUInt8();
-                    var channelMaxSize = await _stream.ReadUInt16();
-                    var channelMaxBrightness = await _stream.ReadUInt8();
-                    var animationMaxColors = await _stream.ReadUInt8();
-                    var animationMinSpeed = await _stream.ReadFloat();
-                    var animationMaxSpeed = await _stream.ReadFloat();
+                    var channelCount = await _stream.ReadUInt8Async();
+                    var channelMaxSize = await _stream.ReadUInt16Async();
+                    var channelMaxBrightness = await _stream.ReadUInt8Async();
+                    var animationMaxColors = await _stream.ReadUInt8Async();
+                    var animationMinSpeed = await _stream.ReadFloatAsync();
+                    var animationMaxSpeed = await _stream.ReadFloatAsync();
 
                     // Store parameters
-                    _bluetoothEnabled = bluetoothEnabled;
                     _channelCount = channelCount;
                     _channelMaxSize = channelMaxSize;
                     _channelMaxBrightness = channelMaxBrightness;
@@ -175,14 +171,14 @@ namespace Brite.Device
                 // Get animations
                 {
                     // Wait for device to respond
-                    await SendCommand(Command.GetAnimations);
+                    await SendCommandAsync(Command.GetAnimations);
 
-                    // Read response
+                    // ReadAsync response
                     _stream.TypesEnabled = true;
-                    var animationCount = await _stream.ReadUInt8();
+                    var animationCount = await _stream.ReadUInt8Async();
                     var supportedAnimations = new List<uint>();
                     for (byte i = 0; i < animationCount; i++)
-                        supportedAnimations.Add(await _stream.ReadUInt32());
+                        supportedAnimations.Add(await _stream.ReadUInt32Async());
 
                     // Store supported animations
                     _supportedAnimations.Clear();
@@ -205,13 +201,13 @@ namespace Brite.Device
             _isOpen = true;
         }
 
-        public async void Close()
+        public async void CloseAsync()
         {
             if (!_isOpen)
                 throw new InvalidOperationException("Port is not open");
 
-            // Close port
-            await _serial.Close();
+            // CloseAsync port
+            await _serial.CloseAsync();
 
             // Dereference stream
             _stream = null;
@@ -219,55 +215,46 @@ namespace Brite.Device
             _isOpen = false;
         }
 
-        // TODO: Update using IUpdater
-
-        public async Task Reset()
+        public async Task ResetAsync()
         {
             // Wait for device to respond
-            await SendCommand(Command.Reset);
+            await SendCommandAsync(Command.Reset);
 
-            // Read response
+            // ReadAsync response
             _stream.TypesEnabled = true;
-            var result = await _stream.ReadUInt8();
+            var result = await _stream.ReadUInt8Async();
             if (result != (byte)Result.Ok)
                 throw new Exception("Unable to reset device");
         }
 
-        private async Task SendCommand(Command command)
+        private async Task SendCommandAsync(Command command)
         {
             var typesEnabled = _stream.TypesEnabled;
-
-            var done = false;
-            for (var i = 1; i <= _retries; i++)
+            
+            for (var i = 0; i < _retries; i++)
             {
                 try
                 {
                     _stream.TypesEnabled = false;
-                    await _stream.WriteUInt8((byte)command);
+                    await _stream.WriteUInt8Async((byte)command);
 
-                    var response = await _stream.ReadUInt8();
+                    var response = await _stream.ReadUInt8Async();
                     if (response == (byte)command)
-                    {
-                        done = true;
                         break;
-                    }
                 }
                 catch (Exception ex)
                 {
-                    log.Warn($"SendCommand failed on try {i}");
-                    log.Warn($"\tError: {ex}");
+                    if (i == _retries - 1)
+                        throw new Exception("Unable to send command", ex);
                 }
             }
 
             _stream.TypesEnabled = typesEnabled;
-
-            if (!done)
-                throw new Exception("Unable to send command");
         }
 
-        public static async Task<List<Device>> GetDevices<TSerial>(IDeviceSearcher searcher) where TSerial : ISerialConnection, new()
+        public static async Task<List<Device>> GetDevicesAsync<TSerial>(ISerialDeviceSearcher searcher) where TSerial : ISerialConnection, new()
         {
-            return (await searcher.GetDevices()).Select(deviceInfo => new Device(new TSerial(), deviceInfo as SerialDeviceInfo)).ToList();
+            return (await searcher.GetDevicesAsync()).Select(deviceInfo => new Device(new TSerial(), deviceInfo)).ToList();
         }
     }
 }

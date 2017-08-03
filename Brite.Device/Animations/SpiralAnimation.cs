@@ -15,38 +15,38 @@ namespace Brite.Device.Animations
             return "Spiral";
         }
 
-        public override async Task SetColorCount(byte colorCount)
+        public override async Task SetColorCountAsync(byte colorCount)
         {
-            await base.SetColorCount((byte)(colorCount + 1));
+            await base.SetColorCountAsync((byte)(colorCount + 1));
         }
 
-        public override async Task SetColor(byte index, Color color)
+        public override async Task SetColorAsync(byte index, Color color)
         {
-            await base.SetColor((byte)(index + 1), color);
+            await base.SetColorAsync((byte)(index + 1), color);
         }
 
-        public async Task SetBackgroundColor(Color color)
+        public async Task SetBackgroundColorAsync(Color color)
         {
-            await base.SetColor(0, color);
+            await base.SetColorAsync(0, color);
         }
 
-        public async Task SetAsForward(bool forward)
+        public async Task SetAsForwardAsync(bool forward)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                // Write request
-                await stream.WriteUInt8((byte)Command.SetForwardEnabled);
-                await stream.WriteBoolean(forward);
+                // WriteAsync request
+                await stream.WriteUInt8Async((byte)Command.SetForwardEnabled);
+                await stream.WriteBooleanAsync(forward);
             });
         }
 
-        public async Task SetGroupSize(ushort size)
+        public async Task SetGroupSizeAsync(ushort size)
         {
-            await SendRequest(async stream =>
+            await SendRequestAsync(async stream =>
             {
-                // Write request
-                await stream.WriteUInt8((byte)Command.SetGroupSize);
-                await stream.WriteUInt16(size);
+                // WriteAsync request
+                await stream.WriteUInt8Async((byte)Command.SetGroupSize);
+                await stream.WriteUInt16Async(size);
             });
         }
     }
