@@ -116,7 +116,7 @@ namespace Brite.Device
                     // Wait for device to get ready
                     await SendCommandAsync(Command.GetVersion);
 
-                    // ReadAsync response
+                    // Read response
                     _stream.TypesEnabled = true;
                     var firmwareVersion = await _stream.ReadUInt32Async();
 
@@ -129,7 +129,7 @@ namespace Brite.Device
                     // Wait for device to get ready
                     await SendCommandAsync(Command.GetId);
 
-                    // ReadAsync response success
+                    // Read response success
                     _stream.TypesEnabled = true;
                     var result = await _stream.ReadUInt8Async();
                     if (result == (byte)Result.Ok)
@@ -150,7 +150,7 @@ namespace Brite.Device
                     // Wait for device to get ready
                     await SendCommandAsync(Command.GetParameters);
 
-                    // ReadAsync response
+                    // Read response
                     _stream.TypesEnabled = true;
                     var channelCount = await _stream.ReadUInt8Async();
                     var channelMaxSize = await _stream.ReadUInt16Async();
@@ -173,7 +173,7 @@ namespace Brite.Device
                     // Wait for device to respond
                     await SendCommandAsync(Command.GetAnimations);
 
-                    // ReadAsync response
+                    // Read response
                     _stream.TypesEnabled = true;
                     var animationCount = await _stream.ReadUInt8Async();
                     var supportedAnimations = new List<uint>();
@@ -220,11 +220,23 @@ namespace Brite.Device
             // Wait for device to respond
             await SendCommandAsync(Command.Reset);
 
-            // ReadAsync response
+            // Read response
             _stream.TypesEnabled = true;
             var result = await _stream.ReadUInt8Async();
             if (result != (byte)Result.Ok)
                 throw new Exception("Unable to reset device");
+        }
+
+        public async Task SynchonizeAsync()
+        {
+            // Wait for device to respond
+            await SendCommandAsync(Command.Synchronize);
+
+            // Read response
+            _stream.TypesEnabled = true;
+            var result = await _stream.ReadUInt8Async();
+            if (result != (byte)Result.Ok)
+                throw new Exception("Unable to synchronize device");
         }
 
         private async Task SendCommandAsync(Command command)

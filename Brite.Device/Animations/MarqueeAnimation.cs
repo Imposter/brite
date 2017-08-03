@@ -18,7 +18,7 @@ namespace Brite.Device.Animations
         {
             await SendRequestAsync(async stream =>
             {
-                // WriteAsync request
+                // Write request
                 await stream.WriteUInt8Async((byte)Command.SetForwardEnabled);
                 await stream.WriteBooleanAsync(forward);
             });

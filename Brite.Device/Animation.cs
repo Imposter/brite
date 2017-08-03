@@ -132,7 +132,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_channel);
                 await _stream.WriteUInt8Async(colorCount);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -169,7 +169,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(color.G);
                 await _stream.WriteUInt8Async(color.B);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -203,7 +203,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_channel);
                 await _stream.WriteFloatAsync(speed);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -237,7 +237,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_channel);
                 await _stream.WriteBooleanAsync(enabled);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -269,7 +269,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_channel);
                 await _stream.WriteUInt32Async(GetId());
 
-                // ReadAsync response
+                // Read response
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
                     throw new Exception("Unable to send animation request");

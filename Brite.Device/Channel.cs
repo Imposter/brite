@@ -67,7 +67,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_index);
                 await _stream.WriteUInt16Async(size);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -101,7 +101,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_index);
                 await _stream.WriteUInt8Async(brightness);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -143,7 +143,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_index);
                 await _stream.WriteUInt32Async(animId);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)
@@ -180,7 +180,7 @@ namespace Brite.Device
                 await _stream.WriteUInt8Async(_index);
                 await _stream.WriteUInt32Async(0);
 
-                // ReadAsync response
+                // Read response
                 _stream.TypesEnabled = true;
                 var result = await _stream.ReadUInt8Async();
                 if (result != (byte)Result.Ok)

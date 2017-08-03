@@ -8,6 +8,7 @@
         Reset,
         GetParameters,
         GetAnimations,
+        Synchronize,
 
         SetChannelBrightness,
         SetChannelLedCount,

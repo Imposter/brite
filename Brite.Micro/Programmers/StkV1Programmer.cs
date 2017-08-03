@@ -335,7 +335,7 @@ namespace Brite.Micro.Programmers
         private delegate Task ResponseCallback(SerialChannel channel, BinaryStream stream);
         private async Task SendRequestAsync(Command command, RequestCallback requestCallback, ResponseCallback responseCallback)
         {
-            // WriteAsync request
+            // Write request
             Channel.Stream.BigEndian = false;
             await Channel.Stream.WriteUInt8Async((byte)command);
             if (requestCallback != null)
@@ -348,7 +348,7 @@ namespace Brite.Micro.Programmers
             if (await Channel.Stream.ReadUInt8Async() != (byte)Result.InSync)
                 throw new ProtocolException("Not synchronized");
 
-            // ReadAsync response
+            // Read response
             if (responseCallback != null)
                 await responseCallback(Channel, Channel.Stream);
 
