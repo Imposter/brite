@@ -11,6 +11,6 @@
         LoadAddress = 0x55,
         Universal = 0x56,
         ProgramPage = 0x64,
-        ReadPage = 0x74,
+        ReadPage = 0x74
     }
 }

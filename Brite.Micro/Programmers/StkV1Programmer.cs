@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Brite.Micro.Programmers.StkV1;
 using Brite.Micro.Programmers.StkV1.Protocol;
 using Brite.Utility.IO;
-using DeviceInfo = Brite.Micro.Programmers.StkV1.DeviceInfo;
 
 namespace Brite.Micro.Programmers
 {

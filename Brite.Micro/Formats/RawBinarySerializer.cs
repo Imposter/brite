@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Brite.Utility.IO;
-using MemoryStream = Brite.Utility.IO.MemoryStream;
 
 namespace Brite.Micro.Formats
 {

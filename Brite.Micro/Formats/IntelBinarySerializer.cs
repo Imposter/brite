@@ -17,6 +17,8 @@ namespace Brite.Micro.Formats
             throw new NotImplementedException();
         }
 
+        // TODO: Write converter tool based on this in NodeJS where the Update Server will reside and it will automatically convert the hex files to binary dumps
+        // so we don't have to do this on the client
         public async Task<MemoryStream> DeserializeAsync(IStream stream)
         {
             var inputStream = new BinaryStream(stream);

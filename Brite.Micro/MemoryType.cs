@@ -6,6 +6,6 @@
         Flash,
         Eeprom,
         LockBits,
-        FuseBits,
+        FuseBits
     }
 }
