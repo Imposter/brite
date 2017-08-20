@@ -126,15 +126,16 @@ namespace Brite.Micro.Programmers
             await ChipEraseAsync();
         }
 
+        // TODO/NOTE: The timings in this aren't 100% reliable, it may reset too early and fail to synchronize with the device
         public override async Task ResetAsync()
         {
             // Turn off DTR
             await Channel.ToggleResetAsync(false);
-            await Task.Delay(25);
+            await Task.Delay(200);
 
             // Turn on DTR, this will cause the device to reset
             await Channel.ToggleResetAsync(true);
-            await Task.Delay(25);
+            await Task.Delay(200);
         }
 
         #region Protocol

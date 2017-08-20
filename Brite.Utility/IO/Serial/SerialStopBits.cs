@@ -4,6 +4,7 @@
     {
         One,
         OnePointFive,
-        Two
+        Two,
+        None
     }
 }

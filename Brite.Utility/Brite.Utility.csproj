@@ -52,6 +52,7 @@
     <Compile Include="IO\DebugLogger.cs" />
     <Compile Include="IO\Logger.cs" />
     <Compile Include="Hardware\Serial\SerialDeviceInfo.cs" />
+    <Compile Include="IO\Serial\SerialHandshake.cs" />
     <Compile Include="IO\Serial\SerialParity.cs" />
     <Compile Include="IO\Serial\SerialStopBits.cs" />
     <Compile Include="IO\TypedStream.cs" />

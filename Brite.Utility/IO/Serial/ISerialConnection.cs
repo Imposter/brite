@@ -16,6 +16,7 @@ namespace Brite.Utility.IO.Serial
         ushort DataBits { get; set; }
         SerialStopBits StopBits { get; set; }
         SerialParity Parity { get; set; }
+        SerialHandshake Handshake { get; set; }
         IStream BaseStream { get; }
         bool IsOpen { get; }
 

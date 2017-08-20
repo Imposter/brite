@@ -38,9 +38,6 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Formats\IBinarySerializer.cs" />
-    <Compile Include="Formats\IntelBinarySerializer.cs" />
-    <Compile Include="Formats\RawBinarySerializer.cs" />
     <Compile Include="IChannel.cs" />
     <Compile Include="IProgrammer.cs" />
     <Compile Include="MemoryType.cs" />

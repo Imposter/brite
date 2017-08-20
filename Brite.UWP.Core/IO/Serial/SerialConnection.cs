@@ -5,8 +5,10 @@ using Windows.Devices.SerialCommunication;
 using Brite.Utility.IO;
 using Brite.Utility.IO.Serial;
 using SerialParity = Brite.Utility.IO.Serial.SerialParity;
+using SerialHandshake = Brite.Utility.IO.Serial.SerialHandshake;
 using WinSerialStopBits = Windows.Devices.SerialCommunication.SerialStopBitCount;
 using WinSerialParity = Windows.Devices.SerialCommunication.SerialParity;
+using WinSerialHandshake = Windows.Devices.SerialCommunication.SerialHandshake;
 
 namespace Brite.UWP.Core.IO.Serial
 {
@@ -51,9 +53,12 @@ namespace Brite.UWP.Core.IO.Serial
         public bool CdHolding => _device.CarrierDetectState;
         public bool DsrHolding => _device.DataSetReadyState;
 
+        // Require connection to be reset
         public ushort DataBits { get; set; }
         public SerialStopBits StopBits { get; set; }
         public SerialParity Parity { get; set; }
+        public SerialHandshake Handshake { get; set; }
+
         public IStream BaseStream => _stream;
 
         public SerialConnection()
@@ -82,12 +87,26 @@ namespace Brite.UWP.Core.IO.Serial
 
         public async Task OpenAsync()
         {
+            if (_device != null)
+                throw new InvalidOperationException("Port is already open");
+
             var selector = SerialDevice.GetDeviceSelector(PortName);
             var devices = await DeviceInformation.FindAllAsync(selector);
             if (devices.Count == 0)
                 throw new Exception("Port not found");
 
             _deviceInformation = devices[0];
+
+            var deviceStatus = DeviceAccessInformation.CreateFromId(_deviceInformation.Id).CurrentStatus;
+            switch (deviceStatus)
+            {
+                case DeviceAccessStatus.Unspecified:
+                    throw new UnauthorizedAccessException("Port in use");
+                case DeviceAccessStatus.DeniedByUser:
+                    throw new UnauthorizedAccessException("Port access denied by user");
+                case DeviceAccessStatus.DeniedBySystem:
+                    throw new UnauthorizedAccessException("Port access denied by system");
+            }
 
             // TODO: Use CurrentStatus in _deviceInformation to check if device is in use:
             // https://github.com/Microsoft/Windows-universal-samples/blob/master/Samples/SerialArduino/cs/EventHandlerForDevice.cs#L277
@@ -98,13 +117,13 @@ namespace Brite.UWP.Core.IO.Serial
 
             _device.BaudRate = BaudRate;
             _device.DataBits = DataBits;
-            _device.StopBits = (WinSerialStopBits)StopBits;
-            _device.Parity = (WinSerialParity)Parity;
             _device.IsDataTerminalReadyEnabled = DtrEnable;
             _device.IsRequestToSendEnabled = RtsEnable;
-            _device.Handshake = SerialHandshake.None;
             _device.ReadTimeout = TimeSpan.FromMilliseconds(Timeout);
             _device.WriteTimeout = TimeSpan.FromMilliseconds(Timeout);
+            _device.Parity = (WinSerialParity)Parity;
+            _device.Handshake = (WinSerialHandshake)Handshake;
+            _device.StopBits = (WinSerialStopBits)StopBits;
 
             _stream = new Stream(_device.InputStream, _device.OutputStream);
         }
@@ -113,14 +132,15 @@ namespace Brite.UWP.Core.IO.Serial
         public async Task CloseAsync()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            if (_device != null)
-            {
-                _device.Dispose();
+            if (_device == null)
+                throw new InvalidOperationException("Port is not open");
 
-                _device = null;
-                _deviceInformation = null;
-                _stream = null;
-            }
+            _device.Dispose();
+            _stream.Dispose();
+
+            _device = null;
+            _deviceInformation = null;
+            _stream = null;
         }
 
         public void Dispose()
@@ -128,6 +148,7 @@ namespace Brite.UWP.Core.IO.Serial
             if (_device != null)
             {
                 _device.Dispose();
+                _stream.Dispose();
 
                 _device = null;
                 _deviceInformation = null;
