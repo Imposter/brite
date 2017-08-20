@@ -10,7 +10,7 @@
     
     <!-- http://www.uwpcommunitytoolkit.com/en/master/controls/HamburgerMenu/ -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <controls:HamburgerMenu
+        <!--<controls:HamburgerMenu
             Name="Menu"
             PaneBackground="{ThemeResource AppBarBackgroundThemeBrush}"
             Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
@@ -19,10 +19,7 @@
             CompactPaneLength="48"
             HamburgerHeight="48"
             IsPaneOpen="False">
-            
-            <!-- TODO: Layout, then use content from a specific field -->
-            
-        </controls:HamburgerMenu>
+        </controls:HamburgerMenu>-->
 
         <!-- Navigate this when changing pages through sidebar -->
         <ContentControl Name="Root" Margin="48,0,0,0" />
