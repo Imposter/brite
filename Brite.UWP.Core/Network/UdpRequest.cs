@@ -10,6 +10,7 @@ using Brite.Utility.Network;
 namespace Brite.UWP.Core.Network
 {
     // one for client and one for server since each is different
+    [Obsolete]
     public class UdpRequest : IUdpRequest
     {
         public IPEndPoint RemoteEndPoint { get; set; }

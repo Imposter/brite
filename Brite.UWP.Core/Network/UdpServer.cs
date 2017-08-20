@@ -8,6 +8,7 @@ using Brite.Utility.Network;
 
 namespace Brite.UWP.Core.Network
 {
+    [Obsolete]
     public class UdpServer : IUdpServer
     {
         private DatagramSocket _socket;
@@ -52,7 +53,7 @@ namespace Brite.UWP.Core.Network
 
         private void SocketOnMessageReceived(DatagramSocket sender, DatagramSocketMessageReceivedEventArgs args)
         {
-            Logger.GetLog().DebugAsync($"{sender.Information.RemoteAddress}:{sender.Information.RemotePort}").Wait();
+            throw new NotImplementedException();
         }
     }
 }

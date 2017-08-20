@@ -9,7 +9,8 @@ using Brite.Utility.Network;
 
 namespace Brite.UWP.Core.Network
 {
-   public class UdpClient : IUdpClient
+    [Obsolete]
+    public class UdpClient : IUdpClient
     {
         public ushort ListenPort { get; }
 
