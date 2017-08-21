@@ -7,6 +7,7 @@ using Brite.Utility.IO;
 namespace Brite.Micro.Programmers
 {
     // For more information, see: http://www.atmel.com/images/doc2525.pdf
+    // Based on: https://github.com/SavchukSergey/Flasher
     public class StkV1Programmer : SerialProgrammer
     {
         public const int DefaultSyncRetries = 5;

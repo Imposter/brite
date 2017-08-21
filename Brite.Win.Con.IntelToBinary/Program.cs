@@ -6,12 +6,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Brite.Utility.IO;
 
 namespace Brite.Win.Con.IntelToBinary
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine("Brite Intel HEX to Binary Converter v{0}", Assembly.GetExecutingAssembly().GetName().Version);
             Console.WriteLine("Copyright (C) 2017 Indigo Games. All Rights Reserved.");
@@ -37,11 +38,11 @@ namespace Brite.Win.Con.IntelToBinary
                 }
             }
 
-            Thread.Sleep(1000);
             Console.WriteLine("All done!");
+            Thread.Sleep(1000);
         }
 
-        static async Task ConvertFileAsync(string filePath)
+        private static async Task ConvertFileAsync(string filePath)
         {
             // Create output file name
             var outputFile = Path.GetDirectoryName(filePath) + "/" + Path.GetFileNameWithoutExtension(filePath) + ".bin";
@@ -50,7 +51,7 @@ namespace Brite.Win.Con.IntelToBinary
             {
                 using (var output = File.Open(outputFile, FileMode.Create))
                 {
-                    var inputStream = new Brite.Utility.IO.BinaryStream(input);
+                    var inputStream = new BinaryStream(input);
                     var newlineCharacters = Environment.NewLine.ToCharArray();
 
                     while (true)

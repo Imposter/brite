@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Brite.Micro;
 using Brite.Micro.Programmers;
@@ -9,9 +10,9 @@ using Brite.Win.Core.IO.Serial;
 
 namespace Brite.Win.Con.FirmwareUpdater
 {
-    public class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine("Brite Firmware Updater v{0}", Assembly.GetExecutingAssembly().GetName().Version);
 
@@ -26,10 +27,13 @@ namespace Brite.Win.Con.FirmwareUpdater
                 }
 
                 UpdateFirmwareAsync(options).Wait();
+
+                Console.WriteLine("All done");
+                Thread.Sleep(1000);
             }
         }
 
-        static async Task UpdateFirmwareAsync(Options options)
+        private static async Task UpdateFirmwareAsync(Options options)
         {
             // Read file
             var buffer = File.ReadAllBytes(options.FirmwareFile);

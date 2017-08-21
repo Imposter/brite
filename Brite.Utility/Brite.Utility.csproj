@@ -60,7 +60,7 @@
     <Compile Include="ManualReset.cs" />
     <Compile Include="Mutex.cs" />
     <Compile Include="Network\IUdpClient.cs" />
-    <Compile Include="Network\IUdpRequest.cs" />
+    <Compile Include="Network\UdpReceivedEventArgs.cs" />
     <Compile Include="Network\IUdpServer.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

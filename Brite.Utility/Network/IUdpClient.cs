@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Brite.Utility.Network
 {
     public interface IUdpClient
     {
-        ushort ListenPort { get; }
+        IPEndPoint ListenEndPoint { get; set; }
+        IPEndPoint RemoteEndPoint { get; set; }
 
-        Task BindAsync();
-        Task SendRequestAsync(IUdpRequest request);
+        Task ConnectAsync();
+        Task DisconnectAsync();
 
-        // ReSharper disable once ConsiderUsingAsyncSuffix
-        Task OnRequestReceived(IUdpRequest request);
+        Task SendRequestAsync(byte[] buffer);
+
+        event EventHandler<UdpReceivedEventArgs> OnRequestReceived;
     }
 }

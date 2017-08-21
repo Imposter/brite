@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.Win.Con.FirmwareUpdat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.Win.Con.IntelToBinary", "Brite.Win.Con.IntelToBinary\Brite.Win.Con.IntelToBinary.csproj", "{710097B6-FA47-4135-B019-62230264DD4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.Win.Con.Daemon", "Brite.Win.Con.Daemon\Brite.Win.Con.Daemon.csproj", "{4341D86A-CFA6-428B-A069-B6110BC424CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -159,6 +161,22 @@ Global
 		{710097B6-FA47-4135-B019-62230264DD4E}.Release|x64.Build.0 = Release|Any CPU
 		{710097B6-FA47-4135-B019-62230264DD4E}.Release|x86.ActiveCfg = Release|Any CPU
 		{710097B6-FA47-4135-B019-62230264DD4E}.Release|x86.Build.0 = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|ARM.Build.0 = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|x64.Build.0 = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Debug|x86.Build.0 = Debug|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|ARM.ActiveCfg = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|ARM.Build.0 = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|x64.ActiveCfg = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|x64.Build.0 = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|x86.ActiveCfg = Release|Any CPU
+		{4341D86A-CFA6-428B-A069-B6110BC424CA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

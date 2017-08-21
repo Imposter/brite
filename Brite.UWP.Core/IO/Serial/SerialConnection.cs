@@ -108,9 +108,6 @@ namespace Brite.UWP.Core.IO.Serial
                     throw new UnauthorizedAccessException("Port access denied by system");
             }
 
-            // TODO: Use CurrentStatus in _deviceInformation to check if device is in use:
-            // https://github.com/Microsoft/Windows-universal-samples/blob/master/Samples/SerialArduino/cs/EventHandlerForDevice.cs#L277
-
             _device = await SerialDevice.FromIdAsync(_deviceInformation.Id);
             if (_device == null)
                 throw new Exception("Unable to connect to device");
