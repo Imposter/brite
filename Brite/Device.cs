@@ -8,7 +8,7 @@ using Brite.Utility.Hardware.Serial;
 using Brite.Utility.IO;
 using Brite.Utility.IO.Serial;
 
-namespace Brite.Device
+namespace Brite
 {
     public class Device
     {

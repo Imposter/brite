@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Brite.Utility;
 using Brite.Utility.IO;
 
-namespace Brite.Device
+namespace Brite
 {
     public class Channel
     {

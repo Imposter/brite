@@ -5,10 +5,10 @@
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2C90A5EC-8F4F-4C34-8050-32BFCF411919}</ProjectGuid>
+    <ProjectGuid>{EDDDC9AD-9B12-43DD-9905-4F16306D1F27}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Brite.Device</RootNamespace>
-    <AssemblyName>Brite.Device</AssemblyName>
+    <RootNamespace>Brite.Daemon</RootNamespace>
+    <AssemblyName>Brite.Daemon</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -34,30 +34,26 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="project.json" />
-    <!-- A reference to the entire .NET Framework is automatically included -->
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
       <Project>{6E94BBF0-86C6-43E0-9B47-595D2E67BC3F}</Project>
       <Name>Brite.Utility</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Brite.Micro\Brite.Micro.csproj">
+      <Project>{FCE966C1-0C86-45D6-A42E-B318F10C27CB}</Project>
+      <Name>Brite.Micro</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation.cs" />
-    <Compile Include="Animations\BreatheAnimation.cs" />
-    <Compile Include="Animations\FadeAnimation.cs" />
-    <Compile Include="Animations\FixedAnimation.cs" />
-    <Compile Include="Animations\ManualAnimation.cs" />
-    <Compile Include="Animations\MarqueeAnimation.cs" />
-    <Compile Include="Animations\PulseAnimation.cs" />
-    <Compile Include="Animations\SpiralAnimation.cs" />
-    <Compile Include="Channel.cs" />
-    <Compile Include="Color.cs" />
-    <Compile Include="Command.cs" />
-    <Compile Include="Device.cs" />
+    <None Include="project.json" />
+    <!-- A reference to the entire .NET Framework is automatically included -->
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="API\Client.cs" />
+    <Compile Include="API\Command.cs" />
+    <Compile Include="API\Server.cs" />
+    <Compile Include="Controller.cs" />
+    <Compile Include="Service.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Result.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

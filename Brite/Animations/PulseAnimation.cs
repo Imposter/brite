@@ -1,4 +1,4 @@
-﻿namespace Brite.Device.Animations
+﻿namespace Brite.Animations
 {
     public class PulseAnimation : Animation
     {

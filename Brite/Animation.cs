@@ -6,7 +6,7 @@ using Brite.Utility;
 using Brite.Utility.Crypto;
 using Brite.Utility.IO;
 
-namespace Brite.Device
+namespace Brite
 {
     public abstract class Animation
     {

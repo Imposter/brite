@@ -1,4 +1,4 @@
-﻿namespace Brite.Device
+﻿namespace Brite
 {
     internal enum Result : byte
     {

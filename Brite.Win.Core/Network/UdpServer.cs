@@ -6,7 +6,7 @@ using SocketUdpClient = System.Net.Sockets.UdpClient;
 
 namespace Brite.Win.Core.Network
 {
-    public abstract class UdpServer : IUdpServer
+    public class UdpServer : IUdpServer
     {
         private SocketUdpClient _server;
 

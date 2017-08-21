@@ -54,7 +54,7 @@ namespace Brite.Win.Core.Network
             {
                 IPEndPoint source = new IPEndPoint(RemoteEndPoint.Address, RemoteEndPoint.Port);
                 var buffer = _client.EndReceive(result, ref source);
-                OnRequestReceived?.Invoke(this, new UdpReceivedEventArgs(source, buffer));
+                OnResponseReceived?.Invoke(this, new UdpReceivedEventArgs(source, buffer));
 
                 _client.BeginReceive(ClientOnDataReceived, _client);
             }
@@ -63,6 +63,6 @@ namespace Brite.Win.Core.Network
             }
         }
 
-        public event EventHandler<UdpReceivedEventArgs> OnRequestReceived;
+        public event EventHandler<UdpReceivedEventArgs> OnResponseReceived;
     }
 }

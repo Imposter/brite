@@ -14,6 +14,6 @@ namespace Brite.Utility.Network
 
         Task SendRequestAsync(byte[] buffer);
 
-        event EventHandler<UdpReceivedEventArgs> OnRequestReceived;
+        event EventHandler<UdpReceivedEventArgs> OnResponseReceived;
     }
 }
