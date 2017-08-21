@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EDDDC9AD-9B12-43DD-9905-4F16306D1F27}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Brite.Daemon</RootNamespace>
-    <AssemblyName>Brite.Daemon</AssemblyName>
+    <RootNamespace>Brite.API</RootNamespace>
+    <AssemblyName>Brite.API</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -48,11 +48,9 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\Client.cs" />
-    <Compile Include="API\Command.cs" />
-    <Compile Include="API\Server.cs" />
-    <Compile Include="Controller.cs" />
-    <Compile Include="Service.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Command.cs" />
+    <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

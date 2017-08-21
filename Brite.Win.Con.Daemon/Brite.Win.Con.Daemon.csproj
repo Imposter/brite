@@ -49,7 +49,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Brite.Daemon\Brite.Daemon.csproj">
+    <ProjectReference Include="..\Brite.API\Brite.API.csproj">
       <Project>{edddc9ad-9b12-43dd-9905-4f16306d1f27}</Project>
       <Name>Brite.Daemon</Name>
     </ProjectReference>

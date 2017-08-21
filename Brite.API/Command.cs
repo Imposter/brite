@@ -1,4 +1,4 @@
-﻿namespace Brite.Daemon.API
+﻿namespace Brite.API
 {
     public enum Command : byte
     {
