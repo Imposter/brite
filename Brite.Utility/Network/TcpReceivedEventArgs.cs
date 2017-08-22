@@ -2,7 +2,7 @@
 
 namespace Brite.Utility.Network
 {
-    public class TcpReceivedEventArgs<TClient> : ReceivedEventArgs
+    public class TcpReceivedEventArgs<TClient> : ReceivedEventArgs // TODO/NOTE: Use stream?
     {
         public TClient Client { get; }
         public IPEndPoint Source { get; }

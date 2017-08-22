@@ -8,9 +8,9 @@ namespace Brite.Win.Core.Network
 {
     public class UdpServer : IUdpServer
     {
-        private SocketUdpClient _server; // TODO: Use Sockets and make a SocketStream : IStream
+        private SocketUdpClient _server;
 
-        public IPEndPoint ListenEndPoint { get; set; }
+        public IPEndPoint ListenEndPoint { get; }
 
         public UdpServer(IPEndPoint endPoint)
         {
@@ -35,7 +35,7 @@ namespace Brite.Win.Core.Network
             if (_server == null)
                 throw new InvalidOperationException("Already stopped");
 
-            _server.Close();
+            _server.Dispose();
             _server = null;
         }
 

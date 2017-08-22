@@ -5,8 +5,8 @@ namespace Brite.Utility.Network
 {
     public interface IUdpClient
     {
-        IPEndPoint ListenEndPoint { get; set; }
-        IPEndPoint RemoteEndPoint { get; set; }
+        IPEndPoint ListenEndPoint { get; }
+        IPEndPoint RemoteEndPoint { get; }
 
         Task ConnectAsync();
         Task DisconnectAsync();

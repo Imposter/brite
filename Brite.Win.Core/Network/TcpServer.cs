@@ -8,8 +8,6 @@ using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network
 {
-    // TODO/NOTE: Implement GetStream in client/server instead and use that with IStream?
-    // SocketStream or so...
     public class TcpServer : ITcpServer<SocketTcpClient>
     {
         private class ClientReadArgs
@@ -28,7 +26,7 @@ namespace Brite.Win.Core.Network
 
         private TcpListener _server;
 
-        public IPEndPoint ListenEndPoint { get; set; }
+        public IPEndPoint ListenEndPoint { get; }
         public int BufferSize { get; set; }
 
         public TcpServer(IPEndPoint endPoint, int bufferSize = DefaultBufferSize)
@@ -56,7 +54,7 @@ namespace Brite.Win.Core.Network
         {
             if (_server == null)
                 throw new InvalidOperationException("Already stopped");
-            
+
             _server.Stop();
             _server = null;
         }

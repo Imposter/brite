@@ -26,8 +26,13 @@ namespace Brite.Win.Con.Daemon
             server.OnDataReceived += (sender, eventArgs) =>
             {
                 Console.WriteLine("Data received");
+                Console.WriteLine(Encoding.ASCII.GetString(eventArgs.Buffer));
             };
             server.StartAsync().Wait();
+
+            var client = new TcpClient(new IPEndPoint(IPAddress.Loopback, server.ListenEndPoint.Port));
+            client.ConnectAsync().Wait();
+            client.GetStream().WriteAsync(Encoding.ASCII.GetBytes("Hello"), 0, 5);
 
             Thread.Sleep(-1);
         }

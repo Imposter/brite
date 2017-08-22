@@ -6,7 +6,7 @@ namespace Brite.Utility.Network
 {
     public interface IUdpServer
     {
-        IPEndPoint ListenEndPoint { get; set; }
+        IPEndPoint ListenEndPoint { get; }
 
         Task StartAsync();
         Task StopAsync();

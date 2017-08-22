@@ -11,16 +11,14 @@ namespace Brite.Win.Core.Network
     {
         private SocketUdpClient _client;
 
-        public IPEndPoint ListenEndPoint { get; set; }
-        public IPEndPoint RemoteEndPoint { get; set; }
+        public IPEndPoint ListenEndPoint { get; }
+        public IPEndPoint RemoteEndPoint { get; }
 
         public UdpClient(IPEndPoint listenEndpoint, IPEndPoint remoteEndPoint)
         {
             ListenEndPoint = listenEndpoint;
             RemoteEndPoint = remoteEndPoint;
         }
-
-        IPEndPoint IUdpClient.ListenEndPoint { get; set; }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task ConnectAsync()
@@ -39,7 +37,7 @@ namespace Brite.Win.Core.Network
             if (_client == null)
                 throw new InvalidOperationException("Client is not connected!");
 
-            _client.Close();
+            _client.Dispose();
             _client = null;
         }
 
