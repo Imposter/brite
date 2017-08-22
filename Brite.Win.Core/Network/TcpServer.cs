@@ -8,6 +8,8 @@ using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network
 {
+    // TODO/NOTE: Implement GetStream in client/server instead and use that with IStream?
+    // SocketStream or so...
     public class TcpServer : ITcpServer<SocketTcpClient>
     {
         private class ClientReadArgs

@@ -8,7 +8,7 @@ namespace Brite.Win.Core.Network
 {
     public class UdpServer : IUdpServer
     {
-        private SocketUdpClient _server;
+        private SocketUdpClient _server; // TODO: Use Sockets and make a SocketStream : IStream
 
         public IPEndPoint ListenEndPoint { get; set; }
 
