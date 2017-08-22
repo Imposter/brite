@@ -19,9 +19,9 @@ namespace Brite.Utility.Crypto
             return offset;
         }
 
-        public static uint Fnv1A32(string str)
+        public static uint Fnv1A32(string data, string encoding = "UTF-8")
         {
-            return Fnv1A32(Encoding.ASCII.GetBytes(str));
+            return Fnv1A32(Encoding.GetEncoding(encoding).GetBytes(data));
         }
     }
 }

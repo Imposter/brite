@@ -44,6 +44,8 @@
     <Compile Include="Hardware\Serial\SerialDeviceSearcher.cs" />
     <Compile Include="IO\TimedStream.cs" />
     <Compile Include="IO\Serial\SerialConnection.cs" />
+    <Compile Include="Network\TcpClient.cs" />
+    <Compile Include="Network\TcpServer.cs" />
     <Compile Include="Network\UdpClient.cs" />
     <Compile Include="Network\UdpServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

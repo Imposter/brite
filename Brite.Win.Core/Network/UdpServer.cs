@@ -25,7 +25,7 @@ namespace Brite.Win.Core.Network
                 throw new InvalidOperationException("Already started");
 
             _server = new SocketUdpClient(ListenEndPoint);
-            _server.BeginReceive(ClientOnDataReceived, _server);
+            _server.BeginReceive(ServerOnDataReceived, _server);
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -39,26 +39,26 @@ namespace Brite.Win.Core.Network
             _server = null;
         }
 
-        public async Task SendResponseAsync(IPEndPoint target, byte[] buffer)
+        public async Task SendAsync(IPEndPoint target, byte[] buffer)
         {
             await _server.SendAsync(buffer, buffer.Length, target);
         }
 
-        private void ClientOnDataReceived(IAsyncResult result)
+        private void ServerOnDataReceived(IAsyncResult result)
         {
             try
             {
                 IPEndPoint source = new IPEndPoint(IPAddress.Any, 0);
                 var buffer = _server.EndReceive(result, ref source);
-                OnRequestReceived?.Invoke(this, new UdpReceivedEventArgs(source, buffer));
+                OnDataReceived?.Invoke(this, new UdpReceivedEventArgs(source, buffer, buffer.Length));
 
-                _server.BeginReceive(ClientOnDataReceived, _server);
+                _server.BeginReceive(ServerOnDataReceived, _server);
             }
             catch (ObjectDisposedException)
             {
             }
         }
 
-        public event EventHandler<UdpReceivedEventArgs> OnRequestReceived;
+        public event EventHandler<UdpReceivedEventArgs> OnDataReceived;
     }
 }

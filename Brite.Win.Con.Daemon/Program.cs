@@ -13,29 +13,23 @@ namespace Brite.Win.Con.Daemon
     {
         static void Main(string[] args)
         {
-            // Server/Client test
-            var server = new UdpServer(new IPEndPoint(IPAddress.Any, 8000));
-            server.OnRequestReceived += async (sender, eventArgs) =>
+            // Server test
+            var server = new TcpServer(new IPEndPoint(IPAddress.Any, 2200));
+            server.OnClientConnected += (sender, eventArgs) =>
             {
-                Console.WriteLine("C>S [{0}]: {1}", eventArgs.Source, Encoding.ASCII.GetString(eventArgs.Buffer));
-                await server.SendResponseAsync(eventArgs.Source, eventArgs.Buffer);
+                Console.WriteLine("Client connected!");
             };
-
+            server.OnClientDisconnected += (sender, eventArgs) =>
+            {
+                Console.WriteLine("Client disconnected");
+            };
+            server.OnDataReceived += (sender, eventArgs) =>
+            {
+                Console.WriteLine("Data received");
+            };
             server.StartAsync().Wait();
 
-            var client = new UdpClient(new IPEndPoint(IPAddress.Any, 50000), new IPEndPoint(IPAddress.Loopback, server.ListenEndPoint.Port));
-            client.OnResponseReceived += (sender, eventArgs) =>
-            {
-                Console.WriteLine("S>C [{0}]: {1}", eventArgs.Source, Encoding.ASCII.GetString(eventArgs.Buffer));
-            };
-
-            client.ConnectAsync().Wait();
-
-            while (true)
-            {
-                client.SendRequestAsync(Encoding.ASCII.GetBytes("Hello")).Wait();
-                Thread.Sleep(1000);
-            }
+            Thread.Sleep(-1);
         }
     }
 }

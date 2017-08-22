@@ -1,17 +1,18 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Brite.Utility.Network
 {
-    public interface IUdpClient
+    public interface ITcpClient
     {
-        IPEndPoint ListenEndPoint { get; set; }
+        int Timeout { get; set; }
         IPEndPoint RemoteEndPoint { get; set; }
 
         Task ConnectAsync();
         Task DisconnectAsync();
 
-        Task<byte[]> ReceiveAsync();
+        Task ReceiveAsync(byte[] buffer);
         Task SendAsync(byte[] buffer);
     }
 }

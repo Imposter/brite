@@ -11,8 +11,8 @@ namespace Brite.Utility.Network
         Task StartAsync();
         Task StopAsync();
 
-        Task SendResponseAsync(IPEndPoint target, byte[] buffer);
+        Task SendAsync(IPEndPoint target, byte[] buffer);
 
-        event EventHandler<UdpReceivedEventArgs> OnRequestReceived;
+        event EventHandler<UdpReceivedEventArgs> OnDataReceived;
     }
 }

@@ -59,7 +59,12 @@
     <Compile Include="ISerializer.cs" />
     <Compile Include="ManualReset.cs" />
     <Compile Include="Mutex.cs" />
+    <Compile Include="Network\ITcpClient.cs" />
+    <Compile Include="Network\ITcpServer.cs" />
     <Compile Include="Network\IUdpClient.cs" />
+    <Compile Include="Network\ReceivedEventArgs.cs" />
+    <Compile Include="Network\TcpConnectionEventArgs.cs" />
+    <Compile Include="Network\TcpReceivedEventArgs.cs" />
     <Compile Include="Network\UdpReceivedEventArgs.cs" />
     <Compile Include="Network\IUdpServer.cs" />
     <Compile Include="ObjectExtensions.cs" />

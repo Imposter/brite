@@ -1,5 +1,6 @@
 ﻿using Brite.Utility.Network;
 using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using SocketUdpClient = System.Net.Sockets.UdpClient;
@@ -29,7 +30,6 @@ namespace Brite.Win.Core.Network
                 throw new InvalidOperationException("Client is already connected!");
 
             _client = new SocketUdpClient(ListenEndPoint);
-            _client.BeginReceive(ClientOnDataReceived, _client);
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -43,26 +43,18 @@ namespace Brite.Win.Core.Network
             _client = null;
         }
 
-        public async Task SendRequestAsync(byte[] buffer)
+        public async Task<byte[]> ReceiveAsync()
+        {
+            var result = await _client.ReceiveAsync();
+            if (!result.RemoteEndPoint.Equals(RemoteEndPoint))
+                throw new IOException("Received data from unknown host");
+
+            return result.Buffer;
+        }
+
+        public async Task SendAsync(byte[] buffer)
         {
             await _client.SendAsync(buffer, buffer.Length, RemoteEndPoint);
         }
-
-        private void ClientOnDataReceived(IAsyncResult result)
-        {
-            try
-            {
-                IPEndPoint source = new IPEndPoint(RemoteEndPoint.Address, RemoteEndPoint.Port);
-                var buffer = _client.EndReceive(result, ref source);
-                OnResponseReceived?.Invoke(this, new UdpReceivedEventArgs(source, buffer));
-
-                _client.BeginReceive(ClientOnDataReceived, _client);
-            }
-            catch (ObjectDisposedException)
-            {
-            }
-        }
-
-        public event EventHandler<UdpReceivedEventArgs> OnResponseReceived;
     }
 }

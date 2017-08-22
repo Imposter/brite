@@ -1,17 +1,15 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace Brite.Utility.Network
 {
-    public class UdpReceivedEventArgs : EventArgs
+    public class UdpReceivedEventArgs : ReceivedEventArgs
     {
         public IPEndPoint Source { get; }
-        public byte[] Buffer { get; }
 
-        public UdpReceivedEventArgs(IPEndPoint source, byte[] buffer)
+        public UdpReceivedEventArgs(IPEndPoint source, byte[] buffer, int length)
+            : base(buffer, length)
         {
             Source = source;
-            Buffer = buffer;
         }
     }
 }
