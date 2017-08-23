@@ -7,7 +7,6 @@ using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network
 {
-    // NOTE: This API will most likely change
     public class TcpServer : ITcpServer
     {
         private class ClientReadArgs

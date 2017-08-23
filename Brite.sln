@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.Win.Con.Daemon", "Bri
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite", "Brite\Brite.csproj", "{2C90A5EC-8F4F-4C34-8050-32BFCF411919}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.UWP.App.Test", "Brite.UWP.App.Test\Brite.UWP.App.Test.csproj", "{C4007A1E-B517-4C1D-AEE3-1A7B39294985}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +179,26 @@ Global
 		{2C90A5EC-8F4F-4C34-8050-32BFCF411919}.Release|x64.Build.0 = Release|Any CPU
 		{2C90A5EC-8F4F-4C34-8050-32BFCF411919}.Release|x86.ActiveCfg = Release|Any CPU
 		{2C90A5EC-8F4F-4C34-8050-32BFCF411919}.Release|x86.Build.0 = Release|Any CPU
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|ARM.ActiveCfg = Debug|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|ARM.Build.0 = Debug|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|ARM.Deploy.0 = Debug|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x64.ActiveCfg = Debug|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x64.Build.0 = Debug|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x64.Deploy.0 = Debug|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x86.ActiveCfg = Debug|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x86.Build.0 = Debug|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Debug|x86.Deploy.0 = Debug|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|Any CPU.ActiveCfg = Release|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|ARM.ActiveCfg = Release|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|ARM.Build.0 = Release|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|ARM.Deploy.0 = Release|ARM
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x64.ActiveCfg = Release|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x64.Build.0 = Release|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x64.Deploy.0 = Release|x64
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x86.ActiveCfg = Release|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x86.Build.0 = Release|x86
+		{C4007A1E-B517-4C1D-AEE3-1A7B39294985}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

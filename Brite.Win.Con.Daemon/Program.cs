@@ -16,7 +16,7 @@ namespace Brite.Win.Con.Daemon
         {
             // Server test
             var server = new TcpServer(new IPEndPoint(IPAddress.Any, 2200));
-            server.OnClientConnected += async (sender, eventArgs) =>
+            server.OnClientConnected += (sender, eventArgs) =>
             {
                 Console.WriteLine("Client connected!");
             };
