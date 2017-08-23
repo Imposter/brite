@@ -1,7 +1,11 @@
-﻿namespace Brite.API
+﻿using Brite.Utility.Network;
+
+namespace Brite.API
 {
     public class Server
     {
+         
+
         /*
         Server runs on a standard port
         

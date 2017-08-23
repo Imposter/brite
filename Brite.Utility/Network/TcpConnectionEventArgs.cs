@@ -3,12 +3,12 @@ using System.Net;
 
 namespace Brite.Utility.Network
 {
-    public class TcpConnectionEventArgs<TClient> : EventArgs
+    public class TcpConnectionEventArgs : EventArgs
     {
-        public TClient Client { get; }
+        public ITcpClient Client { get; }
         public IPEndPoint Source { get; }
 
-        public TcpConnectionEventArgs(TClient client, IPEndPoint source)
+        public TcpConnectionEventArgs(ITcpClient client, IPEndPoint source)
         {
             Client = client;
             Source = source;

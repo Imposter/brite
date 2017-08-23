@@ -4,18 +4,15 @@ using System.Threading.Tasks;
 
 namespace Brite.Utility.Network
 {
-    public interface ITcpServer<TClient>
+    public interface ITcpServer
     {
         IPEndPoint ListenEndPoint { get; }
 
         Task StartAsync();
         Task StopAsync();
 
-        Task DisconnectAsync(TClient client);
-        Task SendAsync(TClient client, byte[] buffer);
-
-        event EventHandler<TcpConnectionEventArgs<TClient>> OnClientConnected;
-        event EventHandler<TcpConnectionEventArgs<TClient>> OnClientDisconnected;
-        event EventHandler<TcpReceivedEventArgs<TClient>> OnDataReceived;
+        event EventHandler<TcpConnectionEventArgs> OnClientConnected;
+        event EventHandler<TcpConnectionEventArgs> OnClientDisconnected;
+        event EventHandler<TcpReceivedEventArgs> OnDataReceived;
     }
 }

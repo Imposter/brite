@@ -29,6 +29,14 @@ namespace Brite.Win.Core.Network
 
         public IPEndPoint RemoteEndPoint { get; }
 
+        internal TcpClient(SocketTcpClient client, IPEndPoint remoteEndPoint, int timeout = DefaultTimeout)
+        {
+            _client = client;
+            RemoteEndPoint = remoteEndPoint;
+            _timeout = timeout;
+            _stream = new TimedStream(client.GetStream());
+        }
+
         public TcpClient(IPEndPoint remoteEndPoint, int timeout = DefaultTimeout)
         {
             RemoteEndPoint = remoteEndPoint;

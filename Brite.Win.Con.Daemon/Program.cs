@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Brite.Utility.IO;
 using Brite.Win.Core.Network;
 
 namespace Brite.Win.Con.Daemon
@@ -15,7 +16,7 @@ namespace Brite.Win.Con.Daemon
         {
             // Server test
             var server = new TcpServer(new IPEndPoint(IPAddress.Any, 2200));
-            server.OnClientConnected += (sender, eventArgs) =>
+            server.OnClientConnected += async (sender, eventArgs) =>
             {
                 Console.WriteLine("Client connected!");
             };
@@ -29,10 +30,6 @@ namespace Brite.Win.Con.Daemon
                 Console.WriteLine(Encoding.ASCII.GetString(eventArgs.Buffer));
             };
             server.StartAsync().Wait();
-
-            var client = new TcpClient(new IPEndPoint(IPAddress.Loopback, server.ListenEndPoint.Port));
-            client.ConnectAsync().Wait();
-            client.GetStream().WriteAsync(Encoding.ASCII.GetBytes("Hello"), 0, 5);
 
             Thread.Sleep(-1);
         }
