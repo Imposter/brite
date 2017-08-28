@@ -29,7 +29,7 @@ namespace Brite
 
         // Brite Info
         private uint _firmwareVersion;
-        private uint _deviceId;
+        private uint _id;
         private byte _channelCount;
         private ushort _channelMaxSize;
         private byte _channelMaxBrightness;
@@ -56,7 +56,7 @@ namespace Brite
         public int Retries => _retries;
         public bool IsOpen => _isOpen;
         public uint FirmwareVersion => _firmwareVersion;
-        public uint DeviceId => _deviceId;
+        public uint Id => _id;
         public byte ChannelCount => _channelCount;
         public ushort ChannelMaxSize => _channelMaxSize;
         public byte ChannelMaxBrightness => _channelMaxBrightness;
@@ -137,7 +137,7 @@ namespace Brite
                         var deviceId = await _stream.ReadUInt32Async();
 
                         // Store device ID
-                        _deviceId = deviceId;
+                        _id = deviceId;
                     }
                     else
                     {

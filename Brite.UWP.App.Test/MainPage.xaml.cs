@@ -54,9 +54,11 @@ namespace Brite.UWP.App.Test
             };
             await server.StartAsync();
 
+            var message = Encoding.ASCII.GetBytes("You're fat NoFaTe");
+
             var client = new TcpClient(server.ListenEndPoint);
             await client.ConnectAsync();
-            await client.GetStream().WriteAsync(Encoding.ASCII.GetBytes("Suck"), 0, 4);
+            await client.GetStream().WriteAsync(message, 0, message.Length);
             await client.DisconnectAsync();
         }
     }

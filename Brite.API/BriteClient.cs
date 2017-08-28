@@ -1,6 +1,6 @@
 ﻿namespace Brite.API
 {
-    public class Client
+    public class BriteClient
     {
     }
 }
