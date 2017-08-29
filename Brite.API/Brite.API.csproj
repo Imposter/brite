@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animations\Server\BaseAnimation.cs" />
+    <Compile Include="Animations\Server\ManualAnimation.cs" />
     <Compile Include="BriteClient.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Priority.cs" />

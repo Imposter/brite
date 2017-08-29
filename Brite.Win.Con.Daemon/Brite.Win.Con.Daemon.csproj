@@ -32,8 +32,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -42,16 +47,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Brite\Brite.csproj">
+      <Project>{2C90A5EC-8F4F-4C34-8050-32BFCF411919}</Project>
+      <Name>Brite</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Brite.API\Brite.API.csproj">
       <Project>{edddc9ad-9b12-43dd-9905-4f16306d1f27}</Project>
-      <Name>Brite.Daemon</Name>
+      <Name>Brite.API</Name>
     </ProjectReference>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
       <Project>{6e94bbf0-86c6-43e0-9b47-595d2e67bc3f}</Project>

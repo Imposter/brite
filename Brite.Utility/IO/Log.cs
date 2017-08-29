@@ -8,7 +8,7 @@ namespace Brite.Utility.IO
         private readonly Logger _logger;
         private readonly string _name;
 
-        public Log(Logger logger, string name)
+        public Log(ref Logger logger, string name)
         {
             _logger = logger;
             _name = name;

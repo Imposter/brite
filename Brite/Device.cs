@@ -12,9 +12,6 @@ namespace Brite
 {
     public class Device
     {
-        // Get logger
-        private static readonly Log log = Logger.GetLog<Device>();
-
         // Serial Device Info
         private readonly SerialDeviceInfo _deviceInfo;
 
@@ -40,7 +37,7 @@ namespace Brite
         private readonly List<Channel> _channels;
 
         // Properties
-        public DeviceInfo Info => _deviceInfo;
+        public SerialDeviceInfo Info => _deviceInfo;
 
         public uint BaudRate => _baudRate;
         public int Timeout

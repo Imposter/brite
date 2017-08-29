@@ -15,12 +15,12 @@ namespace Brite.Utility.IO
 
         public static Log GetLog<T>()
         {
-            return new Log(Instance, typeof(T).GetFriendlyName());
+            return new Log(ref Instance, typeof(T).GetFriendlyName());
         }
 
         public static Log GetLog()
         {
-            return new Log(Instance, "Application");
+            return new Log(ref Instance, "Application");
         }
     }
 }

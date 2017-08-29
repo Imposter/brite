@@ -1,17 +1,17 @@
-﻿using Brite.Utility.Crypto;
+﻿using System;
+using System.Threading.Tasks;
+using Brite.Utility.Crypto;
 using Brite.Utility.IO;
 
 namespace Brite.API.Animations.Server
 {
     public abstract class BaseAnimation
     {
-        private readonly BriteServer _server;
-
         public abstract string GetName();
+        public abstract Type GetAnimation();
 
-        public BaseAnimation(BriteServer server)
+        public BaseAnimation()
         {
-            _server = server;
         }
 
         public uint GetId()
@@ -19,7 +19,9 @@ namespace Brite.API.Animations.Server
             return Hash.Fnv1A32(GetName());
         }
 
-        public virtual void HandleRequest(Channel channel, IStream inputStream, IStream outputStream)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public virtual async Task HandleRequestAsync(Channel channel, BinaryStream inputStream, BinaryStream outputStream)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
         }
     }
