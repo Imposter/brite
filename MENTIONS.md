@@ -1,4 +1,4 @@
 # MENTIONS
 
-#### Sergey Savchuk ([GitHub](https://github.com/SavchukSergey))
+### Sergey Savchuk ([GitHub](https://github.com/SavchukSergey))
 - Flasher

@@ -5,6 +5,6 @@
         Ok,
         Error,
 
-        InUse
+        AccessDenied,
     }
 }

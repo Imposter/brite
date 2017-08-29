@@ -10,33 +10,38 @@ namespace Brite.API
 {
     public class BriteServer : IDisposable
     {
-        private class Client
+        private class ClientInfo
         {
             public ITcpClient InternalClient { get; }
             public string Identifier { get; set; }
-            public Dictionary<Channel, Priority> Channels { get; }
 
-            public Client(ITcpClient client)
+            public ClientInfo(ITcpClient client)
             {
                 InternalClient = client;
-                Channels = new Dictionary<Channel, Priority>();
             }
+        }
+
+        private class ChannelInfo
+        {
+            public Animation Animation { get; set; }
+            public ClientInfo Client { get; set; }
+            public Priority Priority { get; set; }
         }
 
         private readonly ITcpServer _server;
         private readonly Device _device;
-        private readonly List<Client> _clients;
+        private readonly List<ClientInfo> _clients;
         private readonly List<BaseAnimation> _animations;
-        private readonly Dictionary<Channel, BaseAnimation> _channelAnimations;
+        private readonly Dictionary<Channel, ChannelInfo> _channels;
 
         public BriteServer(ITcpServer server, Device device)
         {
             _server = server;
             _device = device;
 
-            _clients = new List<Client>();
+            _clients = new List<ClientInfo>();
             _animations = new List<BaseAnimation>();
-            _channelAnimations = new Dictionary<Channel, BaseAnimation>();
+            _channels = new Dictionary<Channel, ChannelInfo>();
 
             // Add server handlers
             _server.OnClientConnected += ServerOnOnClientConnected;
@@ -52,6 +57,12 @@ namespace Brite.API
             if (_animations.Count == 0)
                 throw new InvalidOperationException("Animations not found");
 
+            lock (_channels)
+            {
+                foreach (var deviceChannel in _device.Channels)
+                    _channels.Add(deviceChannel, new ChannelInfo());
+            }
+
             await _server.StartAsync();
         }
 
@@ -59,7 +70,7 @@ namespace Brite.API
         {
             await _server.StopAsync();
             lock (_clients) _clients.Clear();
-            lock (_channelAnimations) _channelAnimations.Clear();
+            lock (_channels) _channels.Clear();
         }
 
         public void AddAnimation(BaseAnimation animation)
@@ -81,7 +92,7 @@ namespace Brite.API
 
         private void ServerOnOnClientConnected(object sender, TcpConnectionEventArgs e)
         {
-            lock (_clients) _clients.Add(new Client(e.Client));
+            lock (_clients) _clients.Add(new ClientInfo(e.Client));
         }
 
         private void ServerOnClientDisconnected(object sender, TcpConnectionEventArgs e)
@@ -91,7 +102,7 @@ namespace Brite.API
 
         private async void ServerOnOnDataReceived(object sender, TcpReceivedEventArgs e)
         {
-            Client client;
+            ClientInfo client;
             lock (_clients) client = _clients.First(c => c.InternalClient == e.Client);
 
             var inputStream = new BinaryStream(new MemoryStream(e.Buffer));
@@ -105,96 +116,167 @@ namespace Brite.API
             // Write response command
             await outputStream.WriteUInt8Async(command);
 
-            switch ((Command)command)
+            if (client.Identifier == string.Empty && command != (byte)Command.SetId)
             {
-                case Command.SetId:
-                    var identifierLength = await inputStream.ReadInt32Async();
-                    client.Identifier = await inputStream.ReadStringAsync(identifierLength);
+                await outputStream.WriteUInt8Async((byte)Result.Error);
+                return;
+            }
 
-                    // Write response
+            if (command == (byte)Command.SetId)
+            {
+                var identifierLength = await inputStream.ReadInt32Async();
+                client.Identifier = await inputStream.ReadStringAsync(identifierLength);
+
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+            }
+            else if (command == (byte)Command.RequestChannel)
+            {
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > _device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    return;
+                }
+
+                var priority = await inputStream.ReadUInt8Async();
+                if (priority > (byte)Priority.VeryHigh)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    return;
+                }
+
+                var channel = _device.Channels[channelIndex];
+                var channelInfo = _channels[channel];
+                if (priority > (byte)channelInfo.Priority)
+                {
+                    channelInfo.Client = client;
+                    channelInfo.Priority = (Priority)priority;
+
                     await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    break;
+                }
+                else
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
+                }
+            }
+            else if (command == (byte)Command.ReleaseChannel)
+            {
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > _device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    return;
+                }
 
-                case Command.RequestChannel:
-                    // TODO: Implement
-                    break;
+                var channel = _device.Channels[channelIndex];
+                var channelInfo = _channels[channel];
+                if (channelInfo.Client == client)
+                {
+                    channelInfo.Client = null;
+                    channelInfo.Priority = Priority.Normal;
 
-                case Command.ReleaseChannel:
-                    // TODO: Implement
-                    break;
-
-                case Command.DeviceGetVersion:
-                    // Write response
                     await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    await outputStream.WriteUInt32Async(_device.FirmwareVersion);
-                    break;
+                }
+                else
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
+                }
+            }
+            else if (command == (byte)Command.DeviceGetVersion)
+            {
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+                await outputStream.WriteUInt32Async(_device.FirmwareVersion);
+            }
+            else if (command == (byte)Command.DeviceGetId)
+            {
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+                await outputStream.WriteUInt32Async(_device.Id);
+            }
+            else if (command == (byte)Command.DeviceGetParameters)
+            {
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+                await outputStream.WriteUInt8Async(_device.ChannelCount);
+                await outputStream.WriteUInt16Async(_device.ChannelMaxSize);
+                await outputStream.WriteUInt8Async(_device.ChannelMaxBrightness);
+                await outputStream.WriteUInt8Async(_device.AnimationMaxColors);
+                await outputStream.WriteFloatAsync(_device.AnimationMinSpeed);
+                await outputStream.WriteFloatAsync(_device.AnimationMaxSpeed);
+            }
+            else if (command == (byte)Command.DeviceGetAnimations)
+            {
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+                await outputStream.WriteUInt8Async((byte)_animations.Count);
+                foreach (var animation in _animations)
+                    await outputStream.WriteUInt32Async(animation.GetId());
+            }
+            else if (command == (byte)Command.DeviceSynchronize)
+            {
+                await _device.SynchonizeAsync();
 
-                case Command.DeviceGetId:
-                    // Write response
-                    await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    await outputStream.WriteUInt32Async(_device.Id);
-                    break;
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+            }
+            else if (command == (byte)Command.DeviceSetChannelBrightness)
+            {
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > _device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    return;
+                }
 
-                case Command.DeviceGetParameters:
-                    // Write response
-                    await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    await outputStream.WriteUInt8Async(_device.ChannelCount);
-                    await outputStream.WriteUInt16Async(_device.ChannelMaxSize);
-                    await outputStream.WriteUInt8Async(_device.ChannelMaxBrightness);
-                    await outputStream.WriteUInt8Async(_device.AnimationMaxColors);
-                    await outputStream.WriteFloatAsync(_device.AnimationMinSpeed);
-                    await outputStream.WriteFloatAsync(_device.AnimationMaxSpeed);
-                    break;
+                var brightness = await inputStream.ReadUInt8Async();
+                var channel = _device.Channels[channelIndex];
+                var channelInfo = _channels[channel];
+                if (channelInfo.Client != client)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
+                    return;
+                }
 
-                case Command.DeviceGetAnimations:
-                    // Write response
-                    await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    await outputStream.WriteUInt8Async((byte)_animations.Count);
-                    foreach (var animation in _animations)
-                        await outputStream.WriteUInt32Async(animation.GetId());
-                    break;
+                await channel.SetBrightnessAsync(brightness);
 
-                case Command.DeviceSynchronize:
-                    await _device.SynchonizeAsync();
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+            }
+            else if (command == (byte)Command.DeviceSetChannelLedCount)
+            {
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > _device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    return;
+                }
 
-                    // Write response
-                    await outputStream.WriteUInt8Async((byte)Result.Ok);
-                    break;
+                var size = await inputStream.ReadUInt8Async();
+                var channel = _device.Channels[channelIndex];
+                var channelInfo = _channels[channel];
+                if (channelInfo.Client != client)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
+                    return;
+                }
 
-                case Command.DeviceSetChannelBrightness:
+                await channel.SetSizeAsync(size);
 
-                    break;
-
-                case Command.DeviceSetChannelLedCount:
-
-                    break;
-
-                case Command.DeviceSetChannelAnimation:
-
-                    break;
-
-                case Command.DeviceSetChannelAnimationEnabled:
-
-                    break;
-
-                case Command.DeviceSetChannelAnimationSpeed:
-
-                    break;
-
-                case Command.DeviceSetChannelAnimationColorCount:
-
-                    break;
-
-                case Command.DeviceSetChannelAnimationColor:
-
-                    break;
-
-                case Command.DeviceSendChannelAnimationRequest:
-
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+            }
+            else if (command == (byte)Command.DeviceSetChannelAnimation)
+            {
+                // TODO: Implement.
+            }
+            else if (command == (byte)Command.DeviceSetChannelAnimationEnabled)
+            {
+            }
+            else if (command == (byte)Command.DeviceSetChannelAnimationSpeed)
+            {
+            }
+            else if (command == (byte)Command.DeviceSetChannelAnimationColorCount)
+            {
+            }
+            else if (command == (byte)Command.DeviceSetChannelAnimationColor)
+            {
+            }
+            else if (command == (byte)Command.DeviceSendChannelAnimationRequest)
+            {
             }
         }
     }
