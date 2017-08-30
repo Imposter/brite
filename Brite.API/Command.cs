@@ -3,8 +3,9 @@
     internal enum Command : byte
     {
         SetId,
-        RequestChannel,
-        ReleaseChannel,
+        GetDevices,
+        RequestDeviceChannel,
+        ReleaseDeviceChannel,
 
         DeviceGetVersion,
         DeviceGetId,

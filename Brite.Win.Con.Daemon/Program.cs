@@ -60,12 +60,13 @@ namespace Brite.Win.Con.Daemon
                 Environment.Exit(-1);
             }
 
-            server = new BriteServer(serverLayer, briteDevice);
+            server = new BriteServer(serverLayer);
             server.AddAnimation(new ManualAnimation());
+            server.AddDevice(briteDevice);
 
             await briteDevice.OpenAsync(115200, 1000, 10);
 
-            await server.StartAsync();
+            await server.StartAsync(); // NOTE: While updating, the server must be off
         }
     }
 }

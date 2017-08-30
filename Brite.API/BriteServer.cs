@@ -28,33 +28,28 @@ namespace Brite.API
             public Priority Priority { get; set; }
         }
 
-        // TODO: Not per device, only one server for all devices
-        //private class DeviceInfo // TODO: Implement
-        //{
-        //    public Device Device { get; }
-        //    public Dictionary<Channel, ChannelInfo> Channels { get; }
+        private class DeviceInfo
+        {
+            public Dictionary<Channel, ChannelInfo> Channels { get; }
 
-        //    public DeviceInfo(Device device)
-        //    {
-        //        Device = device;
-        //        Channels = new Dictionary<Channel, ChannelInfo>();
-        //    }
-        //}
+            public DeviceInfo()
+            {
+                Channels = new Dictionary<Channel, ChannelInfo>();
+            }
+        }
 
         private readonly ITcpServer _server;
-        private readonly Device _device;
         private readonly List<ClientInfo> _clients;
         private readonly Dictionary<uint, BaseAnimation> _animations;
-        private readonly Dictionary<Channel, ChannelInfo> _channels;
+        private readonly Dictionary<Device, DeviceInfo> _devices;
 
-        public BriteServer(ITcpServer server, Device device)
+        public BriteServer(ITcpServer server)
         {
             _server = server;
-            _device = device;
 
             _clients = new List<ClientInfo>();
             _animations = new Dictionary<uint, BaseAnimation>();
-            _channels = new Dictionary<Channel, ChannelInfo>();
+            _devices = new Dictionary<Device, DeviceInfo>();
 
             // Add server handlers
             _server.OnClientConnected += ServerOnOnClientConnected;
@@ -64,17 +59,15 @@ namespace Brite.API
 
         public async Task StartAsync()
         {
-            if (!_device.IsOpen)
-                throw new InvalidOperationException("Device not open");
+            if (_devices.Count == 0)
+                throw new InvalidOperationException("Devices not found");
 
             if (_animations.Count == 0)
                 throw new InvalidOperationException("Animations not found");
 
-            lock (_channels)
-            {
-                foreach (var deviceChannel in _device.Channels)
-                    _channels.Add(deviceChannel, new ChannelInfo());
-            }
+            foreach (var pair in _devices)
+                foreach (var channel in pair.Key.Channels)
+                    pair.Value.Channels.Add(channel, new ChannelInfo());
 
             await _server.StartAsync();
         }
@@ -83,7 +76,9 @@ namespace Brite.API
         {
             await _server.StopAsync();
             lock (_clients) _clients.Clear();
-            lock (_channels) _channels.Clear();
+
+            foreach (var pair in _devices)
+                pair.Value.Channels.Clear();
         }
 
         public void AddAnimation(BaseAnimation animation)
@@ -95,6 +90,17 @@ namespace Brite.API
         {
             foreach (var animation in animations)
                 _animations.Add(animation.GetId(), animation);
+        }
+
+        public void AddDevice(Device device)
+        {
+            _devices.Add(device, new DeviceInfo());
+        }
+
+        public void AddDevices(IEnumerable<Device> devices)
+        {
+            foreach (var device in devices)
+                _devices.Add(device, new DeviceInfo());
         }
 
         public void Dispose()
@@ -132,7 +138,7 @@ namespace Brite.API
 
             if (client.Identifier == string.Empty && command != (byte)Command.SetId)
             {
-                await outputStream.WriteUInt8Async((byte)Result.Error);
+                await outputStream.WriteUInt8Async((byte)Result.NotIdentified);
                 return;
             }
 
@@ -143,24 +149,40 @@ namespace Brite.API
 
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
             }
-            else if (command == (byte)Command.RequestChannel)
+            else if (command == (byte)Command.GetDevices)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
+                await outputStream.WriteUInt8Async((byte)_devices.Count);
+                foreach (var pair in _devices)
+                    await outputStream.WriteUInt32Async(pair.Key.Id);
+            }
+            else if (command == (byte)Command.RequestDeviceChannel)
+            {
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
                     return;
                 }
 
                 var priority = await inputStream.ReadUInt8Async();
                 if (priority > (byte)Priority.VeryHigh)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidPriority);
                     return;
                 }
 
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 if (priority > (byte)channelInfo.Priority)
                 {
                     channelInfo.Client = client;
@@ -173,17 +195,26 @@ namespace Brite.API
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
                 }
             }
-            else if (command == (byte)Command.ReleaseChannel)
+            else if (command == (byte)Command.ReleaseDeviceChannel)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 if (channelInfo.Client == client)
                 {
                     channelInfo.Client = null;
@@ -198,49 +229,105 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceGetVersion)
             {
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
-                await outputStream.WriteUInt32Async(_device.FirmwareVersion);
+                await outputStream.WriteUInt32Async(device.FirmwareVersion);
             }
             else if (command == (byte)Command.DeviceGetId)
             {
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
-                await outputStream.WriteUInt32Async(_device.Id);
+                await outputStream.WriteUInt32Async(device.Id);
             }
             else if (command == (byte)Command.DeviceGetParameters)
             {
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
-                await outputStream.WriteUInt8Async(_device.ChannelCount);
-                await outputStream.WriteUInt16Async(_device.ChannelMaxSize);
-                await outputStream.WriteUInt8Async(_device.ChannelMaxBrightness);
-                await outputStream.WriteUInt8Async(_device.AnimationMaxColors);
-                await outputStream.WriteFloatAsync(_device.AnimationMinSpeed);
-                await outputStream.WriteFloatAsync(_device.AnimationMaxSpeed);
+                await outputStream.WriteUInt8Async(device.ChannelCount);
+                await outputStream.WriteUInt16Async(device.ChannelMaxSize);
+                await outputStream.WriteUInt8Async(device.ChannelMaxBrightness);
+                await outputStream.WriteUInt8Async(device.AnimationMaxColors);
+                await outputStream.WriteFloatAsync(device.AnimationMinSpeed);
+                await outputStream.WriteFloatAsync(device.AnimationMaxSpeed);
             }
             else if (command == (byte)Command.DeviceGetAnimations)
             {
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
+                var supportedAnimations = (from pair in _animations where device.SupportedAnimations.Contains(pair.Key) select pair.Key).ToArray();
+                if (supportedAnimations.Length == 0)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.NoSupportedAnimations);
+                    return;
+                }
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
-                await outputStream.WriteUInt8Async((byte)_animations.Count);
-                foreach (var animation in _animations)
-                    await outputStream.WriteUInt32Async(animation.Key);
+                await outputStream.WriteUInt8Async((byte)supportedAnimations.Length);
+                foreach (var anim in supportedAnimations)
+                    await outputStream.WriteUInt32Async(anim);
             }
             else if (command == (byte)Command.DeviceSynchronize)
             {
-                await _device.SynchonizeAsync();
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                    return;
+                }
+
+                await device.SynchonizeAsync();
 
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
             }
             else if (command == (byte)Command.DeviceSetChannelBrightness)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var brightness = await inputStream.ReadUInt8Async();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -253,16 +340,25 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelLedCount)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var size = await inputStream.ReadUInt8Async();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -275,16 +371,25 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelAnimation)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var animId = await inputStream.ReadUInt32Async();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -293,7 +398,7 @@ namespace Brite.API
 
                 if (!_animations.ContainsKey(animId))
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidAnimationId);
                     return;
                 }
 
@@ -305,16 +410,25 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelAnimationEnabled)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var enabled = await inputStream.ReadBooleanAsync();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -323,7 +437,7 @@ namespace Brite.API
 
                 if (channel.Animation == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.AnimationNotSet);
                     return;
                 }
 
@@ -333,16 +447,25 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelAnimationSpeed)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var speed = await inputStream.ReadFloatAsync();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -351,7 +474,7 @@ namespace Brite.API
 
                 if (channel.Animation == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.AnimationNotSet);
                     return;
                 }
 
@@ -361,16 +484,25 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelAnimationColorCount)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var count = await inputStream.ReadUInt8Async();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -379,7 +511,7 @@ namespace Brite.API
 
                 if (channel.Animation == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.AnimationNotSet);
                     return;
                 }
 
@@ -389,19 +521,28 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSetChannelAnimationColor)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 var index = await inputStream.ReadUInt8Async();
                 var r = await inputStream.ReadUInt8Async();
                 var g = await inputStream.ReadUInt8Async();
                 var b = await inputStream.ReadUInt8Async();
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -410,7 +551,7 @@ namespace Brite.API
 
                 if (channel.Animation == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.AnimationNotSet);
                     return;
                 }
 
@@ -420,15 +561,24 @@ namespace Brite.API
             }
             else if (command == (byte)Command.DeviceSendChannelAnimationRequest)
             {
-                var channelIndex = await inputStream.ReadUInt8Async();
-                if (channelIndex > _device.Channels.Length)
+                var deviceId = await inputStream.ReadUInt32Async();
+                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
+                if (device == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
                     return;
                 }
 
-                var channel = _device.Channels[channelIndex];
-                var channelInfo = _channels[channel];
+                var deviceInfo = _devices[device];
+                var channelIndex = await inputStream.ReadUInt8Async();
+                if (channelIndex > device.Channels.Length)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                    return;
+                }
+
+                var channel = device.Channels[channelIndex];
+                var channelInfo = deviceInfo.Channels[channel];
                 if (channelInfo.Client != client)
                 {
                     await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
@@ -437,10 +587,10 @@ namespace Brite.API
 
                 if (channel.Animation == null)
                 {
-                    await outputStream.WriteUInt8Async((byte)Result.Error);
+                    await outputStream.WriteUInt8Async((byte)Result.AnimationNotSet);
                     return;
                 }
-                
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
 
                 await channelInfo.Animation.HandleRequestAsync(channel, inputStream, outputStream);
