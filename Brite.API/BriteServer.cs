@@ -156,9 +156,17 @@ namespace Brite.API
             if (command == (byte)Command.SetId)
             {
                 var identifierLength = await inputStream.ReadInt32Async();
-                client.Identifier = await inputStream.ReadStringAsync(identifierLength);
+                var identifier = await inputStream.ReadStringAsync(identifierLength);
 
-                // TODO: Check if client using specified ID already exists
+                ClientInfo existingClient;
+                lock (_clients) existingClient = _clients.First(c => c.Identifier == identifier);
+                if (existingClient != null)
+                {
+                    await outputStream.WriteUInt8Async((byte)Result.IdInUse);
+                    return;
+                }
+
+                client.Identifier = identifier;
 
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
             }
@@ -194,20 +202,17 @@ namespace Brite.API
                     return;
                 }
 
-                // TODO: Wait here indefinitely, until the appropriate permissions are had, and send the client the OK to lock the channel (until the client disconnects)
+                // Wait here indefinitely, until the appropriate permissions are had
+                // and send the client the OK to lock the channel (until the client disconnects)
                 var channel = device.Channels[channelIndex];
                 var channelInfo = deviceInfo.Channels[channel];
-                if (priority > (byte)channelInfo.Priority)
-                {
-                    channelInfo.Client = client;
-                    channelInfo.Priority = (Priority)priority;
+                if (priority <= (byte)channelInfo.Priority)
+                    await channelInfo.Mutex.LockAsync();
 
-                    await outputStream.WriteUInt8Async((byte)Result.Ok);
-                }
-                else
-                {
-                    await outputStream.WriteUInt8Async((byte)Result.AccessDenied);
-                }
+                channelInfo.Client = client;
+                channelInfo.Priority = (Priority)priority;
+
+                await outputStream.WriteUInt8Async((byte)Result.Ok);
             }
             else if (command == (byte)Command.ReleaseDeviceChannel)
             {
@@ -227,7 +232,6 @@ namespace Brite.API
                     return;
                 }
 
-                // TODO: Unlock channel lock mutex
                 var channel = device.Channels[channelIndex];
                 var channelInfo = deviceInfo.Channels[channel];
                 if (channelInfo.Client == client)
@@ -236,6 +240,9 @@ namespace Brite.API
                     channelInfo.Priority = Priority.Normal;
 
                     await outputStream.WriteUInt8Async((byte)Result.Ok);
+
+                    // Unlock channel lock mutex to allow other clients to use the channel
+                    channelInfo.Mutex.Unlock();
                 }
                 else
                 {

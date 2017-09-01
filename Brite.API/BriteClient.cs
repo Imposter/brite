@@ -22,10 +22,12 @@ namespace Brite.API
             _streamLock = new Mutex();
             _devices = new List<BriteDevice>();
         }
-
-        // TODO: Set client timeouts to -1 (Infinity)
+        
         public async Task ConnectAsync()
         {
+            // Set infinite timeout
+            _client.Timeout = -1;
+
             await _client.ConnectAsync();
 
             _stream = new BinaryStream(_client.GetStream());

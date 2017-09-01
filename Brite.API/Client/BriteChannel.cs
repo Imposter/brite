@@ -85,6 +85,25 @@ namespace Brite.API.Client
             }
         }
 
+        public async Task SetSizeAsync(ushort size)
+        {
+            try
+            {
+                await _streamLock.LockAsync();
+
+                await SendCommandAsync(Command.DeviceSetChannelLedCount);
+                await _stream.WriteUInt32Async(_deviceId);
+                await _stream.WriteUInt8Async(_index);
+                await _stream.WriteUInt16Async(size);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
+        }
+
         // ...
 
         private async Task SendCommandAsync(Command command)
