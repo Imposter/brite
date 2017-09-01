@@ -31,17 +31,18 @@ namespace Brite
         public byte Brightness => _brightness;
         public Animation Animation => _animation;
 
-        internal Channel(byte index, ushort maxSize, byte maxBrightness, byte animationMaxColors, float animationMinSpeed, float animationMaxSpeed, TypedStream stream, Mutex streamLock, int retries, List<uint> supportedAnimations)
+        internal Channel(TypedStream stream, Mutex streamLock, int retries, byte index, ushort maxSize, byte maxBrightness, byte animationMaxColors, float animationMinSpeed, float animationMaxSpeed, List<uint> supportedAnimations)
         {
+            _stream = stream;
+            _streamLock = streamLock;
+            _retries = retries;
+
             _index = index;
             _maxSize = maxSize;
             _maxBrightness = maxBrightness;
             _animationMaxColors = animationMaxColors;
             _animationMinSpeed = animationMinSpeed;
             _animationMaxSpeed = animationMaxSpeed;
-            _stream = stream;
-            _streamLock = streamLock;
-            _retries = retries;
             _supportedAnimations = supportedAnimations;
         }
 

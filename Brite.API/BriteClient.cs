@@ -23,6 +23,7 @@ namespace Brite.API
             _devices = new List<BriteDevice>();
         }
 
+        // TODO: Set client timeouts to -1 (Infinity)
         public async Task ConnectAsync()
         {
             await _client.ConnectAsync();

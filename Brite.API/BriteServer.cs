@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brite.API.Animations.Server;
+using Brite.Utility;
 
 namespace Brite.API
 {
@@ -26,6 +27,12 @@ namespace Brite.API
             public BaseAnimation Animation { get; set; }
             public ClientInfo Client { get; set; }
             public Priority Priority { get; set; }
+            public Mutex Mutex { get; }
+
+            public ChannelInfo()
+            {
+                Mutex = new Mutex();
+            }
         }
 
         private class DeviceInfo
@@ -120,6 +127,8 @@ namespace Brite.API
         private void ServerOnClientDisconnected(object sender, TcpConnectionEventArgs e)
         {
             lock (_clients) _clients.RemoveAll(c => c.InternalClient == e.Client);
+
+            // TODO: Remove any lock the client has on a channel
         }
 
         private async void ServerOnOnDataReceived(object sender, TcpReceivedEventArgs e)
@@ -185,6 +194,7 @@ namespace Brite.API
                     return;
                 }
 
+                // TODO: Wait here indefinitely, until the appropriate permissions are had, and send the client the OK to lock the channel (until the client disconnects)
                 var channel = device.Channels[channelIndex];
                 var channelInfo = deviceInfo.Channels[channel];
                 if (priority > (byte)channelInfo.Priority)
@@ -217,6 +227,7 @@ namespace Brite.API
                     return;
                 }
 
+                // TODO: Unlock channel lock mutex
                 var channel = device.Channels[channelIndex];
                 var channelInfo = deviceInfo.Channels[channel];
                 if (channelInfo.Client == client)

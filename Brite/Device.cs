@@ -191,8 +191,8 @@ namespace Brite
             _channels.Clear();
             for (byte i = 0; i < _channelCount; i++)
             {
-                _channels.Add(new Channel(i, _channelMaxSize, _channelMaxBrightness, _animationMaxColors,
-                    _animationMinSpeed, _animationMaxSpeed, _stream, _streamLock, _retries, _supportedAnimations));
+                _channels.Add(new Channel(_stream, _streamLock, _retries, i, _channelMaxSize, _channelMaxBrightness, _animationMaxColors,
+                    _animationMinSpeed, _animationMaxSpeed, _supportedAnimations));
             }
 
             _isOpen = true;

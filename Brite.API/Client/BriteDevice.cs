@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Brite.Utility;
+﻿using Brite.Utility;
 using Brite.Utility.IO;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Brite.API.Client
 {
@@ -79,7 +76,10 @@ namespace Brite.API.Client
                     _supportedAnimations.Add(await _stream.ReadUInt32Async());
             }
 
-            // TODO: Create channels
+            // Create channels
+            for (byte i = 0; i < _channelCount; i++)
+                _channels.Add(new BriteChannel(_stream, _streamLock, _id, i, _channelMaxSize, _channelMaxBrightness,
+                    _animationMaxColors, _animationMinSpeed, _animationMaxSpeed, _supportedAnimations));
         }
 
         public async Task SynchronizeAsync()
