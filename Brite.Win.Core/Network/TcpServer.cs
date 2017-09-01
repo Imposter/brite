@@ -28,6 +28,7 @@ namespace Brite.Win.Core.Network
         private TcpListener _server;
 
         public IPEndPoint ListenEndPoint { get; }
+        public bool Running => _server != null;
         public int BufferSize { get; set; }
 
         public TcpServer(IPEndPoint endPoint, int bufferSize = DefaultBufferSize)

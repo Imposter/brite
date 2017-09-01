@@ -2,14 +2,15 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Brite.Utility.IO;
 
 namespace Brite.Win.Con.Daemon
 {
-    public class Logger : Utility.IO.Logger
+    public class FileLogger : Logger
     {
         private readonly FileStream _stream;
 
-        public Logger(string fileName)
+        public FileLogger(string fileName)
         {
             _stream = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
         }

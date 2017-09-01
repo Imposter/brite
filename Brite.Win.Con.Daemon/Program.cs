@@ -1,72 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Brite.API;
-using Brite.API.Animations.Server;
-using Brite.Utility.IO;
-using Brite.Win.Core.Hardware.Serial;
-using Brite.Win.Core.IO.Serial;
-using Brite.Win.Core.Network;
+﻿using Brite.Utility.IO;
+using Brite.Win.Con.Daemon.Properties;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace Brite.Win.Con.Daemon
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            CreateAndRunServerAsync().Wait();
+            Console.WriteLine("Brite Firmware Updater v{0}", Assembly.GetExecutingAssembly().GetName().Version);
 
-            Thread.Sleep(-1);
-        }
+            // Read instance
+            var instancePath = "./instance/";
+            if (args.Length > 1)
+                instancePath = args[1];
 
-        static BriteServer server;
-        static async Task CreateAndRunServerAsync()
-        {
-            var listenEndPoint = new IPEndPoint(IPAddress.Any, 2200);
-            var serverLayer = new TcpServer(listenEndPoint);
-
-            var deviceSearcher = new SerialDeviceSearcher();
-            var devices = await Device.GetDevicesAsync<SerialConnection>(deviceSearcher);
-
-            Console.WriteLine("Available devices: ");
-            for (int i = 0; i < devices.Count; i++)
+            // Check if instance path exists
+            if (!Directory.Exists(instancePath))
             {
-                var device = devices[i];
-                Console.WriteLine($"{i}) {device.Info.PortName}");
+                Console.WriteLine("Invalid instance path!");
+                MessageBox.Show("Invalid instance path!", "Brite", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
-            Console.WriteLine();
-            Console.Write("Select device: ");
-            string port = Console.ReadLine();
-
-            Device briteDevice = null;
-            foreach (var device in devices)
+            // Check if config file exists
+            if (!File.Exists(Path.Combine(instancePath, "config.json")))
             {
-                if (device.Info.PortName == port)
+                Console.WriteLine("Config file not found!");
+                MessageBox.Show("Config file not found!", "Brite", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            // Initialize logger
+            var logger = new FileLogger(Path.Combine(instancePath, "brite-daemon.log"));
+            Logger.SetInstance(logger);
+
+            // Create notification icon
+            var notifyIcon = new NotifyIcon
+            {
+                Icon = Resources.BriteIcon,
+                Visible = true
+            };
+            notifyIcon.ContextMenu = new ContextMenu(new[]
+            {
+                new MenuItem("Edit Configuration", (sender, eventArgs) =>
                 {
-                    briteDevice = device;
-                    break;
-                }
-            }
+                    Process.Start(new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        FileName = Path.GetFullPath(Path.Combine(instancePath, ".\\config.json"))
+                    });
+                }),
+                new MenuItem("Exit", (sender, eventArgs) =>
+                {
+                    notifyIcon.Visible = false;
+                    Environment.Exit(0);
+                })
+            });
 
-            if (briteDevice == null)
-            {
-                Console.WriteLine("Invalid device");
-                await Task.Delay(1000);
-                Environment.Exit(-1);
-            }
+            // Create service
+            var service = new Service(instancePath);
+            service.StartAsync().Wait();
 
-            server = new BriteServer(serverLayer);
-            server.AddAnimation(new ManualAnimation());
-            server.AddDevice(briteDevice);
+            Console.WriteLine("Press ENTER to exit...");
+            Console.ReadLine();
 
-            await briteDevice.OpenAsync(115200, 1000, 10);
-
-            await server.StartAsync(); // NOTE: While updating, the server must be off
+            service.StopAsync().Wait();
         }
     }
 }

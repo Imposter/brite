@@ -8,7 +8,6 @@
         ReleaseDeviceChannel,
 
         DeviceGetVersion,
-        DeviceGetId,
         DeviceGetParameters,
         DeviceGetAnimations,
         DeviceSynchronize,

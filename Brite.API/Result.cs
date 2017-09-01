@@ -1,11 +1,12 @@
 ﻿namespace Brite.API
 {
-    internal enum Result : byte
+    public enum Result : byte
     {
         Ok,
         Error,
 
         NotIdentified,
+        IdInUse,
 
         InvalidDeviceId,
         InvalidChannelIndex,

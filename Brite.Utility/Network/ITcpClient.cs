@@ -9,6 +9,7 @@ namespace Brite.Utility.Network
     {
         int Timeout { get; set; }
         IPEndPoint RemoteEndPoint { get; }
+        bool Connected { get; }
 
         Task ConnectAsync();
         Task DisconnectAsync();

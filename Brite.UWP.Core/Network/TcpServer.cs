@@ -16,6 +16,7 @@ namespace Brite.UWP.Core.Network
         private StreamSocketListener _listener;
 
         public IPEndPoint ListenEndPoint { get; }
+        public bool Running => _listener != null;
         public int BufferSize { get; set; }
 
         public TcpServer(IPEndPoint listenEndPoint, int bufferSize = DefaultBufferSize)

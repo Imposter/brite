@@ -52,18 +52,20 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animations\Client\BaseAnimation.cs" />
     <Compile Include="Animations\Server\BaseAnimation.cs" />
     <Compile Include="Animations\Server\ManualAnimation.cs" />
+    <Compile Include="BriteApiException.cs" />
     <Compile Include="BriteClient.cs" />
+    <Compile Include="Client\BriteChannel.cs" />
+    <Compile Include="Client\BriteDevice.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Priority.cs" />
     <Compile Include="Result.cs" />
     <Compile Include="BriteServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Animations\Client\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="Note.txt" />
   </ItemGroup>

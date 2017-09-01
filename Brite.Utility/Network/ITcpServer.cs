@@ -7,6 +7,7 @@ namespace Brite.Utility.Network
     public interface ITcpServer
     {
         IPEndPoint ListenEndPoint { get; }
+        bool Running { get; }
 
         Task StartAsync();
         Task StopAsync();

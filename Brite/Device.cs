@@ -198,7 +198,7 @@ namespace Brite
             _isOpen = true;
         }
 
-        public async void CloseAsync()
+        public async Task CloseAsync()
         {
             if (!_isOpen)
                 throw new InvalidOperationException("Port is not open");

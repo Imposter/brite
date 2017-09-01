@@ -43,6 +43,8 @@ namespace Brite.API
         private readonly Dictionary<uint, BaseAnimation> _animations;
         private readonly Dictionary<Device, DeviceInfo> _devices;
 
+        public bool Running => _server.Running;
+
         public BriteServer(ITcpServer server)
         {
             _server = server;
@@ -147,6 +149,8 @@ namespace Brite.API
                 var identifierLength = await inputStream.ReadInt32Async();
                 client.Identifier = await inputStream.ReadStringAsync(identifierLength);
 
+                // TODO: Check if client using specified ID already exists
+
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
             }
             else if (command == (byte)Command.GetDevices)
@@ -239,19 +243,6 @@ namespace Brite.API
 
                 await outputStream.WriteUInt8Async((byte)Result.Ok);
                 await outputStream.WriteUInt32Async(device.FirmwareVersion);
-            }
-            else if (command == (byte)Command.DeviceGetId)
-            {
-                var deviceId = await inputStream.ReadUInt32Async();
-                var device = (from pair in _devices where pair.Key.Id == deviceId select pair.Key).First();
-                if (device == null)
-                {
-                    await outputStream.WriteUInt8Async((byte)Result.InvalidDeviceId);
-                    return;
-                }
-
-                await outputStream.WriteUInt8Async((byte)Result.Ok);
-                await outputStream.WriteUInt32Async(device.Id);
             }
             else if (command == (byte)Command.DeviceGetParameters)
             {

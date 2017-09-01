@@ -29,6 +29,7 @@ namespace Brite.UWP.Core.Network
         }
 
         public IPEndPoint RemoteEndPoint { get; }
+        public bool Connected => _socket != null;
 
         internal TcpClient(StreamSocket socket, IPEndPoint remoteEndPoint, int timeout = DefaultTimeout)
         {
