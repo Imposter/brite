@@ -17,7 +17,7 @@ namespace Brite.Win.Con.Daemon
 {
     internal class Service
     {
-        private static Log logger = Logger.GetLog<Service>(); // TODO: Use logging
+        private static readonly Log Log = Logger.GetLog<Service>(); // TODO: Use logging
 
         private readonly string _path;
         private readonly List<Device> _devices;
@@ -108,7 +108,7 @@ namespace Brite.Win.Con.Daemon
 
                             // Connect to device
                             var baudRate = config.Devices[device.Info.PortName];
-                            await device.OpenAsync(baudRate, config.Timeout, config.Retries);
+                            await device.OpenAsync(baudRate, config.Timeout, config.Retries); // TODO/NOTE: We need to fix connections to devices
 
                             _devices.Add(device);
                         }
@@ -117,16 +117,21 @@ namespace Brite.Win.Con.Daemon
                     }
                 }
 
-                // Create new server
+                // Create underlying server
                 var tcpServer = new TcpServer(new IPEndPoint(IPAddress.Any, config.Port));
+
                 _server = new BriteServer(tcpServer);
                 _server.AddDevices(_devices);
+
+                // Add animations
                 _server.AddAnimation(new ManualAnimation());
-                // TODO: Add animations
+                _server.AddAnimation(new BreatheAnimation());
+                
                 await _server.StartAsync();
             }
-            catch
+            catch (Exception ex)
             {
+                await Log.ErrorAsync("LoadConfigAsync (FAILED): {0}", ex);
                 return;
             }
 

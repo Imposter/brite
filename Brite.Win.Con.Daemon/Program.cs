@@ -12,7 +12,7 @@ namespace Brite.Win.Con.Daemon
     {
         private static void Main(string[] args)
         {
-            Console.WriteLine("Brite Firmware Updater v{0}", Assembly.GetExecutingAssembly().GetName().Version);
+            Console.WriteLine("Brite Daemon v{0}", Assembly.GetExecutingAssembly().GetName().Version);
 
             // Read instance
             var instancePath = "./instance/";

@@ -128,7 +128,7 @@ namespace Brite
             _animation = animation;
 
             // Initialize animation
-            _animation.Initialize(_index, _animationMaxColors, _animationMinSpeed, _animationMaxSpeed, _stream, _streamLock, _retries, reset);
+            _animation.Initialize(_stream, _streamLock, _retries, reset, _index, _animationMaxColors, _animationMinSpeed, _animationMaxSpeed);
 
             // Notify device
             try

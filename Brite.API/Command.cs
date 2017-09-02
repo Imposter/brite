@@ -11,6 +11,7 @@
         DeviceGetParameters,
         DeviceGetAnimations,
         DeviceSynchronize,
+        DeviceChannelReset,
         DeviceSetChannelBrightness,
         DeviceSetChannelLedCount,
         DeviceSetChannelAnimation,

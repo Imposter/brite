@@ -21,6 +21,9 @@ namespace Brite.Win.Core.IO
 
         public async Task<int> ReadAsync(byte[] buffer, int offset, int length)
         {
+            if (length <= 0)
+                return 0;
+
             var task = _stream.ReadAsync(buffer, offset, length);
             if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
                 return task.Result;
@@ -30,6 +33,9 @@ namespace Brite.Win.Core.IO
 
         public async Task WriteAsync(byte[] buffer, int offset, int length)
         {
+            if (length <= 0)
+                return;
+
             var task = _stream.WriteAsync(buffer, offset, length);
             if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
                 return;

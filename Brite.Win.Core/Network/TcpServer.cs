@@ -29,6 +29,7 @@ namespace Brite.Win.Core.Network
 
         public IPEndPoint ListenEndPoint { get; }
         public bool Running => _server != null;
+        public bool AutoReceive { get; set; }
         public int BufferSize { get; set; }
 
         public TcpServer(IPEndPoint endPoint, int bufferSize = DefaultBufferSize)
@@ -65,16 +66,22 @@ namespace Brite.Win.Core.Network
         {
             try
             {
+                if (_server == null)
+                    return;
+
                 var tcpClient = _server.EndAcceptTcpClient(result);
                 var client = new TcpClient(tcpClient, (IPEndPoint)tcpClient.Client.RemoteEndPoint);
                 OnClientConnected?.Invoke(this, new TcpConnectionEventArgs(client, client.RemoteEndPoint));
-                
-                // Create buffer
-                var buffer = new byte[BufferSize];
 
-                // Read
-                var stream = tcpClient.GetStream();
-                stream.BeginRead(buffer, 0, buffer.Length, ClientOnReadCallback, new ClientReadArgs(client, tcpClient, buffer));
+                if (AutoReceive)
+                {
+                    // Create buffer
+                    var buffer = new byte[BufferSize];
+
+                    // Read
+                    var stream = tcpClient.GetStream();
+                    stream.BeginRead(buffer, 0, buffer.Length, ClientOnReadCallback, new ClientReadArgs(client, tcpClient, buffer));
+                }
 
                 _server.BeginAcceptTcpClient(ServerOnTcpClient, _server);
             }
@@ -101,7 +108,7 @@ namespace Brite.Win.Core.Network
 
                 stream.BeginRead(buffer, 0, buffer.Length, ClientOnReadCallback, new ClientReadArgs(client, tcpClient, buffer));
             }
-            catch (ObjectDisposedException)
+            catch (Exception)
             {
                 OnClientDisconnected?.Invoke(this, new TcpConnectionEventArgs(client, client.RemoteEndPoint));
             }

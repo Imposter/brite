@@ -34,30 +34,26 @@ namespace Brite
 
         public abstract string GetName();
 
-        protected virtual void OnInitialize()
-        {
-        }
-
         protected Animation()
         {
             _colors = new List<Color>();
         }
 
-        internal void Initialize(byte channel, byte maxColors, float minSpeed, float maxSpeed, TypedStream stream, Mutex streamLock, int retries, bool reset)
+        internal void Initialize(TypedStream stream, Mutex streamLock, int retries, bool reset, byte channel, byte maxColors, float minSpeed, float maxSpeed)
         {
             if (channel != _channel)
                 reset = true;
 
             _enabled = false;
 
+            _stream = stream;
+            _streamLock = streamLock;
+            _retries = retries;
+
             _channel = channel;
             _maxColors = maxColors;
             _minSpeed = minSpeed;
             _maxSpeed = maxSpeed;
-
-            _stream = stream;
-            _streamLock = streamLock;
-            _retries = retries;
 
             if (!reset)
                 return;
@@ -70,8 +66,6 @@ namespace Brite
 
             _colors.Clear();
             _colors.AddRange(Enumerable.Repeat(Color.Black, maxColors));
-
-            OnInitialize();
         }
 
         internal void Reset()

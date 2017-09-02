@@ -5,6 +5,7 @@
         Ok,
         Error,
 
+        InvalidId,
         NotIdentified,
         IdInUse,
 

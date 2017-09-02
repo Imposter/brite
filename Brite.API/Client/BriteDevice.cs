@@ -95,14 +95,14 @@ namespace Brite.API.Client
             await _stream.WriteUInt8Async((byte)command);
             var responseCommand = await _stream.ReadUInt8Async();
             if (responseCommand != (byte)command)
-                throw new BriteApiException($"Unexpected command response, expected {command} got {(Command)responseCommand}");
+                throw new BriteException($"Unexpected command response, expected {command} got {(Command)responseCommand}");
         }
 
         private async Task ReceiveResultAsync(Result expected = Result.Ok)
         {
             var result = await _stream.ReadUInt8Async();
             if (result != (byte)expected)
-                throw new BriteApiException($"Unexpected result, expected {expected} got {(Result)result}");
+                throw new BriteException($"Unexpected result, expected {expected} got {(Result)result}");
         }
     }
 }

@@ -53,9 +53,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animations\Client\BaseAnimation.cs" />
+    <Compile Include="Animations\Client\BreatheAnimation.cs" />
     <Compile Include="Animations\Server\BaseAnimation.cs" />
+    <Compile Include="Animations\Server\BreatheAnimation.cs" />
     <Compile Include="Animations\Server\ManualAnimation.cs" />
-    <Compile Include="BriteApiException.cs" />
+    <Compile Include="BriteException.cs" />
     <Compile Include="BriteClient.cs" />
     <Compile Include="Client\BriteChannel.cs" />
     <Compile Include="Client\BriteDevice.cs" />

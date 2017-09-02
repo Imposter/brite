@@ -10,7 +10,7 @@ namespace Brite.Utility.Network
         public TcpReceivedEventArgs(ITcpClient client, IPEndPoint source, byte[] buffer, int length)
             : base(buffer, length)
         {
-            Client = Client;
+            Client = client;
             Source = source;
         }
     }

@@ -18,11 +18,8 @@ namespace Brite.API.Animations.Server
         {
             return Hash.Fnv1A32(GetName());
         }
-
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public virtual async Task HandleRequestAsync(Channel channel, BinaryStream inputStream, BinaryStream outputStream)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-        {
-        }
+        
+        public abstract Task HandleRequestAsync(Channel channel, BinaryStream inputStream,
+            BinaryStream outputStream);
     }
 }

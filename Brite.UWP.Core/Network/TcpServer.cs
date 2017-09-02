@@ -17,6 +17,7 @@ namespace Brite.UWP.Core.Network
 
         public IPEndPoint ListenEndPoint { get; }
         public bool Running => _listener != null;
+        public bool AutoReceive { get; set; }
         public int BufferSize { get; set; }
 
         public TcpServer(IPEndPoint listenEndPoint, int bufferSize = DefaultBufferSize)
@@ -58,25 +59,30 @@ namespace Brite.UWP.Core.Network
 
             OnClientConnected?.Invoke(this, new TcpConnectionEventArgs(client, ipEndPoint));
 
-            Task.Run(async () =>
+            if (AutoReceive)
             {
-                try
+                Task.Run(async () =>
                 {
-                    var buffer = new byte[BufferSize];
-                    while (true)
+                    try
                     {
-                        var result = await args.Socket.InputStream.ReadAsync(buffer.AsBuffer(), (uint)buffer.Length, InputStreamOptions.Partial);
-                        if (result.Length > 0)
+                        var buffer = new byte[BufferSize];
+                        while (true)
                         {
-                            OnDataReceived?.Invoke(this, new TcpReceivedEventArgs(client, ipEndPoint, buffer, (int)result.Length));
+                            var result = await args.Socket.InputStream.ReadAsync(buffer.AsBuffer(),
+                                (uint) buffer.Length, InputStreamOptions.Partial);
+                            if (result.Length > 0)
+                            {
+                                OnDataReceived?.Invoke(this,
+                                    new TcpReceivedEventArgs(client, ipEndPoint, buffer, (int) result.Length));
+                            }
                         }
                     }
-                }
-                catch (ObjectDisposedException)
-                {
-                    OnClientDisconnected?.Invoke(this, new TcpConnectionEventArgs(client, ipEndPoint));
-                }
-            });
+                    catch (ObjectDisposedException)
+                    {
+                        OnClientDisconnected?.Invoke(this, new TcpConnectionEventArgs(client, ipEndPoint));
+                    }
+                });
+            }
         }
 
         public event EventHandler<TcpConnectionEventArgs> OnClientConnected;

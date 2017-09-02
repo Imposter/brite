@@ -2,6 +2,7 @@
 
 namespace Brite.Utility.IO
 {
+    // TODO: Add logger level
     public abstract class Logger
     {
         private static Logger Instance = new DebugLogger();

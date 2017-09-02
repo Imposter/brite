@@ -103,6 +103,8 @@ namespace Brite.Win.Core.IO.Serial
             _port.DataBits = DataBits;
             _port.DtrEnable = DtrEnable;
             _port.RtsEnable = RtsEnable;
+            _port.ReadTimeout = -1;
+            _port.WriteTimeout = -1;
 
             switch (StopBits)
             {

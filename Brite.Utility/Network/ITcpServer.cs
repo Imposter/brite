@@ -8,6 +8,7 @@ namespace Brite.Utility.Network
     {
         IPEndPoint ListenEndPoint { get; }
         bool Running { get; }
+        bool AutoReceive { get; set; }
 
         Task StartAsync();
         Task StopAsync();
