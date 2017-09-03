@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Brite.API.Animations.Commands;
 using Brite.Utility.IO;
 
 namespace Brite.API.Animations.Server
@@ -21,7 +22,11 @@ namespace Brite.API.Animations.Server
 
         public override async Task HandleRequestAsync(Channel channel, BinaryStream inputStream, BinaryStream outputStream)
         {
-            // TODO: Implement
+            var command = await inputStream.ReadUInt8Async();
+            if (command == (byte)Manual.SetColor)
+            {
+                // TODO: ...
+            }
         }
     }
 }

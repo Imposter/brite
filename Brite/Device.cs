@@ -214,32 +214,52 @@ namespace Brite
 
         public async Task ResetAsync()
         {
-            // Wait for device to respond
-            await SendCommandAsync(Command.Reset);
+            try
+            {
+                // Lock mutex
+                await _streamLock.LockAsync();
 
-            // Read response
-            _stream.TypesEnabled = true;
-            var result = await _stream.ReadUInt8Async();
-            if (result != (byte)Result.Ok)
-                throw new Exception("Unable to reset device");
+                // Wait for device to respond
+                await SendCommandAsync(Command.Reset);
+
+                // Read response
+                _stream.TypesEnabled = true;
+                var result = await _stream.ReadUInt8Async();
+                if (result != (byte)Result.Ok)
+                    throw new Exception("Unable to reset device");
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
         }
 
         public async Task SynchonizeAsync()
         {
-            // Wait for device to respond
-            await SendCommandAsync(Command.Synchronize);
+            try
+            {
+                // Lock mutex
+                await _streamLock.LockAsync();
 
-            // Read response
-            _stream.TypesEnabled = true;
-            var result = await _stream.ReadUInt8Async();
-            if (result != (byte)Result.Ok)
-                throw new Exception("Unable to synchronize device");
+                // Wait for device to respond
+                await SendCommandAsync(Command.Synchronize);
+
+                // Read response
+                _stream.TypesEnabled = true;
+                var result = await _stream.ReadUInt8Async();
+                if (result != (byte)Result.Ok)
+                    throw new Exception("Unable to synchronize device");
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
         }
 
         private async Task SendCommandAsync(Command command)
         {
             var typesEnabled = _stream.TypesEnabled;
-            
+
             for (var i = 0; i < _retries; i++)
             {
                 try

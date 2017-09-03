@@ -171,6 +171,7 @@ namespace Brite.API
                                 continue;
                             }
 
+                            // NOTE: Using LINQ here somehow causes a deadlock?
                             ClientInfo existingClient = null;
                             lock (_clients)
                             {

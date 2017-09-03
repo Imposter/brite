@@ -54,7 +54,19 @@
   <ItemGroup>
     <Compile Include="Animations\Client\BaseAnimation.cs" />
     <Compile Include="Animations\Client\BreatheAnimation.cs" />
+    <Compile Include="Animations\Client\FadeAnimation.cs" />
+    <Compile Include="Animations\Client\FixedAnimation.cs" />
+    <Compile Include="Animations\Client\ManualAnimation.cs" />
+    <Compile Include="Animations\Client\MarqueeAnimation.cs" />
+    <Compile Include="Animations\Client\PulseAnimation.cs" />
+    <Compile Include="Animations\Client\SpiralAnimation.cs" />
+    <Compile Include="Animations\Commands\Manual.cs" />
+    <Compile Include="Animations\Commands\Marquee.cs" />
+    <Compile Include="Animations\Commands\Spiral.cs" />
     <Compile Include="Animations\Server\BaseAnimation.cs" />
+    <Compile Include="Animations\Server\PulseAnimation.cs" />
+    <Compile Include="Animations\Server\FadeAnimation.cs" />
+    <Compile Include="Animations\Server\FixedAnimation.cs" />
     <Compile Include="Animations\Server\BreatheAnimation.cs" />
     <Compile Include="Animations\Server\ManualAnimation.cs" />
     <Compile Include="BriteException.cs" />
@@ -68,8 +80,5 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <Content Include="Note.txt" />
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
 </Project>

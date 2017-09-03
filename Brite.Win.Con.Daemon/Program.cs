@@ -39,6 +39,10 @@ namespace Brite.Win.Con.Daemon
             var logger = new FileLogger(Path.Combine(instancePath, "brite-daemon.log"));
             Logger.SetInstance(logger);
 
+            // Log uncaught exceptions
+            AppDomain.CurrentDomain.UnhandledException += async (sender, eventArgs) =>
+                await Logger.GetLog().ErrorAsync($"UNHANDLED EXCEPTION: {eventArgs.ExceptionObject}");
+
             // Create notification icon
             var notifyIcon = new NotifyIcon
             {

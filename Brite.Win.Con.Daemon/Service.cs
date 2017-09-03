@@ -63,10 +63,11 @@ namespace Brite.Win.Con.Daemon
             _running = false;
             _thread.Join();
 
-            // stop server
-            await _server.StopAsync();
+            // Stop server
+            if (_server != null)
+                await _server.StopAsync();
 
-            // disconnect devices
+            // Disconnect devices
             foreach (var device in _devices)
                 await device.CloseAsync();
         }
@@ -81,7 +82,7 @@ namespace Brite.Win.Con.Daemon
             if (_server != null && _server.Running)
                 await _server.StopAsync();
 
-            // close devices
+            // Disconnect devices
             foreach (var device in _devices)
                 await device.CloseAsync();
 
@@ -108,7 +109,7 @@ namespace Brite.Win.Con.Daemon
 
                             // Connect to device
                             var baudRate = config.Devices[device.Info.PortName];
-                            await device.OpenAsync(baudRate, config.Timeout, config.Retries); // TODO/NOTE: We need to fix connections to devices
+                            await device.OpenAsync(baudRate, config.Timeout, config.Retries);
 
                             _devices.Add(device);
                         }
@@ -125,24 +126,19 @@ namespace Brite.Win.Con.Daemon
 
                 // Add animations
                 _server.AddAnimation(new ManualAnimation());
+                _server.AddAnimation(new FixedAnimation());
                 _server.AddAnimation(new BreatheAnimation());
-                
+                _server.AddAnimation(new PulseAnimation());
+                _server.AddAnimation(new FadeAnimation());// TODO: Spiral + Marquee
+
                 await _server.StartAsync();
             }
             catch (Exception ex)
             {
-                await Log.ErrorAsync("LoadConfigAsync (FAILED): {0}", ex);
-                return;
+                await Log.ErrorAsync("LoadConfigAsync: {0}", ex);
             }
 
             _lastConfigModifiedTime = modifiedTime;
-        }
-
-        private static void LoadAssembliesInDirectory(string path)
-        {
-            var files = Directory.GetFiles(path, "*.dll");
-            foreach (var file in files)
-                Assembly.LoadFile(file);
         }
     }
 }

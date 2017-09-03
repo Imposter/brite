@@ -75,7 +75,7 @@ namespace Brite.API.Animations.Client
             return Hash.Fnv1A32(GetName());
         }
 
-        public async Task SetColorCountAsync(byte colorCount)
+        public virtual async Task SetColorCountAsync(byte colorCount)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -99,7 +99,7 @@ namespace Brite.API.Animations.Client
             }
         }
 
-        public async Task SetColorAsync(byte index, Color color)
+        public virtual async Task SetColorAsync(byte index, Color color)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");
@@ -126,7 +126,7 @@ namespace Brite.API.Animations.Client
             }
         }
 
-        public async Task SetSpeedAsync(float speed)
+        public virtual async Task SetSpeedAsync(float speed)
         {
             if (_stream == null)
                 throw new InvalidOperationException("Animation channel not set");

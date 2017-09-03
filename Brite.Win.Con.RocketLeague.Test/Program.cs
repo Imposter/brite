@@ -25,27 +25,16 @@ namespace Brite.Win.Con.RocketLeague.Test
             var client = new BriteClient(tcpClient, $"{{{id}-{new Random().Next(0, 255)}}}");
 
             Thread.Sleep(5000);
-
-            while (true)
-            {
-                try
-                {
-                    client.ConnectAsync().Wait();
-                    break;
-                }
-                catch
-                {
-                    
-                }
-            }
+            client.ConnectAsync().Wait();
 
             Console.WriteLine("Connected");
 
             var dev1 = client.Devices[0];
             var channel = dev1.Channels[0];
             channel.RequestAsync().Wait();
-            channel.SetSizeAsync(32).Wait(); // NOTE: These aren't correctly implemented
+            channel.SetSizeAsync(32).Wait();
             channel.SetBrightnessAsync(255).Wait();
+
             var anim = new BreatheAnimation();
             channel.SetAnimationAsync(anim).Wait();
             anim.SetColorCountAsync(1).Wait();
