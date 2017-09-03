@@ -181,21 +181,21 @@ namespace Brite
                     _supportedAnimations.Clear();
                     _supportedAnimations.AddRange(supportedAnimations);
                 }
+
+                // Create channels
+                _channels.Clear();
+                for (byte i = 0; i < _channelCount; i++)
+                {
+                    _channels.Add(new Channel(_stream, _streamLock, _retries, i, _channelMaxSize, _channelMaxBrightness, _animationMaxColors,
+                        _animationMinSpeed, _animationMaxSpeed, _supportedAnimations));
+                }
+
+                _isOpen = true;
             }
             finally
             {
                 _streamLock.Unlock();
             }
-
-            // Create channels
-            _channels.Clear();
-            for (byte i = 0; i < _channelCount; i++)
-            {
-                _channels.Add(new Channel(_stream, _streamLock, _retries, i, _channelMaxSize, _channelMaxBrightness, _animationMaxColors,
-                    _animationMinSpeed, _animationMaxSpeed, _supportedAnimations));
-            }
-
-            _isOpen = true;
         }
 
         public async Task CloseAsync()

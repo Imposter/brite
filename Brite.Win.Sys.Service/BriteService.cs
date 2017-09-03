@@ -83,11 +83,6 @@ namespace Brite.Win.Sys.Service
             // Stop previously active server
             if (_briteServer != null)
                 await _briteServer.StopAsync();
-
-            // Stop previously active devices
-            if (_devices != null)
-                foreach (var device in _devices)
-                    await device.CloseAsync();
         }
 
         private async void ChangeThreadProcess()
@@ -106,47 +101,17 @@ namespace Brite.Win.Sys.Service
                 if (_briteServer != null)
                     await _briteServer.StopAsync();
 
-                // Stop previously active devices
-                if (_devices != null)
-                    foreach (var device in _devices)
-                        await device.CloseAsync();
-
                 // Read config
                 _config = await LoadConfigAsync(path);
 
                 // Find devices
                 _devices = await GetDevicesAsync(_config.Devices.Keys);
 
-                // Initialize devices
-                foreach (var device in _devices)
-                {
-                    for (var i = 0; i < _config.ConnectionRetries; i++)
-                    {
-                        try
-                        {
-                            var baudRate = _config.Devices[device.Info.PortName];
-                            await device.OpenAsync(baudRate, _config.Timeout, _config.Retries, true);
-                        }
-                        catch (Exception ex)
-                        {
-                            if (i != _config.ConnectionRetries - 1)
-                            {
-                                await Log.ErrorAsync($"[{i + 1}] Failed to connect to device {device.Info.PortName}, retrying: {ex}");
-                            }
-                            else
-                            {
-                                await Log.ErrorAsync($"[{i + 1}] Failed to connect to device {device.Info.PortName}, ignoring device: {ex}");
-                                break;
-                            }
-                        }
-                    }
-                }
-
                 // Create underlying server
                 _server = new TcpServer(new IPEndPoint(IPAddress.Any, _config.Port));
 
                 // Create server
-                _briteServer = new BriteServer(_server);
+                _briteServer = new BriteServer(_server, _config.Timeout, _config.Retries, _config.ConnectionRetries);
 
                 // Add animations
                 _briteServer.AddAnimations(new BaseAnimation[]
@@ -161,7 +126,11 @@ namespace Brite.Win.Sys.Service
                 });
 
                 // Add devices
-                _briteServer.AddDevices(_devices);
+                foreach (var device in _devices)
+                {
+                    var baudRate = _config.Devices[device.Info.PortName];
+                    _briteServer.AddDevice(device, baudRate);
+                }
 
                 // Start server
                 await _briteServer.StartAsync();
@@ -195,15 +164,6 @@ namespace Brite.Win.Sys.Service
             var discoveredDevices = await Device.GetDevicesAsync<SerialConnection>(deviceSearcher);
 
             return discoveredDevices.Where(device => ports.Contains(device.Info.PortName));
-        }
-
-        private void InitializeComponent()
-        {
-            // 
-            // BriteService
-            // 
-            this.ServiceName = "BriteService";
-
         }
     }
 }

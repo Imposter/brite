@@ -82,12 +82,90 @@ namespace Brite.API.Client
                     _animationMaxColors, _animationMinSpeed, _animationMaxSpeed, _supportedAnimations));
         }
 
+        public async Task RequestAsync(Priority priority = Priority.VeryLow)
+        {
+            try
+            {
+                await _streamLock.LockAsync();
+
+                await SendCommandAsync(Command.RequestDevice);
+                await _stream.WriteUInt32Async(_id);
+                await _stream.WriteUInt8Async((byte)priority);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
+        }
+
+        public async Task ReleaseAsync()
+        {
+            try
+            {
+                await _streamLock.LockAsync();
+
+                await SendCommandAsync(Command.ReleaseDevice);
+                await _stream.WriteUInt32Async(_id);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
+        }
+
+        public async Task OpenAsync()
+        {
+            try
+            {
+                await _streamLock.LockAsync();
+
+                await SendCommandAsync(Command.OpenDevice);
+                await _stream.WriteUInt32Async(_id);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
+        }
+
+        public async Task CloseAsync()
+        {
+            try
+            {
+                await _streamLock.LockAsync();
+
+                await SendCommandAsync(Command.CloseDevice);
+                await _stream.WriteUInt32Async(_id);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
+        }
+
         public async Task SynchronizeAsync()
         {
-            await SendCommandAsync(Command.DeviceSynchronize);
-            await _stream.WriteUInt32Async(_id);
+            try
+            {
+                await _streamLock.LockAsync();
 
-            await ReceiveResultAsync();
+                await SendCommandAsync(Command.DeviceSynchronize);
+                await _stream.WriteUInt32Async(_id);
+
+                await ReceiveResultAsync();
+            }
+            finally
+            {
+                _streamLock.Unlock();
+            }
         }
 
         private async Task SendCommandAsync(Command command)

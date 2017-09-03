@@ -13,7 +13,8 @@
         InvalidChannelIndex,
         InvalidPriority,
         InvalidAnimationId,
-
+        
+        DeviceNotOpen,
         AccessDenied,
 
         NoSupportedAnimations,

@@ -4,6 +4,13 @@
     {
         SetId,
         GetDevices,
+
+        // Only for opening/closing the device
+        RequestDevice,
+        ReleaseDevice,
+        OpenDevice,
+        CloseDevice,
+
         RequestDeviceChannel,
         ReleaseDeviceChannel,
 
