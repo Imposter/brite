@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Brite.Win.Con.RocketLeague.Test")]
+[assembly: AssemblyTitle("Brite.Win.Sys.Service")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Indigo Games")]
-[assembly: AssemblyProduct("Brite.Win.Con.RocketLeague.Test")]
+[assembly: AssemblyProduct("Brite.Win.Sys.Service")]
 [assembly: AssemblyCopyright("Copyright © 2017 Indigo Games. All Rights Reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("9b26946f-a334-44ef-977c-2f3528ef1cda")]
+[assembly: Guid("b4b027a6-1f90-49df-bab7-bbf76545df66")]
 
 // Version information for an assembly consists of the following four values:
 //
