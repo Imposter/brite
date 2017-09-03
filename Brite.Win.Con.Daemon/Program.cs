@@ -36,7 +36,13 @@ namespace Brite.Win.Con.Daemon
             }
 
             // Initialize logger
-            var logger = new FileLogger(Path.Combine(instancePath, "brite-daemon.log"));
+            var logger = new FileLogger(Path.Combine(instancePath, "brite-daemon.log"),
+#if DEBUG
+                LoggerLevel.Trace
+#else
+                LoggerLevel.Error
+#endif
+                );
             Logger.SetInstance(logger);
 
             // Log uncaught exceptions

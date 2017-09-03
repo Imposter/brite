@@ -3,7 +3,9 @@ using Brite.Utility.Network;
 using Brite.Win.Core.IO;
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
+using Brite.Utility;
 using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network
@@ -28,7 +30,7 @@ namespace Brite.Win.Core.Network
         }
 
         public IPEndPoint RemoteEndPoint { get; }
-        public bool Connected => _client != null;
+        public bool Connected => _client != null && _client.Connected;
 
         internal TcpClient(SocketTcpClient client, IPEndPoint remoteEndPoint, int timeout = DefaultTimeout)
         {
@@ -50,8 +52,17 @@ namespace Brite.Win.Core.Network
                 throw new InvalidOperationException("Client is already connected!");
 
             _client = new SocketTcpClient();
-            await _client.ConnectAsync(RemoteEndPoint.Address, RemoteEndPoint.Port);
-            
+
+            try
+            {
+                await _client.ConnectAsync(RemoteEndPoint.Address, RemoteEndPoint.Port)
+                    .WithCancellation(new CancellationTokenSource(_timeout).Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException("Unable to connect to the specified host");
+            }
+
             _stream = new TimedStream(_client.GetStream(), _timeout);
         }
 

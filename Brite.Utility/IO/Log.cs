@@ -16,27 +16,32 @@ namespace Brite.Utility.IO
 
         public async Task InfoAsync(string format, params object[] args)
         {
-            await _logger.WriteLineAsync("[INFO] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
+            if (_logger.Level >= LoggerLevel.Info)
+                await _logger.WriteLineAsync("[INFO] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
         }
 
         public async Task ErrorAsync(string format, params object[] args)
         {
-            await _logger.WriteLineAsync("[ERROR] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
+            if (_logger.Level >= LoggerLevel.Error)
+                await _logger.WriteLineAsync("[ERROR] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
         }
 
         public async Task WarnAsync(string format, params object[] args)
         {
-            await _logger.WriteLineAsync("[WARN] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
+            if (_logger.Level >= LoggerLevel.Warn)
+                await _logger.WriteLineAsync("[WARN] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
         }
 
         public async Task DebugAsync(string format, params object[] args)
         {
-            await _logger.WriteLineAsync("[DEBUG] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
+            if (_logger.Level >= LoggerLevel.Debug)
+                await _logger.WriteLineAsync("[DEBUG] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
         }
 
         public async Task TraceAsync(string format, params object[] args)
         {
-            await _logger.WriteLineAsync("[TRACE] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
+            if (_logger.Level >= LoggerLevel.Trace)
+                await _logger.WriteLineAsync("[TRACE] {0} - {1}: {2}", DateTime.Now, _name, string.Format(format, args));
         }
     }
 }

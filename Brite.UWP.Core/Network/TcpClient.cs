@@ -3,9 +3,11 @@ using Brite.Utility.Network;
 using Brite.UWP.Core.IO;
 using System;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
+using Brite.Utility;
 
 namespace Brite.UWP.Core.Network
 {
@@ -29,7 +31,7 @@ namespace Brite.UWP.Core.Network
         }
 
         public IPEndPoint RemoteEndPoint { get; }
-        public bool Connected => _socket != null;
+        public bool Connected => _socket != null; // TODO: Fix/improve this
 
         internal TcpClient(StreamSocket socket, IPEndPoint remoteEndPoint, int timeout = DefaultTimeout)
         {
@@ -51,7 +53,16 @@ namespace Brite.UWP.Core.Network
                 throw new InvalidOperationException("Client is already connected!");
 
             _socket = new StreamSocket();
-            await _socket.ConnectAsync(new HostName(RemoteEndPoint.Address.ToString()), RemoteEndPoint.Port.ToString());
+            
+            try
+            {
+                await _socket.ConnectAsync(new HostName(RemoteEndPoint.Address.ToString()), RemoteEndPoint.Port.ToString()).AsTask()
+                    .WithCancellation(new CancellationTokenSource(_timeout).Token);
+            }
+            catch (OperationCanceledException)
+            {
+                throw new TimeoutException("Unable to connect to the specified host");
+            }
 
             _stream = new TimedStream(_socket.InputStream, _socket.OutputStream, _timeout);
         }

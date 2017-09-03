@@ -10,7 +10,8 @@ namespace Brite.Win.Con.Daemon
     {
         private readonly FileStream _stream;
 
-        public FileLogger(string fileName)
+        public FileLogger(string fileName, LoggerLevel level)
+            : base(level)
         {
             _stream = File.Open(fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
         }

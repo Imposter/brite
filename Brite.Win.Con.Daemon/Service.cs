@@ -9,12 +9,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brite.Win.Con.Daemon
 {
+    // TODO: Make Windows service, which requires manual reloading after edits are made to the configuration
     internal class Service
     {
         private static readonly Log Log = Logger.GetLog<Service>(); // TODO: Use logging
@@ -125,20 +125,25 @@ namespace Brite.Win.Con.Daemon
                 _server.AddDevices(_devices);
 
                 // Add animations
-                _server.AddAnimation(new ManualAnimation());
-                _server.AddAnimation(new FixedAnimation());
-                _server.AddAnimation(new BreatheAnimation());
-                _server.AddAnimation(new PulseAnimation());
-                _server.AddAnimation(new FadeAnimation());// TODO: Spiral + Marquee
+                _server.AddAnimations(new BaseAnimation[]
+                {
+                    new ManualAnimation(),
+                    new FixedAnimation(),
+                    new BreatheAnimation(),
+                    new PulseAnimation(),
+                    new FadeAnimation(),
+                    new MarqueeAnimation(),
+                    new SpiralAnimation()
+                });
 
                 await _server.StartAsync();
+
+                _lastConfigModifiedTime = modifiedTime;
             }
             catch (Exception ex)
             {
                 await Log.ErrorAsync("LoadConfigAsync: {0}", ex);
             }
-
-            _lastConfigModifiedTime = modifiedTime;
         }
     }
 }

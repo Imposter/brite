@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Brite.Utility.IO;
+using System;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage.Streams;
-using Brite.Utility.IO;
 
 namespace Brite.UWP.Core.IO
 {

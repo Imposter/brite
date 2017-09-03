@@ -64,11 +64,13 @@
     <Compile Include="Animations\Commands\Marquee.cs" />
     <Compile Include="Animations\Commands\Spiral.cs" />
     <Compile Include="Animations\Server\BaseAnimation.cs" />
+    <Compile Include="Animations\Server\MarqueeAnimation.cs" />
     <Compile Include="Animations\Server\PulseAnimation.cs" />
     <Compile Include="Animations\Server\FadeAnimation.cs" />
     <Compile Include="Animations\Server\FixedAnimation.cs" />
     <Compile Include="Animations\Server\BreatheAnimation.cs" />
     <Compile Include="Animations\Server\ManualAnimation.cs" />
+    <Compile Include="Animations\Server\SpiralAnimation.cs" />
     <Compile Include="BriteException.cs" />
     <Compile Include="BriteClient.cs" />
     <Compile Include="Client\BriteChannel.cs" />

@@ -9,6 +9,8 @@ namespace Brite.API
 {
     public class BriteClient
     {
+        public const int DefaultConnectionTimeout = 5000;
+
         private readonly ITcpClient _client;
         private BinaryStream _stream;
         private readonly string _id;
@@ -26,12 +28,15 @@ namespace Brite.API
             _devices = new List<BriteDevice>();
         }
         
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(int timeout = DefaultConnectionTimeout)
         {
-            // Set infinite timeout
-            _client.Timeout = -1;
+            // Set timeout for connection
+            _client.Timeout = timeout;
 
             await _client.ConnectAsync();
+
+            // Set infinite timeout
+            _client.Timeout = -1;
 
             _stream = new BinaryStream(_client.GetStream());
 

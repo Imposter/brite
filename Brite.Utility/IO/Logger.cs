@@ -2,12 +2,17 @@
 
 namespace Brite.Utility.IO
 {
-    // TODO: Add logger level
     public abstract class Logger
     {
         private static Logger Instance = new DebugLogger();
-
+        
+        public LoggerLevel Level { get; set; }
         public abstract Task WriteLineAsync(string format, params object[] args);
+
+        public Logger(LoggerLevel level = LoggerLevel.Error)
+        {
+            Level = level;
+        }
 
         public static void SetInstance(Logger logger)
         {
