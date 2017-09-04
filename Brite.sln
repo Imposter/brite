@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite", "Brite\Brite.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.Win.Sys.Service", "Brite.Win.Sys.Service\Brite.Win.Sys.Service.csproj", "{B4B027A6-1F90-49DF-BAB7-BBF76545DF66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brite.UWP.App", "Brite.UWP.App\Brite.UWP.App.csproj", "{CE89B67B-B40D-4A37-9C07-1936990B8CC8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +179,26 @@ Global
 		{B4B027A6-1F90-49DF-BAB7-BBF76545DF66}.Release|x64.Build.0 = Release|Any CPU
 		{B4B027A6-1F90-49DF-BAB7-BBF76545DF66}.Release|x86.ActiveCfg = Release|Any CPU
 		{B4B027A6-1F90-49DF-BAB7-BBF76545DF66}.Release|x86.Build.0 = Release|Any CPU
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|ARM.ActiveCfg = Debug|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|ARM.Build.0 = Debug|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|ARM.Deploy.0 = Debug|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x64.ActiveCfg = Debug|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x64.Build.0 = Debug|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x64.Deploy.0 = Debug|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x86.ActiveCfg = Debug|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x86.Build.0 = Debug|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Debug|x86.Deploy.0 = Debug|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|Any CPU.ActiveCfg = Release|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|ARM.ActiveCfg = Release|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|ARM.Build.0 = Release|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|ARM.Deploy.0 = Release|ARM
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x64.ActiveCfg = Release|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x64.Build.0 = Release|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x64.Deploy.0 = Release|x64
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x86.ActiveCfg = Release|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x86.Build.0 = Release|x86
+		{CE89B67B-B40D-4A37-9C07-1936990B8CC8}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
