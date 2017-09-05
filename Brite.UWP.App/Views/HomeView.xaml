@@ -19,6 +19,6 @@
     </Page.Transitions>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <!-- TODO: Add content here -->
+        
     </Grid>
 </Page>

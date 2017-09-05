@@ -95,6 +95,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\HeaderedPanel.xaml.cs">
+      <DependentUpon>HeaderedPanel.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Core\DelegateCommand.cs" />
     <Compile Include="Core\ViewModel.cs" />
     <Compile Include="Global.cs" />
@@ -179,6 +182,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Controls\HeaderedPanel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RootFrame.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
