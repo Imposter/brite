@@ -18,36 +18,7 @@
         </TransitionCollection>
     </Page.Transitions>
 
-    <Page.Resources>
-        <DataTemplate x:Key="HamburgerMenuItem" x:DataType="local:MenuItem">
-            <Grid Width="320" Height="32">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="48" />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <SymbolIcon Grid.Column="0" Symbol="{x:Bind Icon, Mode=OneWay}" />
-                <TextBlock Grid.Column="1" Text="{x:Bind Name, Mode=OneWay}" FontSize="16" VerticalAlignment="Center" />
-            </Grid>
-        </DataTemplate>
-    </Page.Resources>
-
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <controls:HamburgerMenu
-            Name="Menu"
-            PaneBackground="{ThemeResource AppBarBackgroundThemeBrush}"
-            Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"
-            ItemTemplate="{StaticResource HamburgerMenuItem}"
-            OptionsItemTemplate="{StaticResource HamburgerMenuItem}"
-            OpenPaneLength="320"
-            DisplayMode="CompactInline"
-            CompactPaneLength="48"
-            HamburgerHeight="48"
-            IsPaneOpen="False"
-            ItemClick="Menu_ItemClick"
-            OptionsItemClick="Menu_ItemClick">
-
-        </controls:HamburgerMenu>
-
         <!-- TODO: Add content here -->
     </Grid>
 </Page>

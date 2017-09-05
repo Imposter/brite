@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Brite.UWP.App.ViewModels
 {
-    public class SettingsModel : ViewModel
+    public class SettingsViewModel : ViewModel
     {
         //...
     }

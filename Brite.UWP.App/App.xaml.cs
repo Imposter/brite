@@ -1,4 +1,5 @@
 ﻿using Brite.UWP.App.Views;
+using Brite.UWP.Core.Network;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -41,6 +42,21 @@ namespace Brite.UWP.App
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            // Check if the application is already running
+            if (Global.Running)
+                Exit();
+
+            // Set as running
+            Global.Running = true;
+
+            // TODO: Initialize logger
+            // TODO: Read settings
+
+
+            // TODO: Initialize brite client
+
+
+            // Get window root frame
             Frame rootFrame = Window.Current.Content as Frame;
 
             // Do not repeat app initialization when the Window already has content,
@@ -52,9 +68,11 @@ namespace Brite.UWP.App
 
                 rootFrame.NavigationFailed += OnNavigationFailed;
 
+                // NOTE: We probably won't need this
                 if (e.PreviousExecutionState == ApplicationExecutionState.Terminated)
                 {
-                    //TODO: Load state from previously suspended application
+                    // TODO: Load state from previously suspended application
+
                 }
 
                 // Place the frame in the current Window
@@ -68,7 +86,25 @@ namespace Brite.UWP.App
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(HomeView), e.Arguments);
+                    rootFrame.Navigate(typeof(RootFrame), e.Arguments);
+
+                    // Store inner frame in global variables
+                    Global.RootFrame = rootFrame.Content as RootFrame;
+
+                    // Initialize menu
+                    Global.RootFrame.MenuItems.AddRange(new []
+                    {
+                        new MenuItem(Symbol.Home, "Home", typeof(HomeView))
+                    });
+
+                    Global.RootFrame.MenuOptionItems.AddRange(new []
+                    {
+                        new MenuItem(Symbol.Setting, "Settings", typeof(SettingsView)),
+                        new MenuItem(Symbol.Upload, "Upgrade Firmware", null) // TODO: ...
+                    });
+
+                    // Navigate to home view
+                    Global.RootFrame.Navigate(typeof(HomeView));
                 }
 
                 // Register a global back event handler. This can be registered on a per-page-bases if you only have a subset of your pages
@@ -90,16 +126,16 @@ namespace Brite.UWP.App
         /// <param name="e"></param>
         private void OnBackRequested(object sender, BackRequestedEventArgs e)
         {
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame == null)
+            var frame = Global.RootFrame;
+            if (frame == null)
                 return;
 
             // If we can go back and the event has not already been handled, do so.
-            if (rootFrame.CanGoBack && e.Handled == false)
+            if (frame.CanGoBack && e.Handled == false)
             {
                 e.Handled = true;
-                rootFrame.GoBack();
-            } // TODO: Use our old method where we have a root page, and use this with that (so we can persist sidebar)
+                frame.GoBack();
+            }
         }
 
         /// <summary>
@@ -122,7 +158,7 @@ namespace Brite.UWP.App
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
-            //TODO: Save application state and stop any background activity
+            // TODO: Save application state and stop any background activity
             deferral.Complete();
         }
     }

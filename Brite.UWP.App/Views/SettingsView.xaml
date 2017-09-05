@@ -12,16 +12,17 @@
         <TransitionCollection>
             <NavigationThemeTransition>
                 <NavigationThemeTransition.DefaultNavigationTransitionInfo>
-                    <ContinuumNavigationTransitionInfo/>
+                    <ContinuumNavigationTransitionInfo />
                 </NavigationThemeTransition.DefaultNavigationTransitionInfo>
             </NavigationThemeTransition>
         </TransitionCollection>
     </Page.Transitions>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <controls:HeaderedTextBlock Header="HeaderedTextBlockControl" 
-           Text="UWP Community Toolkit" 
-           Orientation="Vertical"
-           Margin="10,10,0,962" Width="661" />
+        <controls:HeaderedTextBlock 
+            Header="HeaderedTextBlockControl" 
+            Text="UWP Community Toolkit" 
+            Orientation="Vertical"
+            Margin="10,10,0,962" Width="661" />
     </Grid>
 </Page>

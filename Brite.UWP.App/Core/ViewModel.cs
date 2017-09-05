@@ -7,18 +7,18 @@ namespace Brite.UWP.App.Core
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        protected bool SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = null)
         {
-            if (Equals(storage, value))
+            if (Equals(property, value))
                 return false;
 
-            storage = value;
+            property = value;
             OnPropertyChanged(propertyName);
 
             return true;
         }
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }

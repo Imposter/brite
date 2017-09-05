@@ -25,13 +25,12 @@ namespace Brite.UWP.App.Views
     {
         public SettingsView()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            var rootFrame = Window.Current.Content as Frame;
-            if (rootFrame.CanGoBack)
+            if (Global.RootFrame.CanGoBack)
             {
                 // If we have pages in our in-app backstack and have opted in to showing back, do so
                 SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
