@@ -16,8 +16,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Brite.UWP.App.Controls
 {
-    // TODO: Update this with tut on how to use usercontrols in wpf/uwp
-    public sealed partial class HeaderedPanel : UserControl // TODO: Use this in the settings view
+    public sealed partial class HeaderedPanel : UserControl
     {
         public string Title
         {

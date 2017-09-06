@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Brite.UWP.App.Core;
+using System;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Animation;
 
 namespace Brite.UWP.App
 {
@@ -9,37 +9,40 @@ namespace Brite.UWP.App
     {
         public List<MenuItem> MenuItems { get; }
         public List<MenuItem> MenuOptionItems { get; }
-        public bool CanGoBack => _frame.CanGoBack;
-        public bool CanGoForward => _frame.CanGoForward;
-
-        private readonly Frame _frame;
+        public bool CanGoBack => ContentFrame.CanGoBack;
+        public bool CanGoForward => ContentFrame.CanGoForward;
 
         public RootFrame()
         {
             InitializeComponent();
-
-            _frame = new Frame();
 
             MenuItems = new List<MenuItem>();
             MenuOptionItems = new List<MenuItem>();
 
             Menu.ItemsSource = MenuItems;
             Menu.OptionsItemsSource = MenuOptionItems;
-            InnerContent.Content = _frame;
         }
 
         private void Menu_ItemClick(object sender, ItemClickEventArgs e)
         {
             var item = e.ClickedItem as MenuItem;
-            if (!_frame.Navigate(item.PageType, null))
+            if (ContentFrame.Content != null && item.PageType == ContentFrame.Content.GetType())
+                return;
+
+            Header.Text = item.Name;
+            HeaderStoryboard.Begin();
+            if (!ContentFrame.Navigate(item.PageType, null))
                 throw new Exception("Navigation failed");
 
             Menu.StartBringIntoView();
         }
 
-        public void Navigate(Type pageType)
+        public void Navigate(Type pageType, object parameter = null)
         {
-            if (!_frame.Navigate(pageType, null))
+            if (ContentFrame.Content != null && pageType == ContentFrame.Content.GetType())
+                return;
+            
+            if (!ContentFrame.Navigate(pageType, NavigationStore.Store(parameter)))
                 throw new Exception("Navigation failed");
 
             Menu.StartBringIntoView();
@@ -48,25 +51,35 @@ namespace Brite.UWP.App
 
         public void GoBack()
         {
-            _frame.GoBack();
-            UpdateSelectedMenuItem(_frame.Content.GetType());
+            ContentFrame.GoBack();
+            UpdateSelectedMenuItem(ContentFrame.Content.GetType());
         }
 
         public void GoForward()
         {
-            _frame.GoBack();
-            UpdateSelectedMenuItem(_frame.Content.GetType());
+            ContentFrame.GoBack();
+            UpdateSelectedMenuItem(ContentFrame.Content.GetType());
         }
 
         private void UpdateSelectedMenuItem(Type pageType)
         {
+            Header.Text = string.Empty;
             var index = MenuItems.FindIndex(i => i.PageType == pageType);
-            if (index != -1) Menu.SelectedIndex = index;
+            if (index != -1)
+            {
+                Menu.SelectedIndex = index;
+                Header.Text = MenuItems[index].Name;
+            }
             else Menu.SelectedIndex = -1;
 
             index = MenuOptionItems.FindIndex(i => i.PageType == pageType);
-            if (index != -1) Menu.SelectedOptionsIndex = index;
+            if (index != -1)
+            {
+                Menu.SelectedOptionsIndex = index;
+                Header.Text = MenuOptionItems[index].Name;
+            }
             else Menu.SelectedOptionsIndex = -1;
+            HeaderStoryboard.Begin();
         }
     }
 }

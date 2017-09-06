@@ -99,6 +99,7 @@
       <DependentUpon>HeaderedPanel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Core\DelegateCommand.cs" />
+    <Compile Include="Core\NavigationStore.cs" />
     <Compile Include="Core\ViewModel.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="MenuItem.cs" />
