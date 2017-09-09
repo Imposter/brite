@@ -11,5 +11,7 @@ namespace Brite.UWP.App
 
         public static ITcpClient TcpClient;
         public static BriteClient BriteClient;
+
+        public static Config Config;
     }
 }

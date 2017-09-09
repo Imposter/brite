@@ -1,14 +1,20 @@
-﻿using Brite.UWP.App.Views;
+﻿using Brite.API;
+using Brite.Utility.IO;
+using Brite.UWP.App.Views;
 using Brite.UWP.Core.Network;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -23,7 +29,7 @@ namespace Brite.UWP.App
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
+    public sealed partial class App
     {
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -40,7 +46,7 @@ namespace Brite.UWP.App
         /// will be used such as when the application is launched to open a specific file.
         /// </summary>
         /// <param name="e">Details about the launch request and process.</param>
-        protected override void OnLaunched(LaunchActivatedEventArgs e)
+        protected override async void OnLaunched(LaunchActivatedEventArgs e)
         {
             // Check if the application is already running
             if (Global.Running)
@@ -49,12 +55,25 @@ namespace Brite.UWP.App
             // Set as running
             Global.Running = true;
 
-            // TODO: Initialize logger
-            // TODO: Read settings
+            // Initialize logger
+            var localFolder = ApplicationData.Current.LocalFolder;
 
+            var logFile = await localFolder.CreateFileAsync("brite.log", CreationCollisionOption.ReplaceExisting);
+            var logger = new FileLogger(logFile);
+            Logger.SetInstance(logger);
 
-            // TODO: Initialize brite client
+            // Read config
+            var configFile = await localFolder.GetFileAsync("config.json");
+            var config = await FileIO.ReadTextAsync(configFile);
+            Global.Config = JsonConvert.DeserializeObject<Config>(config);
 
+            // Initialize brite client
+            Global.TcpClient = new TcpClient(new IPEndPoint(IPAddress.Parse(Global.Config.ServerIpAddress), Global.Config.ServerPort));
+            Global.BriteClient = new BriteClient(Global.TcpClient, "Brite.UWP.App");
+
+            // Connect to server
+            await Global.BriteClient.ConnectAsync(); // TODO: Catch exceptions
+            // TODO: Add class for management of network and brite client
 
             // Get window root frame
             Frame rootFrame = Window.Current.Content as Frame;
@@ -92,12 +111,13 @@ namespace Brite.UWP.App
                     Global.RootFrame = rootFrame.Content as RootFrame;
 
                     // Initialize menu
-                    Global.RootFrame.MenuItems.AddRange(new []
+                    // ReSharper disable once PossibleNullReferenceException
+                    Global.RootFrame.MenuItems.AddRange(new[]
                     {
                         new MenuItem(Symbol.Home, "Home", typeof(HomeView))
                     });
 
-                    Global.RootFrame.MenuOptionItems.AddRange(new []
+                    Global.RootFrame.MenuOptionItems.AddRange(new[]
                     {
                         new MenuItem(Symbol.Setting, "Settings", typeof(SettingsView)),
                         new MenuItem(Symbol.Upload, "Upgrade Firmware", null) // TODO: ...
