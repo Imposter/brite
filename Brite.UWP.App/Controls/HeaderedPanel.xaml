@@ -10,7 +10,7 @@
     d:DesignWidth="400">
 
     <Grid>
-        <TextBlock Name="TextBlock" TextWrapping="Wrap" Text="{Binding }" Margin="0,0,0,280"/>
-        <ContentControl Name="ContentControl" Margin="0,20,0,0"/>
+        <TextBlock Name="TextBlock" TextWrapping="Wrap" Text="Header" Margin="0,0,0,265" Padding="5"/>
+        <ContentControl Name="ContentControl" Margin="0,35,0,0" Padding="10"/>
     </Grid>
 </UserControl>

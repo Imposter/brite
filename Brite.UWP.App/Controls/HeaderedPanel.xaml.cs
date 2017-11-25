@@ -24,12 +24,6 @@ namespace Brite.UWP.App.Controls
             set => TextBlock.Text = value;
         }
 
-        public double TitleHeight
-        {
-            get => TextBlock.Height;
-            set => TextBlock.Height = value;
-        }
-
         public new object Content
         {
             get => ContentControl.Content;

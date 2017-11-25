@@ -23,6 +23,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.Toolkit.Uwp.Helpers;
 
 namespace Brite.UWP.App
 {
@@ -63,7 +64,9 @@ namespace Brite.UWP.App
             Logger.SetInstance(logger);
 
             // Read config
-            var configFile = await localFolder.GetFileAsync("config.json");
+            var configFile = await localFolder.CreateFileAsync("config.json", CreationCollisionOption.OpenIfExists);
+            // TODO: If empty, create defaults
+
             var config = await FileIO.ReadTextAsync(configFile);
             Global.Config = JsonConvert.DeserializeObject<Config>(config);
 
