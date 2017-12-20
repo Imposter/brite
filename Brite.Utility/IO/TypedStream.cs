@@ -149,7 +149,11 @@ namespace Brite.Utility.IO
             if (!await ReadDataTypeAsync(DataType.Int8))
                 throw new TimeoutException("Unable to read data type");
 
-            return (sbyte)await ReadAsync();
+            var buffer = new byte[sizeof(sbyte)];
+            if (!await ReadAsync(buffer, buffer.Length))
+                throw new TimeoutException("Unable to read data");
+
+            return (sbyte)buffer[0];
         }
 
         public async Task<byte> ReadUInt8Async()
