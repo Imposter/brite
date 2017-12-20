@@ -1,4 +1,12 @@
-﻿using System;
+﻿/*
+ * Copyright (C) 2017 Eyaz Rehman. All Rights Reserved.
+ *
+ * This file is part of Brite.
+ * Licensed under the GNU General Public License. See LICENSE file in the project
+ * root for full license information.
+ */
+
+using System;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -43,6 +51,7 @@ namespace Brite.Win.Con.FirmwareUpdater
             {
                 using (var channel = new Channel(serial))
                 {
+                    // Set up device information for Atmel ATmega328 (basic Arduino)
                     var info = new DeviceInfo(DeviceType.ATmega328);
                     info.Ram.Size = 2048;
                     info.Flash.Size = 32768;
