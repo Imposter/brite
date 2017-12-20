@@ -92,7 +92,7 @@ namespace Brite.Utility.IO
         {
             var b = await ReadAsync();
             if (b < 0)
-                return false;
+                throw new TimeoutException("Unable to read data");
 
             return b == 1;
         }
