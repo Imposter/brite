@@ -13,21 +13,21 @@ namespace Brite.Utility
 {
     public class ManualReset
     {
-        private readonly SemaphoreSlim _semaphore;
+        private readonly ManualResetEvent _event;
 
         public ManualReset()
         {
-            _semaphore = new SemaphoreSlim(0, 1);
+            _event = new ManualResetEvent(false);
         }
 
         public async Task WaitAsync()
         {
-            await _semaphore.WaitAsync();
+            await Task.Run(() => _event.WaitOne());
         }
 
         public void Set()
         {
-            _semaphore.Release();
+            _event.Set();
         }
     }
 }
