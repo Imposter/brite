@@ -1,68 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FCE966C1-0C86-45D6-A42E-B318F10C27CB}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Brite.Micro</RootNamespace>
-    <AssemblyName>Brite.Micro</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="project.json" />
-    <!-- A reference to the entire .NET Framework is automatically included -->
+    <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="IChannel.cs" />
-    <Compile Include="IProgrammer.cs" />
-    <Compile Include="MemoryType.cs" />
-    <Compile Include="Programmer.cs" />
-    <Compile Include="Programmers\StkV1Programmer.cs" />
-    <Compile Include="Programmers\StkV1\DeviceInfo.cs" />
-    <Compile Include="Programmers\StkV1\DeviceMemoryInfo.cs" />
-    <Compile Include="Programmers\StkV1\DeviceType.cs" />
-    <Compile Include="Programmers\StkV1\Protocol\Command.cs" />
-    <Compile Include="Programmers\StkV1\Protocol\DeviceParameters.cs" />
-    <Compile Include="Programmers\StkV1\Protocol\DeviceParametersExt.cs" />
-    <Compile Include="Programmers\StkV1\Protocol\Result.cs" />
-    <Compile Include="Programmers\StkV1\Channel.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ProtocolException.cs" />
-    <Compile Include="SerialChannel.cs" />
-    <Compile Include="SerialPinType.cs" />
-    <Compile Include="SerialProgrammer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
-      <Project>{6E94BBF0-86C6-43E0-9B47-595D2E67BC3F}</Project>
-      <Name>Brite.Utility</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+
 </Project>

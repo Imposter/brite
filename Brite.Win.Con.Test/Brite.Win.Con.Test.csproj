@@ -62,10 +62,6 @@
       <Project>{a9cc5468-4fed-4258-beb0-ab2da1fdb121}</Project>
       <Name>Brite.Win.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Brite\Brite.csproj">
-      <Project>{2c90a5ec-8f4f-4c34-8050-32bfcf411919}</Project>
-      <Name>Brite</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

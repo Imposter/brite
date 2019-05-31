@@ -27,7 +27,7 @@ namespace Brite.Win.Con.Test
                             await channel.RequestAsync();
 
                             // Perform changes
-                            var animation = new MarqueeAnimation();
+                            var animation = new BreatheAnimation();
 
                             await channel.SetSizeAsync(12);
                             await channel.SetBrightnessAsync(255);

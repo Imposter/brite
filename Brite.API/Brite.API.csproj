@@ -1,89 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EDDDC9AD-9B12-43DD-9905-4F16306D1F27}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Brite.API</RootNamespace>
-    <AssemblyName>Brite.API</AssemblyName>
-    <DefaultLanguage>en-US</DefaultLanguage>
-    <FileAlignment>512</FileAlignment>
-    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
-    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Brite\Brite.csproj">
-      <Project>{2C90A5EC-8F4F-4C34-8050-32BFCF411919}</Project>
-      <Name>Brite</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
-      <Project>{6E94BBF0-86C6-43E0-9B47-595D2E67BC3F}</Project>
-      <Name>Brite.Utility</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Brite.Micro\Brite.Micro.csproj">
-      <Project>{FCE966C1-0C86-45D6-A42E-B318F10C27CB}</Project>
-      <Name>Brite.Micro</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj" />
+    <ProjectReference Include="..\Brite\Brite.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="project.json" />
-    <!-- A reference to the entire .NET Framework is automatically included -->
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Animations\Client\BaseAnimation.cs" />
-    <Compile Include="Animations\Client\BreatheAnimation.cs" />
-    <Compile Include="Animations\Client\FadeAnimation.cs" />
-    <Compile Include="Animations\Client\FixedAnimation.cs" />
-    <Compile Include="Animations\Client\ManualAnimation.cs" />
-    <Compile Include="Animations\Client\MarqueeAnimation.cs" />
-    <Compile Include="Animations\Client\PulseAnimation.cs" />
-    <Compile Include="Animations\Client\SpiralAnimation.cs" />
-    <Compile Include="Animations\Commands\Manual.cs" />
-    <Compile Include="Animations\Commands\Marquee.cs" />
-    <Compile Include="Animations\Commands\Spiral.cs" />
-    <Compile Include="Animations\Server\BaseAnimation.cs" />
-    <Compile Include="Animations\Server\MarqueeAnimation.cs" />
-    <Compile Include="Animations\Server\PulseAnimation.cs" />
-    <Compile Include="Animations\Server\FadeAnimation.cs" />
-    <Compile Include="Animations\Server\FixedAnimation.cs" />
-    <Compile Include="Animations\Server\BreatheAnimation.cs" />
-    <Compile Include="Animations\Server\ManualAnimation.cs" />
-    <Compile Include="Animations\Server\SpiralAnimation.cs" />
-    <Compile Include="BriteException.cs" />
-    <Compile Include="Client\BriteClient.cs" />
-    <Compile Include="Client\BriteChannel.cs" />
-    <Compile Include="Client\BriteDevice.cs" />
-    <Compile Include="Client\Message.cs" />
-    <Compile Include="Server\Message.cs" />
-    <Compile Include="Server\PriorityMutex.cs" />
-    <Compile Include="Command.cs" />
-    <Compile Include="Priority.cs" />
-    <Compile Include="Result.cs" />
-    <Compile Include="Server\BriteServer.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+
 </Project>
