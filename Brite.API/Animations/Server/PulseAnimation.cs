@@ -6,9 +6,9 @@
  * root for full license information.
  */
 
-using Brite.Utility.IO;
 using System;
 using System.Threading.Tasks;
+using Brite.Utility.IO;
 
 namespace Brite.API.Animations.Server
 {
@@ -24,7 +24,7 @@ namespace Brite.API.Animations.Server
             return typeof(Brite.Animations.PulseAnimation);
         }
 
-        public override Task HandleRequestAsync(Channel channel, BinaryStream inputStream, BinaryStream outputStream)
+        public override Task HandleRequestAsync(Channel channel, BinaryStream inputStream)
         {
             throw new NotImplementedException();
         }

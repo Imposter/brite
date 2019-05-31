@@ -6,11 +6,11 @@
  * root for full license information.
  */
 
-using Brite.API.Animations.Commands;
-using Brite.Utility.IO;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brite.API.Animations.Commands;
+using Brite.Utility.IO;
 
 namespace Brite.API.Animations.Server
 {
@@ -26,7 +26,7 @@ namespace Brite.API.Animations.Server
             return typeof(Brite.Animations.ManualAnimation);
         }
 
-        public override async Task HandleRequestAsync(Channel channel, BinaryStream inputStream, BinaryStream outputStream)
+        public override async Task HandleRequestAsync(Channel channel, BinaryStream inputStream)
         {
             var anim = channel.Animation as Brite.Animations.ManualAnimation;
             if (anim == null)

@@ -1,16 +1,15 @@
-﻿using Brite.API.Animations.Client;
-using Brite.Utility;
-using Brite.Utility.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brite.API.Animations.Client;
+using Brite.Utility;
+using Brite.Utility.IO;
 
 namespace Brite.API.Client
 {
     public class BriteChannel
     {
-        private readonly BinaryStream _stream;
-        private readonly Mutex _streamLock;
+        private readonly BriteClient _client;
         private readonly uint _deviceId;
         private readonly byte _index;
         private readonly ushort _maxSize;
@@ -33,12 +32,11 @@ namespace Brite.API.Client
         public byte Brightness => _brightness;
         public BaseAnimation Animation => _animation;
 
-        internal BriteChannel(BinaryStream stream, Mutex streamLock, uint deviceId, byte index, ushort maxSize,
+        internal BriteChannel(BriteClient client, uint deviceId, byte index, ushort maxSize,
             byte maxBrightness, byte animationMaxColors, float animationMinSpeed, float animationMaxSpeed,
             List<uint> supportedAnimations)
         {
-            _stream = stream;
-            _streamLock = streamLock;
+            _client = client;
 
             _deviceId = deviceId;
             _index = index;
@@ -52,81 +50,46 @@ namespace Brite.API.Client
 
         public async Task RequestAsync(Priority priority = Priority.VeryLow)
         {
-            try
-            {
-                await _streamLock.LockAsync();
+            var request = new Message(Command.RequestDeviceChannel);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
+            await request.Stream.WriteUInt8Async((byte)priority);
 
-                await SendCommandAsync(Command.RequestDeviceChannel);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-                await _stream.WriteUInt8Async((byte)priority);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
+            await _client.SendMessageAsync(request);
         }
 
         public async Task ReleaseAsync()
         {
-            try
-            {
-                await _streamLock.LockAsync();
+            var request = new Message(Command.ReleaseDeviceChannel);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
 
-                await SendCommandAsync(Command.ReleaseDeviceChannel);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
+            await _client.SendMessageAsync(request);
         }
 
         public async Task SetSizeAsync(ushort size)
         {
+
+            var request = new Message(Command.DeviceSetChannelLedCount);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
+            await request.Stream.WriteUInt16Async(size);
+
+            await _client.SendMessageAsync(request);
+
             _size = size;
-
-            try
-            {
-                await _streamLock.LockAsync();
-
-                await SendCommandAsync(Command.DeviceSetChannelLedCount);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-                await _stream.WriteUInt16Async(size);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
         }
 
         public async Task SetBrightnessAsync(byte brightness)
         {
+            var request = new Message(Command.DeviceSetChannelBrightness);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
+            await request.Stream.WriteUInt8Async(brightness);
+
+            await _client.SendMessageAsync(request);
+
             _brightness = brightness;
-
-            try
-            {
-                await _streamLock.LockAsync();
-
-                await SendCommandAsync(Command.DeviceSetChannelBrightness);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-                await _stream.WriteUInt8Async(brightness);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
         }
 
         public async Task SetAnimationAsync(BaseAnimation animation, bool reset = true)
@@ -139,60 +102,28 @@ namespace Brite.API.Client
             // Reset previous animation
             _animation?.Reset();
 
+            // Set animation
+            var request = new Message(Command.DeviceSetChannelAnimation);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
+            await request.Stream.WriteUInt32Async(animId);
+
+            await _client.SendMessageAsync(request);
+
             // Store animation
             _animation = animation;
 
             // Initialize animation
-            _animation.Initialize(_stream, _streamLock, reset, _deviceId, _index, _animationMaxColors, _animationMinSpeed, _animationMaxSpeed);
-
-            try
-            {
-                await _streamLock.LockAsync();
-
-                await SendCommandAsync(Command.DeviceSetChannelAnimation);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-                await _stream.WriteUInt32Async(animId);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
+            _animation.Initialize(_client, reset, _deviceId, _index, _animationMaxColors, _animationMinSpeed, _animationMaxSpeed);
         }
 
         public async Task ResetAsync()
         {
-            try
-            {
-                await _streamLock.LockAsync();
+            var request = new Message(Command.DeviceChannelReset);
+            await request.Stream.WriteUInt32Async(_deviceId);
+            await request.Stream.WriteUInt8Async(_index);
 
-                await SendCommandAsync(Command.DeviceChannelReset);
-                await _stream.WriteUInt32Async(_deviceId);
-                await _stream.WriteUInt8Async(_index);
-
-                await ReceiveResultAsync();
-            }
-            finally
-            {
-                _streamLock.Unlock();
-            }
-        }
-
-        private async Task SendCommandAsync(Command command)
-        {
-            await _stream.WriteUInt8Async((byte)command);
-            var responseCommand = await _stream.ReadUInt8Async();
-            if (responseCommand != (byte)command)
-                throw new BriteException($"Unexpected command response, expected {command} got {(Command)responseCommand}");
-        }
-
-        private async Task ReceiveResultAsync(Result expected = Result.Ok)
-        {
-            var result = await _stream.ReadUInt8Async();
-            if (result != (byte)expected)
-                throw new BriteException($"Unexpected result, expected {expected} got {(Result)result}");
+            await _client.SendMessageAsync(request);
         }
     }
 }

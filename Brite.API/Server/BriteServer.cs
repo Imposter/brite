@@ -6,16 +6,15 @@
  * root for full license information.
  */
 
+using Brite.API.Animations.Server;
 using Brite.Utility.IO;
 using Brite.Utility.Network;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Brite.API.Animations.Server;
-using Brite.Utility;
 
-namespace Brite.API
+namespace Brite.API.Server
 {
     public class BriteServer : IDisposable
     {
@@ -35,12 +34,11 @@ namespace Brite.API
         {
             public BaseAnimation Animation { get; set; }
             public ClientInfo Client { get; set; }
-            public Priority Priority { get; set; }
-            public Mutex Mutex { get; }
+            public PriorityMutex<Priority> Mutex { get; }
 
             public ChannelInfo()
             {
-                Mutex = new Mutex();
+                Mutex = new PriorityMutex<Priority>();
             }
         }
 
@@ -49,14 +47,13 @@ namespace Brite.API
             public uint BaudRate { get; set; }
             public Dictionary<Channel, ChannelInfo> Channels { get; }
             public ClientInfo Client { get; set; }
-            public Priority Priority { get; set; }
-            public Mutex Mutex { get; }
+            public PriorityMutex<Priority> Mutex { get; }
 
             public DeviceInfo(uint baudRate)
             {
                 BaudRate = baudRate;
                 Channels = new Dictionary<Channel, ChannelInfo>();
-                Mutex = new Mutex();
+                Mutex = new PriorityMutex<Priority>();
             }
         }
 
@@ -143,7 +140,7 @@ namespace Brite.API
                 // Unlock device if needed
                 if (pair.Value.Client != null)
                 {
-                    pair.Value.Mutex.Unlock();
+                    pair.Value.Mutex.Unlock(pair.Value.Client);
                     pair.Value.Client = null;
                 }
             }
@@ -172,6 +169,26 @@ namespace Brite.API
             _server.OnClientConnected -= ServerOnOnClientConnected;
         }
 
+        private async Task SendResponse(Message request, Result result, BinaryStream outputStream = null)
+        {
+            // Write header
+            var stream = request.InternalStream;
+            await stream.WriteUInt8Async((byte)request.Command);
+            await stream.WriteInt32Async(request.Id);
+            await stream.WriteUInt8Async((byte)result);
+
+            if (outputStream != null)
+            {
+                var outData = ((MemoryStream)outputStream.Stream).ToArray();
+                await stream.WriteInt32Async(outData.Length);
+                await stream.WriteBlobAsync(outData);
+            }
+            else
+            {
+                await stream.WriteInt32Async(0);
+            }
+        }
+
         private async void ServerOnOnClientConnected(object sender, TcpConnectionEventArgs e)
         {
             await Log.InfoAsync($"Client connected from {e.Source}");
@@ -193,36 +210,41 @@ namespace Brite.API
 
                         var stream = new BinaryStream(e.Client.GetStream());
 
-                        // Read command
+                        // Read header
                         var command = await stream.ReadUInt8Async();
                         if (command >= (byte)Command.Max)
                             continue;
 
+                        var id = await stream.ReadInt32Async();
+                        var inDataLength = await stream.ReadInt32Async();
+                        var inData = await stream.ReadBlobAsync(inDataLength);
+
                         await Log.TraceAsync($"Received {(Command)command} request from {e.Source}");
 
-                        // Write response command
-                        await stream.WriteUInt8Async(command);
+                        // Create message
+                        var request = new Message(stream, (Command)command, id, new BinaryStream(new MemoryStream(inData)));
 
+                        // Handle message
                         if (string.IsNullOrWhiteSpace(client.Identifier) && command != (byte)Command.SetId)
                         {
-                            await stream.WriteUInt8Async((byte)Result.NotIdentified);
+                            await SendResponse(request, Result.NotIdentified);
                             continue;
                         }
 
                         if (command == (byte)Command.SetId)
                         {
-                            var identifierLength = await stream.ReadInt32Async();
-                            var identifier = await stream.ReadStringAsync(identifierLength);
+                            var identifierLength = await request.Stream.ReadInt32Async();
+                            var identifier = await request.Stream.ReadStringAsync(identifierLength);
 
                             if (string.IsNullOrWhiteSpace(identifier))
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidId);
+                                await SendResponse(request, Result.InvalidId);
                                 continue;
                             }
 
                             // NOTE: Using LINQ here somehow causes a deadlock?
                             ClientInfo existingClient = null;
-                            lock (_clients)
+                            lock (_clients) // TODO: Lock clients in another way
                             {
                                 foreach (var clientInfo in _clients)
                                 {
@@ -236,94 +258,101 @@ namespace Brite.API
 
                             if (existingClient != null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.IdInUse);
+                                await SendResponse(request, Result.IdInUse);
                                 continue;
                             }
 
                             client.Identifier = identifier;
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.GetDevices)
                         {
-                            await stream.WriteUInt8Async((byte)Result.Ok);
-                            await stream.WriteUInt8Async((byte)_devices.Count);
+                            var outputStream = new BinaryStream(new MemoryStream());
+                            await outputStream.WriteUInt8Async((byte)_devices.Count);
                             foreach (var pair in _devices)
-                                await stream.WriteUInt32Async(pair.Key.Id);
+                                await outputStream.WriteUInt32Async(pair.Key.Id);
+
+                            await SendResponse(request, Result.Ok, outputStream);
                         }
                         else if (command == (byte)Command.RequestDevice)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var priority = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var priority = await request.Stream.ReadUInt8Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             if (priority > (byte)Priority.VeryHigh)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidPriority);
+                                await SendResponse(request, Result.InvalidPriority);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
                             if (deviceInfo.Client != null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
-                            // Wait here indefinitely, until the appropriate permissions are had
-                            // and send the client the OK to lock the device (until the client disconnects)
-                            if (priority <= (byte)deviceInfo.Priority)
-                                await deviceInfo.Mutex.LockAsync();
+                            // Unlock channels if needed
+                            foreach (var pair in deviceInfo.Channels)
+                            {
+                                if (pair.Value.Client != null)
+                                    pair.Value.Mutex.Unlock(pair.Value.Client);
+                            }
+
+                            
+                            // Lock device
+                            await deviceInfo.Mutex.LockAsync(client, (Priority)priority);
 
                             deviceInfo.Client = client;
-                            deviceInfo.Priority = (Priority)priority;
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.ReleaseDevice)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
                             if (deviceInfo.Client == client)
                             {
-                                deviceInfo.Client = null;
-                                deviceInfo.Priority = Priority.Normal;
-
-                                await stream.WriteUInt8Async((byte)Result.Ok);
-
                                 // Unlock device lock mutex to allow other clients to lock the device
-                                deviceInfo.Mutex.Unlock();
+                                deviceInfo.Mutex.Unlock(deviceInfo.Client);
+
+                                deviceInfo.Client = null;
+
+                                await SendResponse(request, Result.Ok);
                             }
                             else
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                             }
                         }
                         else if (command == (byte)Command.OpenDevice)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
                             if (deviceInfo.Client == client)
                             {
+                                var errorOccurred = false;
                                 for (var i = 0; i < _deviceConnectionRetries; i++)
                                 {
                                     try
@@ -336,26 +365,28 @@ namespace Brite.API
                                     {
                                         if (i == _deviceConnectionRetries - 1)
                                         {
-                                            await stream.WriteUInt8Async((byte)Result.Error);
-                                            return;
+                                            await SendResponse(request, Result.Error);
+                                            errorOccurred = true;
+                                            break;
                                         }
                                     }
                                 }
 
-                                await stream.WriteUInt8Async((byte)Result.Ok);
+                                if (!errorOccurred)
+                                    await SendResponse(request, Result.Ok);
                             }
                             else
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                             }
                         }
                         else if (command == (byte)Command.CloseDevice)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
@@ -365,43 +396,51 @@ namespace Brite.API
                                 // Close device
                                 await device.CloseAsync();
 
-                                await stream.WriteUInt8Async((byte)Result.Ok);
+                                await SendResponse(request, Result.Ok);
                             }
                             else
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                             }
                         }
                         else if (command == (byte)Command.RequestDeviceChannel)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var priority = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var priority = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             if (priority > (byte)Priority.VeryHigh)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidPriority);
+                                await SendResponse(request, Result.InvalidPriority);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -409,37 +448,43 @@ namespace Brite.API
                             // and send the client the OK to lock the channel (until the client disconnects)
                             var channel = device.Channels[channelIndex];
                             var channelInfo = deviceInfo.Channels[channel];
-                            if (priority <= (byte)channelInfo.Priority)
-                                await channelInfo.Mutex.LockAsync();
-
                             channelInfo.Client = client;
-                            channelInfo.Priority = (Priority)priority;
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await channelInfo.Mutex.LockAsync(channelInfo.Client, (Priority)priority); 
+
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.ReleaseDeviceChannel)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -447,78 +492,108 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client == client)
                             {
-                                channelInfo.Client = null;
-                                channelInfo.Priority = Priority.Normal;
-
-                                await stream.WriteUInt8Async((byte)Result.Ok);
-
                                 // Unlock channel lock mutex to allow other clients to use the channel
-                                channelInfo.Mutex.Unlock();
+                                channelInfo.Mutex.Unlock(channelInfo.Client);
+
+                                channelInfo.Client = null;
+
+                                await SendResponse(request, Result.Ok);
                             }
                             else
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                             }
                         }
                         else if (command == (byte)Command.DeviceGetVersion)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
+                                continue;
+                            }
+
+                            var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
-                            await stream.WriteUInt32Async(device.FirmwareVersion);
+                            var outputStream = new BinaryStream(new MemoryStream());
+                            await outputStream.WriteUInt32Async(device.FirmwareVersion);
+
+                            await SendResponse(request, Result.Ok, outputStream);
                         }
                         else if (command == (byte)Command.DeviceGetParameters)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
+                                continue;
+                            }
+
+                            var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
-                            await stream.WriteUInt8Async(device.ChannelCount);
-                            await stream.WriteUInt16Async(device.ChannelMaxSize);
-                            await stream.WriteUInt8Async(device.ChannelMaxBrightness);
-                            await stream.WriteUInt8Async(device.AnimationMaxColors);
-                            await stream.WriteFloatAsync(device.AnimationMinSpeed);
-                            await stream.WriteFloatAsync(device.AnimationMaxSpeed);
+                            var outputStream = new BinaryStream(new MemoryStream());
+                            await outputStream.WriteUInt8Async(device.ChannelCount);
+                            await outputStream.WriteUInt16Async(device.ChannelMaxSize);
+                            await outputStream.WriteUInt8Async(device.ChannelMaxBrightness);
+                            await outputStream.WriteUInt8Async(device.AnimationMaxColors);
+                            await outputStream.WriteFloatAsync(device.AnimationMinSpeed);
+                            await outputStream.WriteFloatAsync(device.AnimationMaxSpeed);
+
+                            await SendResponse(request, Result.Ok, outputStream);
                         }
                         else if (command == (byte)Command.DeviceGetAnimations)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
+                                continue;
+                            }
+
+                            var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -527,59 +602,78 @@ namespace Brite.API
                                 .Select(pair => pair.Key)).ToArray();
                             if (supportedAnimations.Length == 0)
                             {
-                                await stream.WriteUInt8Async((byte)Result.NoSupportedAnimations);
+                                await SendResponse(request, Result.NoSupportedAnimations);
                                 continue;
                             }
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
-                            await stream.WriteUInt8Async((byte)supportedAnimations.Length);
+                            var outputStream = new BinaryStream(new MemoryStream());
+                            await outputStream.WriteUInt8Async((byte)supportedAnimations.Length);
                             foreach (var anim in supportedAnimations)
-                                await stream.WriteUInt32Async(anim);
+                                await outputStream.WriteUInt32Async(anim);
+
+                            await SendResponse(request, Result.Ok, outputStream);
                         }
                         else if (command == (byte)Command.DeviceSynchronize)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
+                                continue;
+                            }
+
+                            var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
                             await device.SynchonizeAsync();
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceChannelReset)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -587,38 +681,46 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             await channel.ResetAsync();
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelBrightness)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var brightness = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var brightness = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -626,38 +728,46 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             await channel.SetBrightnessAsync(brightness);
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelLedCount)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var size = await stream.ReadUInt16Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var size = await request.Stream.ReadUInt16Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -665,38 +775,46 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             await channel.SetSizeAsync(size);
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelAnimation)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var animId = await stream.ReadUInt32Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var animId = await request.Stream.ReadUInt32Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -704,13 +822,13 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (!_animations.ContainsKey(animId))
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidAnimationId);
+                                await SendResponse(request, Result.InvalidAnimationId);
                                 continue;
                             }
 
@@ -719,32 +837,40 @@ namespace Brite.API
                             await channel.SetAnimationAsync(
                                 (Animation)Activator.CreateInstance(animation.GetAnimation()));
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelAnimationEnabled)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var enabled = await stream.ReadBooleanAsync();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var enabled = await request.Stream.ReadBooleanAsync();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -752,44 +878,52 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (channel.Animation == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AnimationNotSet);
+                                await SendResponse(request, Result.AnimationNotSet);
                                 continue;
                             }
 
                             await channel.Animation.SetEnabledAsync(enabled);
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelAnimationSpeed)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var speed = await stream.ReadFloatAsync();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var speed = await request.Stream.ReadFloatAsync();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -797,44 +931,52 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (channel.Animation == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AnimationNotSet);
+                                await SendResponse(request, Result.AnimationNotSet);
                                 continue;
                             }
 
                             await channel.Animation.SetSpeedAsync(speed);
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelAnimationColorCount)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var count = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var count = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -842,47 +984,55 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (channel.Animation == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AnimationNotSet);
+                                await SendResponse(request, Result.AnimationNotSet);
                                 continue;
                             }
 
                             await channel.Animation.SetColorCountAsync(count);
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSetChannelAnimationColor)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
-                            var index = await stream.ReadUInt8Async();
-                            var r = await stream.ReadUInt8Async();
-                            var g = await stream.ReadUInt8Async();
-                            var b = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
+                            var index = await request.Stream.ReadUInt8Async();
+                            var r = await request.Stream.ReadUInt8Async();
+                            var g = await request.Stream.ReadUInt8Async();
+                            var b = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -890,43 +1040,51 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (channel.Animation == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AnimationNotSet);
+                                await SendResponse(request, Result.AnimationNotSet);
                                 continue;
                             }
 
                             await channel.Animation.SetColorAsync(index, new Color(r, g, b));
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await SendResponse(request, Result.Ok);
                         }
                         else if (command == (byte)Command.DeviceSendChannelAnimationRequest)
                         {
-                            var deviceId = await stream.ReadUInt32Async();
-                            var channelIndex = await stream.ReadUInt8Async();
+                            var deviceId = await request.Stream.ReadUInt32Async();
+                            var channelIndex = await request.Stream.ReadUInt8Async();
 
                             var device = _devices.Where(pair => pair.Key.Id == deviceId).Select(pair => pair.Key).First();
                             if (device == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidDeviceId);
+                                await SendResponse(request, Result.InvalidDeviceId);
                                 continue;
                             }
 
                             var deviceInfo = _devices[device];
+
+                            // Check if the device is currently locked by another client
+                            if (deviceInfo.Client != null && deviceInfo.Client != client)
+                            {
+                                await SendResponse(request, Result.AccessDenied);
+                                continue;
+                            }
+
                             if (channelIndex > device.Channels.Length)
                             {
-                                await stream.WriteUInt8Async((byte)Result.InvalidChannelIndex);
+                                await SendResponse(request, Result.InvalidChannelIndex);
                                 continue;
                             }
 
                             // Check if device is open
                             if (!device.IsOpen)
                             {
-                                await stream.WriteUInt8Async((byte)Result.DeviceNotOpen);
+                                await SendResponse(request, Result.DeviceNotOpen);
                                 continue;
                             }
 
@@ -934,26 +1092,25 @@ namespace Brite.API
                             var channelInfo = deviceInfo.Channels[channel];
                             if (channelInfo.Client != client)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AccessDenied);
+                                await SendResponse(request, Result.AccessDenied);
                                 continue;
                             }
 
                             if (channel.Animation == null)
                             {
-                                await stream.WriteUInt8Async((byte)Result.AnimationNotSet);
+                                await SendResponse(request, Result.AnimationNotSet);
                                 continue;
                             }
 
-                            await stream.WriteUInt8Async((byte)Result.Ok);
+                            await channelInfo.Animation.HandleRequestAsync(channel, request.Stream);
 
-                            await channelInfo.Animation.HandleRequestAsync(channel, stream, stream);
+                            await SendResponse(request, Result.Ok);
                         }
                     }
                 }
                 catch
                 {
-                    // Client disconnected
-                    lock (_clients) _clients.RemoveAll(c => c.InternalClient == e.Client);
+                    // Remove locks on devices and channels
                     foreach (var devicePair in _devices)
                     {
                         foreach (var channelPair in devicePair.Value.Channels)
@@ -961,8 +1118,8 @@ namespace Brite.API
                             var channelInfo = channelPair.Value;
                             if (channelInfo.Client != null && channelInfo.Client.InternalClient == e.Client)
                             {
+                                channelInfo.Mutex.RemoveLockRequest(channelInfo.Client);
                                 channelInfo.Client = null;
-                                channelInfo.Mutex.Unlock();
 
                                 await Log.InfoAsync($"Releasing channel from disconnected client: {e.Source}");
                             }
@@ -971,12 +1128,15 @@ namespace Brite.API
                         var deviceInfo = devicePair.Value;
                         if (deviceInfo.Client != null && deviceInfo.Client.InternalClient == e.Client)
                         {
+                            deviceInfo.Mutex.RemoveLockRequest(deviceInfo.Client);
                             deviceInfo.Client = null;
-                            deviceInfo.Mutex.Unlock();
 
                             await Log.InfoAsync($"Releasing device from disconnected client: {e.Source}");
                         }
                     }
+                    
+                    // Remove from client list
+                    lock (_clients) _clients.RemoveAll(c => c.InternalClient == e.Client);
                 }
             });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed

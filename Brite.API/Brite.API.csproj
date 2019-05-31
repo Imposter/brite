@@ -72,13 +72,16 @@
     <Compile Include="Animations\Server\ManualAnimation.cs" />
     <Compile Include="Animations\Server\SpiralAnimation.cs" />
     <Compile Include="BriteException.cs" />
-    <Compile Include="BriteClient.cs" />
+    <Compile Include="Client\BriteClient.cs" />
     <Compile Include="Client\BriteChannel.cs" />
     <Compile Include="Client\BriteDevice.cs" />
+    <Compile Include="Client\Message.cs" />
+    <Compile Include="Server\Message.cs" />
+    <Compile Include="Server\PriorityMutex.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="Priority.cs" />
     <Compile Include="Result.cs" />
-    <Compile Include="BriteServer.cs" />
+    <Compile Include="Server\BriteServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />
