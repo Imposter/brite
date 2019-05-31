@@ -25,11 +25,20 @@ namespace Brite.Win.Core.IO
             if (length <= 0)
                 return 0;
 
-            var task = ReadInternalAsync(buffer, offset, length);
-            if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
-                return task.Result;
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
 
-            throw new TimeoutException("Failed to read within specified time");
+            var readBytes = 0;
+            while ((Timeout < 0 || stopwatch.ElapsedMilliseconds < Timeout) && readBytes < length)
+            {
+                var task = _stream.ReadAsync(buffer, offset + readBytes, length - readBytes);
+                if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
+                    readBytes += task.Result;
+            }
+
+            stopwatch.Stop();
+
+            return readBytes;
         }
 
         public async Task WriteAsync(byte[] buffer, int offset, int length)
@@ -42,24 +51,6 @@ namespace Brite.Win.Core.IO
                 return;
 
             throw new TimeoutException("Failed to write within specified time");
-        }
-        
-        private async Task<int> ReadInternalAsync(byte[] buffer, int offset, int length)
-        {
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            var readBytes = 0;
-            while (Timeout < 0 && readBytes < length || stopwatch.ElapsedMilliseconds < Timeout)
-            {
-                var task = _stream.ReadAsync(buffer, offset + readBytes, length - readBytes);
-                if (await Task.WhenAny(task, Task.Delay(Timeout)) == task)
-                    readBytes += task.Result;
-            }
-
-            stopwatch.Stop();
-
-            return readBytes;
         }
 
         public void Dispose()
