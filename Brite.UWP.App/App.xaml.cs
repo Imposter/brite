@@ -31,6 +31,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Brite.API.Client;
 using Microsoft.Toolkit.Uwp.Helpers;
 
 namespace Brite.UWP.App

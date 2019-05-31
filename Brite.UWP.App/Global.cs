@@ -7,6 +7,7 @@
  */
 
 using Brite.API;
+using Brite.API.Client;
 using Brite.Utility.Network;
 
 namespace Brite.UWP.App

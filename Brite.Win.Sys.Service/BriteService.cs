@@ -6,8 +6,8 @@
  * root for full license information.
  */
 
-using Brite.API;
 using Brite.API.Animations.Server;
+using Brite.API.Server;
 using Brite.Utility.IO;
 using Brite.Utility.Network;
 using Brite.Win.Core.Hardware.Serial;
@@ -15,6 +15,7 @@ using Brite.Win.Core.IO.Serial;
 using Brite.Win.Core.Network;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -43,6 +44,10 @@ namespace Brite.Win.Sys.Service
 
         protected override async void OnStart(string[] args)
         {
+#if DEBUG
+            Debugger.Launch();
+#endif
+
             // Initialize logger
             var logger = new EventLogger("BriteService",
 #if DEBUG
@@ -97,13 +102,14 @@ namespace Brite.Win.Sys.Service
         {
             while (_running)
             {
-                Thread.Sleep(ConfigCheckDelay);
-
                 // Check if config was modified
                 var path = Path.Combine(_instancePath, ConfigFileName);
                 var modifiedTime = File.GetLastWriteTime(path);
                 if (modifiedTime == _lastModified)
+                {
+                    Thread.Sleep(ConfigCheckDelay);
                     continue;
+                }
 
                 // Stop previously active server
                 if (_briteServer != null)
