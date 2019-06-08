@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Brite.Utility;
 using Brite.Utility.IO;
 using Brite.Utility.Network;
@@ -17,6 +18,8 @@ namespace Brite.API.Client
 {
     public class BriteClient
     {
+        private const uint ProtocolHeader = 0xB17EFEED;
+
         public const int DefaultConnectionTimeout = 5000;
 
         private readonly ITcpClient _client;
@@ -140,14 +143,19 @@ namespace Brite.API.Client
             // Get data
             var data = ((MemoryStream)message.Stream.Stream).ToArray();
 
+            // Build packet
+            var packet = new BinaryStream(new MemoryStream());
+            await packet.WriteUInt32Async(ProtocolHeader);
+            await packet.WriteUInt8Async((byte)message.Command);
+            await packet.WriteInt32Async(id);
+            await packet.WriteInt32Async(data.Length);
+            await packet.WriteBlobAsync(data);
+
             // Send message
             try
             {
                 await _streamLock.LockAsync();
-                await _stream.WriteUInt8Async((byte)message.Command);
-                await _stream.WriteInt32Async(id);
-                await _stream.WriteInt32Async(data.Length);
-                await _stream.WriteBlobAsync(data);
+                await _stream.WriteBlobAsync(((MemoryStream)packet.Stream).ToArray());
 
                 var response = await message.GetResponse();
                 if (response.Result != expectedResult)
@@ -166,7 +174,14 @@ namespace Brite.API.Client
             while (_connected)
             {
                 // Read command
+                var protocolHeader = await _stream.ReadUInt32Async();
+                if (protocolHeader != ProtocolHeader)
+                    throw new BriteException("Received invalid protocol header");
+
                 var command = await _stream.ReadUInt8Async();
+                if (command > (byte) Command.Max)
+                    throw new BriteException("Received invalid command ID");
+
                 var id = await _stream.ReadInt32Async();
                 var result = await _stream.ReadUInt8Async();
                 var length = await _stream.ReadInt32Async();

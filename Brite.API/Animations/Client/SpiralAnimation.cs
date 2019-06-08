@@ -7,6 +7,7 @@
  */
 
 using System.Threading.Tasks;
+
 using Brite.API.Animations.Commands;
 
 namespace Brite.API.Animations.Client
@@ -20,6 +21,8 @@ namespace Brite.API.Animations.Client
 
         public override async Task SetColorCountAsync(byte colorCount)
         {
+            if (colorCount >= MaxColors)
+                colorCount = (byte)(MaxColors - 1);
             await base.SetColorCountAsync((byte)(colorCount + 1));
         }
 

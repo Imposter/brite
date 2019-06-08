@@ -8,6 +8,7 @@
 
 using System;
 using System.Threading.Tasks;
+
 using Brite.Utility.IO;
 
 namespace Brite.API.Animations.Server

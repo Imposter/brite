@@ -9,6 +9,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Brite.API.Animations.Commands;
 using Brite.Utility.IO;
 

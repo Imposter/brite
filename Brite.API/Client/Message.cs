@@ -1,6 +1,7 @@
-﻿using Brite.Utility;
+﻿using System.Threading.Tasks;
+
+using Brite.Utility;
 using Brite.Utility.IO;
-using System.Threading.Tasks;
 
 namespace Brite.API.Client
 {

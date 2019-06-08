@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 using Brite.API.Animations.Client;
 using Brite.Utility;
 using Brite.Utility.IO;

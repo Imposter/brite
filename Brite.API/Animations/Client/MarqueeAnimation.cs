@@ -7,6 +7,7 @@
  */
 
 using System.Threading.Tasks;
+
 using Brite.API.Animations.Commands;
 
 namespace Brite.API.Animations.Client
