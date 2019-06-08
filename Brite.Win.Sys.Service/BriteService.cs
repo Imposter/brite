@@ -6,13 +6,6 @@
  * root for full license information.
  */
 
-using Brite.API.Animations.Server;
-using Brite.API.Server;
-using Brite.Utility.IO;
-using Brite.Utility.Network;
-using Brite.Win.Core.Hardware.Serial;
-using Brite.Win.Core.IO.Serial;
-using Brite.Win.Core.Network;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +15,15 @@ using System.Net;
 using System.ServiceProcess;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Brite.API.Animations.Server;
+using Brite.API.Server;
+using Brite.Utility.IO;
+using Brite.Utility.Network;
+using Brite.Win.Core.Hardware.Serial;
+using Brite.Win.Core.IO.Serial;
+using Brite.Win.Core.Network;
+
 using YamlDotNet.Serialization;
 
 namespace Brite.Win.Sys.Service
@@ -92,6 +94,8 @@ namespace Brite.Win.Sys.Service
         {
             _running = false;
             _changeThread.Join();
+
+            // TODO: OnShutdown, memorize settings and reapply them when the service starts -- useful for windows shutdown/startup?
 
             // Stop previously active server
             if (_briteServer != null)
