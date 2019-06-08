@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017 Eyaz Rehman. All Rights Reserved.
  *
  * This file is part of Brite.
@@ -9,8 +9,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Storage.Streams;
+
 using Brite.Utility.IO;
+
+using Windows.Storage.Streams;
 
 namespace Brite.UWP.Core.IO
 {

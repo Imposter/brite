@@ -6,11 +6,13 @@
  * root for full license information.
  */
 
-using Brite.Utility.Network;
 using System;
 using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+
+using Brite.Utility.Network;
+
 using Windows.Networking;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;

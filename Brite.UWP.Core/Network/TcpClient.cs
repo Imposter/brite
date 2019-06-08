@@ -6,16 +6,18 @@
  * root for full license information.
  */
 
-using Brite.Utility.IO;
-using Brite.Utility.Network;
-using Brite.UWP.Core.IO;
 using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Brite.Utility;
+using Brite.Utility.IO;
+using Brite.Utility.Network;
+using Brite.UWP.Core.IO;
+
 using Windows.Networking;
 using Windows.Networking.Sockets;
-using Brite.Utility;
 
 namespace Brite.UWP.Core.Network
 {

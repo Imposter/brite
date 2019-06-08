@@ -6,10 +6,12 @@
  * root for full license information.
  */
 
-using Brite.Utility.IO;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
+using Brite.Utility.IO;
+
 using Windows.Storage.Streams;
 
 namespace Brite.UWP.Core.IO

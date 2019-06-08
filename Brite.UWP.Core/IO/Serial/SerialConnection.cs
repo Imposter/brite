@@ -8,15 +8,22 @@
 
 using System;
 using System.Threading.Tasks;
-using Windows.Devices.Enumeration;
-using Windows.Devices.SerialCommunication;
+
 using Brite.Utility.IO;
 using Brite.Utility.IO.Serial;
-using SerialParity = Brite.Utility.IO.Serial.SerialParity;
+
 using SerialHandshake = Brite.Utility.IO.Serial.SerialHandshake;
-using WinSerialStopBits = Windows.Devices.SerialCommunication.SerialStopBitCount;
-using WinSerialParity = Windows.Devices.SerialCommunication.SerialParity;
+
+using SerialParity = Brite.Utility.IO.Serial.SerialParity;
+
+using Windows.Devices.Enumeration;
+using Windows.Devices.SerialCommunication;
+
 using WinSerialHandshake = Windows.Devices.SerialCommunication.SerialHandshake;
+
+using WinSerialParity = Windows.Devices.SerialCommunication.SerialParity;
+
+using WinSerialStopBits = Windows.Devices.SerialCommunication.SerialStopBitCount;
 
 namespace Brite.UWP.Core.IO.Serial
 {

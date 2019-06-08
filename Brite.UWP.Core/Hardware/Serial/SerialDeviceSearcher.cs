@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017 Eyaz Rehman. All Rights Reserved.
  *
  * This file is part of Brite.
@@ -9,9 +9,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+using Brite.Utility.Hardware.Serial;
+
 using Windows.Devices.Enumeration;
 using Windows.Devices.SerialCommunication;
-using Brite.Utility.Hardware.Serial;
 
 namespace Brite.UWP.Core.Hardware.Serial
 {
