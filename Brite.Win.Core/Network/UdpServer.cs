@@ -1,7 +1,9 @@
-﻿using Brite.Utility.Network;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+
+using Brite.Utility.Network;
+
 using SocketUdpClient = System.Net.Sockets.UdpClient;
 
 namespace Brite.Win.Core.Network

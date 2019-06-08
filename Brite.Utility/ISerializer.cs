@@ -7,6 +7,7 @@
  */
 
 using System.Threading.Tasks;
+
 using Brite.Utility.IO;
 
 namespace Brite.Utility

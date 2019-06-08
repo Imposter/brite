@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Brite.Utility;
 using Brite.Utility.Hardware;
 using Brite.Utility.Hardware.Serial;

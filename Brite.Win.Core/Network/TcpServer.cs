@@ -2,7 +2,9 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+
 using Brite.Utility.Network;
+
 using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network

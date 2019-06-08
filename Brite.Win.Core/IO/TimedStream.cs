@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+
 using Brite.Utility.IO;
+
 using IOStream = System.IO.Stream;
 
 namespace Brite.Win.Core.IO

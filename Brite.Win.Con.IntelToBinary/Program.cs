@@ -6,7 +6,6 @@
  * root for full license information.
  */
 
-using Brite.Win.Core.IO;
 using System;
 using System.Globalization;
 using System.IO;
@@ -14,7 +13,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Brite.Utility.IO;
+using Brite.Win.Core.IO;
 
 namespace Brite.Win.Con.IntelToBinary
 {

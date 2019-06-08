@@ -1,12 +1,17 @@
-﻿using Brite.Utility.IO;
-using Brite.Utility.IO.Serial;
-using System;
+﻿using System;
 using System.IO.Ports;
 using System.Threading.Tasks;
+
+using Brite.Utility.IO;
+using Brite.Utility.IO.Serial;
+
 using SerialParity = Brite.Utility.IO.Serial.SerialParity;
-using WinSerialParity = System.IO.Ports.Parity;
-using WinSerialStopBits = System.IO.Ports.StopBits;
+
 using WinSerialHandshake= System.IO.Ports.Handshake;
+
+using WinSerialParity = System.IO.Ports.Parity;
+
+using WinSerialStopBits = System.IO.Ports.StopBits;
 
 namespace Brite.Win.Core.IO.Serial
 {

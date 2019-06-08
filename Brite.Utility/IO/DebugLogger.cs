@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2017 Eyaz Rehman. All Rights Reserved.
  *
  * This file is part of Brite.

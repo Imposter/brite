@@ -1,11 +1,13 @@
-﻿using Brite.Utility.IO;
-using Brite.Utility.Network;
-using Brite.Win.Core.IO;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Brite.Utility;
+using Brite.Utility.IO;
+using Brite.Utility.Network;
+using Brite.Win.Core.IO;
+
 using SocketTcpClient = System.Net.Sockets.TcpClient;
 
 namespace Brite.Win.Core.Network

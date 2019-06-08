@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Management;
 using System.Threading.Tasks;
+
 using Brite.Utility.Hardware.Serial;
 
 namespace Brite.Win.Core.Hardware.Serial

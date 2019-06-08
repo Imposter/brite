@@ -12,7 +12,7 @@ namespace Brite.Utility.IO
 {
     public abstract class Logger
     {
-        private static Logger Instance = new DebugLogger();
+        private static Logger _instance = new DebugLogger();
         
         public LoggerLevel Level { get; set; }
         public abstract Task WriteLineAsync(string format, params object[] args);
@@ -24,17 +24,17 @@ namespace Brite.Utility.IO
 
         public static void SetInstance(Logger logger)
         {
-            Instance = logger;
+            _instance = logger;
         }
 
         public static Log GetLog<T>()
         {
-            return new Log(ref Instance, typeof(T).GetFriendlyName());
+            return new Log(ref _instance, typeof(T).GetFriendlyName());
         }
 
         public static Log GetLog()
         {
-            return new Log(ref Instance, "Application");
+            return new Log(ref _instance, "Application");
         }
     }
 }
