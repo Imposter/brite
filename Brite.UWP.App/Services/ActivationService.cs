@@ -12,6 +12,7 @@ using Brite.UWP.App.Services;
 using Windows.ApplicationModel.Activation;
 using Windows.ApplicationModel.Core;
 using Windows.UI;
+using Windows.UI.Popups;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -48,6 +49,31 @@ namespace Brite.UWP.App.Services
                 {
                     // Create a Frame to act as the navigation context and navigate to the first page
                     Window.Current.Content = _shell?.Value ?? new Frame();
+
+                    // TODO: DEBUG Test
+                    var pluginManager = new PluginManager(IPAddress.Loopback, 6450);
+
+                    try
+                    {
+                        await pluginManager.InitializeAsync();
+                        var plugin = await pluginManager.CreatePluginInstanceAsync("WinNotificationPlugin", "00000000");
+                        await plugin.StartAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Create the message dialog and set its content
+                        var messageDialog = new MessageDialog(ex.ToString(), "Error starting plugin");
+
+
+                        // Set the command that will be invoked by default
+                        messageDialog.DefaultCommandIndex = 0;
+
+                        // Show the message dialog
+                        await messageDialog.ShowAsync();
+                        //Trace.WriteLine(ex);
+                    }
+
+                    //Trace.WriteLine("Done!");
                 }
             }
 
@@ -72,22 +98,6 @@ namespace Brite.UWP.App.Services
             // Extend titlebar
             var coreTitleBar = CoreApplication.GetCurrentView().TitleBar;
             coreTitleBar.ExtendViewIntoTitleBar = true;
-
-            // TODO: DEBUG Test
-            var pluginManager = new PluginManager(IPAddress.Loopback, 6450);
-
-            try
-            {
-                await pluginManager.InitializeAsync();
-                var plugin = await pluginManager.CreatePluginInstanceAsync("TestPlugin", "00000000");
-                await plugin.StartAsync();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-
-            Debug.WriteLine("Done!");
         }
 
         private async Task HandleActivationAsync(object activationArgs)

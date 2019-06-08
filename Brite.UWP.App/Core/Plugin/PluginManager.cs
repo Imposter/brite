@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using IronPython.Runtime;
 
 namespace Brite.UWP.App.Core.Plugin
 {
@@ -17,12 +16,14 @@ namespace Brite.UWP.App.Core.Plugin
         {
             public PluginInfo Info { get; }
             public string Path { get; }
+            public Script Script { get; }
             public dynamic ClassObj { get; }
 
-            public PluginRegistry(PluginInfo info, string path, dynamic classObj)
+            public PluginRegistry(PluginInfo info, string path, Script script, dynamic classObj)
             {
                 Info = info;
                 Path = path;
+                Script = script;
                 ClassObj = classObj;
             }
         }
@@ -33,7 +34,6 @@ namespace Brite.UWP.App.Core.Plugin
         private static readonly Log Log = Logger.GetLog<PluginManager>();
 
         private readonly Dictionary<string, PluginRegistry> _pluginRegistries;
-        private readonly ScriptManager _scriptManager; // TODO: Create task manager in the script manager for all scripts
         private readonly List<PluginInstance> _instances;
 
         private readonly IPAddress _ipAddress;
@@ -44,13 +44,10 @@ namespace Brite.UWP.App.Core.Plugin
         public PluginManager(IPAddress ipAddress, int port)
         {
             _pluginRegistries = new Dictionary<string, PluginRegistry>();
-            _scriptManager = new ScriptManager();
             _instances = new List<PluginInstance>();
 
             _ipAddress = ipAddress;
             _port = port;
-
-            _scriptManager.AddSearchPath(LibsPath);
         }
 
         public async Task InitializeAsync()
@@ -89,22 +86,20 @@ namespace Brite.UWP.App.Core.Plugin
                         continue;
                     }
 
-                    // Add to search path
-                    _scriptManager.AddSearchPath(pluginPath);
-
                     // Initialize plugin
                     var pluginCode = await File.ReadAllTextAsync(pluginSourcePath);
-                    var script = _scriptManager.LoadScript(pluginCode);
+                    var script = new Script(pluginCode);
 
-                    // Set plugin so we can register IPlugin type from python
+                    // Add search paths
+                    script.AddSearchPath(LibsPath);
+                    script.AddSearchPath(pluginPath);
+
+                    // Set RegisterPlugin so we can register IPlugin type from python
                     dynamic classObj = null;
-                    script.SetVariable("RegisterPlugin", new Action<dynamic>(obj => { classObj = obj; }));
+                    script.SetGlobalVariable("RegisterPlugin", new Action<dynamic>(obj => { classObj = obj; }));
 
                     // Execute plugin
                     await script.ExecuteAsync();
-
-                    // Dispose of script?
-                    script.Dispose();
 
                     // Check if plugin class was registered
                     if (classObj == null)
@@ -113,7 +108,7 @@ namespace Brite.UWP.App.Core.Plugin
                         continue;
                     }
 
-                    _pluginRegistries.Add(info.Name, new PluginRegistry(info, pluginPath, classObj));
+                    _pluginRegistries.Add(info.Name, new PluginRegistry(info, pluginPath, script, classObj));
 
                     await Log.InfoAsync($"Loaded plugin {info.Name} (v{info.Version})");
                 }
@@ -127,6 +122,7 @@ namespace Brite.UWP.App.Core.Plugin
                 instance.Dispose();
             _instances.Clear();
         }
+
         public async Task<PluginInstance> CreatePluginInstanceAsync(string name, string id, IDictionary<string, dynamic> options = null)
         {
             if (!_pluginRegistries.ContainsKey(name))
@@ -136,6 +132,7 @@ namespace Brite.UWP.App.Core.Plugin
             var registry = _pluginRegistries[name];
             var config = registry.Info;
             var path = registry.Path;
+            var script = registry.Script;
             var classObj = registry.ClassObj;
 
             var localOptions = new Dictionary<string, dynamic>
@@ -157,7 +154,7 @@ namespace Brite.UWP.App.Core.Plugin
             }
 
             // Initialize plug
-            var plugin = _scriptManager.CreateInstance(classObj, localOptions);
+            var plugin = script.CreateInstance(classObj, localOptions);
 
             // Create instance
             var instance = new PluginInstance(plugin, config);
@@ -174,6 +171,11 @@ namespace Brite.UWP.App.Core.Plugin
             foreach (var instance in _instances)
                 instance.Dispose();
             _instances.Clear();
+
+            // Dispose registry scripts
+            foreach (var registry in _pluginRegistries)
+                registry.Value.Script.Dispose();
+            _pluginRegistries.Clear();
         }
     }
 }

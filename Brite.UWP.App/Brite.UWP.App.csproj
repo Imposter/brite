@@ -126,7 +126,7 @@
     <Compile Include="Core\Plugin\PluginInstance.cs" />
     <Compile Include="Core\Scripting\ScriptException.cs" />
     <Compile Include="Core\Scripting\TaskManager.cs" />
-    <Compile Include="Core\Plugin\DebugStream.cs" />
+    <Compile Include="Core\Plugin\TraceStream.cs" />
     <Compile Include="BackgroundTasks\BackgroundTask.cs" />
     <Compile Include="BackgroundTasks\ServiceBackgroundTask.cs" />
     <Compile Include="Behaviors\NavigationViewHeaderBehavior.cs" />
@@ -134,7 +134,6 @@
     <Compile Include="Core\Plugin\PluginManager.cs" />
     <Compile Include="Core\Profile.cs" />
     <Compile Include="Core\Scripting\Script.cs" />
-    <Compile Include="Core\Scripting\ScriptManager.cs" />
     <Compile Include="Helpers\EnumToBooleanConverter.cs" />
     <Compile Include="Helpers\NavHelper.cs" />
     <Compile Include="Helpers\Observable.cs" />

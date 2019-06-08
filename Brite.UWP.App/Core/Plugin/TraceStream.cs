@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Brite.UWP.App.Core.Plugin
 {
-    class DebugStream : Stream
+    class TraceStream : Stream
     {
         public override void Flush()
         {
@@ -28,7 +28,7 @@ namespace Brite.UWP.App.Core.Plugin
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            Debug.Write(Encoding.ASCII.GetString(buffer, offset, count));
+            Trace.Write(Encoding.ASCII.GetString(buffer, offset, count));
         }
 
         public override bool CanRead => false;
