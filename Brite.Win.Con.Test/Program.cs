@@ -1,9 +1,10 @@
-﻿using Brite.API.Animations.Client;
-using Brite.API.Client;
-using Brite.Win.Core.Network;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+
+using Brite.API.Animations.Client;
+using Brite.API.Client;
+using Brite.Win.Core.Network;
 
 namespace Brite.Win.Con.Test
 {
@@ -19,6 +20,7 @@ namespace Brite.Win.Con.Test
                 {
                     await client.ConnectAsync();
 
+                    var random = new Random();
                     foreach (var device in client.Devices)
                     {
                         foreach (var channel in device.Channels)
@@ -27,7 +29,7 @@ namespace Brite.Win.Con.Test
                             await channel.RequestAsync();
 
                             // Perform changes
-                            var animation = new BreatheAnimation();
+                            var animation = new FadeAnimation();
 
                             await channel.SetSizeAsync(12);
                             await channel.SetBrightnessAsync(255);
@@ -35,30 +37,21 @@ namespace Brite.Win.Con.Test
                             await animation.SetSpeedAsync(0.925f);
                             await animation.SetEnabledAsync(true);
 
+                            await animation.SetColorCountAsync(animation.MaxColors);
+                            for (var i = 0; i < animation.ColorCount; i++)
+                                await animation.SetColorAsync((byte)i, new Color(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
+
+                            await Task.Delay(100);
+
                             // Release channel
                             await channel.ReleaseAsync();
                         }
 
-                        var random = new Random();
-                        while (true)
-                        {
-                            foreach (var channel in device.Channels)
-                            {
-                                // Request channel
-                                await channel.RequestAsync();
-
-                                var animation = channel.Animation;
-                                await animation.SetColorCountAsync(animation.MaxColors);
-                                for (var i = 0; i < animation.MaxColors; i++)
-                                    await animation.SetColorAsync((byte)i, new Color(random.Next(0, 255), random.Next(0, 255), random.Next(0, 255)));
-                                
-                                await Task.Delay(100);
-
-                                // Release channel
-                                await channel.ReleaseAsync();
-                            }
-                        }
+                        // Synchronize device
+                        await device.SynchronizeAsync(); // TODO/NOTE: Doesn't seem to be working -- also update AnimationCore::Animate to supply animations with deltaTime so we can lerp
                     }
+
+                    await client.DisconnectAsync();
                 }
                 catch (Exception ex)
                 {
