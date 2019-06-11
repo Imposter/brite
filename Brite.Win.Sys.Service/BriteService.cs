@@ -164,7 +164,7 @@ namespace Brite.Win.Sys.Service
             {
                 var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 var reader = new StreamReader(stream);
-                var deserializer = new Deserializer();
+                var deserializer = new Deserializer(); // TODO: Use Newtonsoft.Json instead of YamlDotNet
 
                 var config = deserializer.Deserialize<Config>(reader);
 

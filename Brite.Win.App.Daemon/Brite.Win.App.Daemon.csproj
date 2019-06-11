@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AboutWindow.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="IronPython" Version="2.7.10-alpha0" />
+    <PackageReference Include="IronPython.StdLib" Version="2.7.10-alpha0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="YamlDotNet" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Brite.API\Brite.API.csproj" />
+    <ProjectReference Include="..\Brite.Micro\Brite.Micro.csproj" />
+    <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj" />
+    <ProjectReference Include="..\Brite.Win.App.Plugin\Brite.Win.App.Plugin.csproj" />
+    <ProjectReference Include="..\Brite.Win.Core\Brite.Win.Core.csproj" />
+    <ProjectReference Include="..\Brite\Brite.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Runtime.WindowsRuntime">
+      <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETCore\v4.5\System.Runtime.WindowsRuntime.dll</HintPath>
+    </Reference>
+    <Reference Include="Windows">
+      <HintPath>C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.18362.0\Windows.winmd</HintPath>
+      <IsWinMDFile>true</IsWinMDFile>
+    </Reference>
+  </ItemGroup>
+
+</Project>
