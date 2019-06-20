@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Controls;
 
 namespace Brite.Win.App.Plugin
 {
@@ -8,6 +7,6 @@ namespace Brite.Win.App.Plugin
         void Start();
         void Stop();
 
-        Page GetConfigPage();
+        string GetConfigPageXaml();
     }
 }

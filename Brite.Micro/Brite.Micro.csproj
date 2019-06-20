@@ -5,5 +5,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj" />
   </ItemGroup>
-
 </Project>

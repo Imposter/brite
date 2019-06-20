@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using Brite.UWP.App.Core.Plugin;
 using Brite.Win.App.Plugin;
 
@@ -12,7 +11,7 @@ namespace Brite.Win.App.Core.Plugin
         private readonly PluginInfo _info;
 
         public PluginInfo Info => _info;
-        public Page ConfigPage => _plugin.GetConfigPage();
+        public string ConfigPageXaml => _plugin.GetConfigPageXaml();
 
         public PluginInstance(IPlugin plugin, PluginInfo info)
         {
