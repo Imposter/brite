@@ -24,14 +24,14 @@ using Brite.Win.Core.Hardware.Serial;
 using Brite.Win.Core.IO.Serial;
 using Brite.Win.Core.Network;
 
-using YamlDotNet.Serialization;
+using Newtonsoft.Json;
 
 namespace Brite.Win.Sys.Service
 {
     public class BriteService : ServiceBase
     {
         private const int ConfigCheckDelay = 10000;
-        private const string ConfigFileName = "config.yml";
+        private const string ConfigFileName = "config.json";
 
         private static Log Log = Logger.GetLog();
 
@@ -160,19 +160,16 @@ namespace Brite.Win.Sys.Service
 
         private static async Task<Config> LoadConfigAsync(string path)
         {
-            return await Task.Run(() =>
-            {
-                var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                var reader = new StreamReader(stream);
-                var deserializer = new Deserializer(); // TODO: Use Newtonsoft.Json instead of YamlDotNet
+            var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var reader = new StreamReader(stream);
 
-                var config = deserializer.Deserialize<Config>(reader);
+            var data = await reader.ReadToEndAsync();
+            var config = JsonConvert.DeserializeObject<Config>(data);
 
-                reader.Close();
-                stream.Close();
+            reader.Close();
+            stream.Close();
 
-                return config;
-            });
+            return config;
         }
 
         private static async Task<IEnumerable<Device>> GetDevicesAsync(IEnumerable<string> ports)
