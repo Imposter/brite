@@ -92,12 +92,6 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="IronPython">
-      <Version>2.7.10-alpha0</Version>
-    </PackageReference>
-    <PackageReference Include="IronPython.StdLib">
-      <Version>2.7.10-alpha0</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.8</Version>
     </PackageReference>
@@ -122,18 +116,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Activation\ActivationHandler.cs" />
-    <Compile Include="Core\Plugin\PluginInfo.cs" />
-    <Compile Include="Core\Plugin\PluginInstance.cs" />
-    <Compile Include="Core\Scripting\ScriptException.cs" />
-    <Compile Include="Core\Scripting\TaskManager.cs" />
-    <Compile Include="Core\Plugin\TraceStream.cs" />
     <Compile Include="BackgroundTasks\BackgroundTask.cs" />
     <Compile Include="BackgroundTasks\ServiceBackgroundTask.cs" />
     <Compile Include="Behaviors\NavigationViewHeaderBehavior.cs" />
     <Compile Include="Behaviors\NavigationViewHeaderMode.cs" />
-    <Compile Include="Core\Plugin\PluginManager.cs" />
-    <Compile Include="Core\Profile.cs" />
-    <Compile Include="Core\Scripting\Script.cs" />
+    <Compile Include="Core\DynamicViewModel.cs" />
     <Compile Include="Helpers\EnumToBooleanConverter.cs" />
     <Compile Include="Helpers\NavHelper.cs" />
     <Compile Include="Helpers\Observable.cs" />
@@ -247,10 +234,6 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Brite.API\Brite.API.csproj">
-      <Project>{edddc9ad-9b12-43dd-9905-4f16306d1f27}</Project>
-      <Name>Brite.API</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Brite.Utility\Brite.Utility.csproj">
       <Project>{6e94bbf0-86c6-43e0-9b47-595d2e67bc3f}</Project>
       <Name>Brite.Utility</Name>
@@ -259,15 +242,20 @@
       <Project>{060F5A62-BC2F-4688-B5B5-CC5388FC2585}</Project>
       <Name>Brite.UWP.App.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Brite.UWP.App.Plugin\Brite.UWP.App.Plugin.csproj">
-      <Project>{15b000f3-f979-4879-b22b-6f5bc9f22c5f}</Project>
-      <Name>Brite.UWP.App.Plugin</Name>
+    <ProjectReference Include="..\Brite.UWP.App.RPC\Brite.UWP.App.RPC.csproj">
+      <Project>{d922a7a3-0c93-4069-8260-8b8593f82459}</Project>
+      <Name>Brite.UWP.App.RPC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Brite.UWP.App.Services\Brite.UWP.App.Services.csproj">
+      <Project>{3429834d-ca1d-4cfd-a165-4cee0d91cc54}</Project>
+      <Name>Brite.UWP.App.Services</Name>
     </ProjectReference>
     <ProjectReference Include="..\Brite.UWP.Core\Brite.UWP.Core.csproj">
       <Project>{43ac5a96-b37b-44bf-aad5-cdc904a26add}</Project>
       <Name>Brite.UWP.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
