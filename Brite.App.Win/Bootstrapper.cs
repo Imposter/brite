@@ -35,9 +35,7 @@ namespace Brite.App.Win
         public static void Initialize(string title)
         {
             if (_rootScope != null)
-            {
                 return;
-            }
 
             _title = title;
 

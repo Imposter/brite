@@ -5,7 +5,5 @@
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <converters:SelectedItemToContentConverter x:Key="SelectedItemToContentConverter" />
-    <converters:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter" />
-    <converters:PixelToScreenConverter x:Key="PixelToScreenConverter" />
 
 </ResourceDictionary>

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using Brite.App.Win.Commands;
@@ -21,22 +20,14 @@ namespace Brite.App.Win.ViewModels
 
         public int CurrentPageIndex
         {
-            get => Pages.Where(p => p is IPageViewModel).IndexOf(CurrentPage);
-            set
-            {
-                if (value > -1)
-                    OnNavigateTo(value);
-            }
+            get => PageIndex<IPageViewModel>();
+            set => PageNavigate<IPageViewModel>(value);
         }
 
         public int CurrentOptionPageIndex
         {
-            get => Pages.Where(p => p is IOptionPageViewModel).IndexOf(CurrentPage);
-            set
-            {
-                if (value > -1)
-                    OnNavigateTo(value);
-            }
+            get => PageIndex<IOptionPageViewModel>();
+            set => PageNavigate<IOptionPageViewModel>(value);
         }
 
         public IEnumerable<HamburgerMenuIconItem> MainPageItems => Pages.Where(p => p is IPageViewModel)
@@ -76,17 +67,25 @@ namespace Brite.App.Win.ViewModels
 
             // Default page
             if (Pages.Any())
-                OnNavigateTo(0);
+                PageNavigate<IPageViewModel>(0);
+        }
+
+        private int PageIndex<T>()
+            where T : IChildViewModel
+        {
+            return Pages.Where(p => p is T).IndexOf(CurrentPage);
+        }
+
+        private void PageNavigate<T>(int index)
+            where T : IChildViewModel
+        {
+            if (index > -1 && index < Pages.Count())
+                _navigationService.NavigateTo(Pages.Where(p => p is T).ElementAt(index));
         }
 
         private void OnNavigateBack(object obj)
         {
             _navigationService.NavigateBack();
-        }
-
-        private void OnNavigateTo(int index)
-        {
-            _navigationService.NavigateTo(Pages.ElementAt(index));
         }
 
         private void OnNavigated(IChildViewModel page)

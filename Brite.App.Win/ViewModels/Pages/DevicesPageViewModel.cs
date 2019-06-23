@@ -3,7 +3,7 @@ using MahApps.Metro.IconPacks;
 
 namespace Brite.App.Win.ViewModels.Pages
 {
-    class DevicesPageViewModel : IPageViewModel
+    public sealed class DevicesPageViewModel : IPageViewModel
     {
         public int Order => 1;
         public string Title => "Devices";

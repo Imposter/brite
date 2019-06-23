@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace Brite.App.Win.Converters
 {
-    public class SelectedItemToContentConverter : IMultiValueConverter
+    public sealed class SelectedItemToContentConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {

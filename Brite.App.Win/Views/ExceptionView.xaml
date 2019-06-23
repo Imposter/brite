@@ -23,7 +23,7 @@
                 <LineBreak />
                 <Run>You can either</Run>
                 <Run FontWeight="Bold">Exit</Run>
-                <Run>, or </Run>
+                <Run> or </Run>
                 <Run FontWeight="Bold">Restart</Run>
                 <Run> the application</Run>
             </TextBlock>

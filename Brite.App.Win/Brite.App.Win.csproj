@@ -260,8 +260,6 @@
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
     <Compile Include="Commands\ReactiveCommand.cs" />
-    <Compile Include="Converters\DoubleToGridLengthConverter.cs" />
-    <Compile Include="Converters\PixelToScreenConverter.cs" />
     <Compile Include="Converters\SelectedItemToContentConverter.cs" />
     <Compile Include="Extensions\ReactiveObjectExtensions.cs" />
     <Compile Include="Helpers\ExpressionHelper.cs" />
@@ -282,6 +280,7 @@
     <Compile Include="ViewModels\Pages\DevicesPageViewModel.cs" />
     <Compile Include="ViewModels\ExceptionViewModel.cs" />
     <Compile Include="ViewModels\IExceptionViewModel.cs" />
+    <Compile Include="ViewModels\Pages\SettingsPageViewModel.cs" />
     <Compile Include="Views\MessageDialog.cs" />
     <Compile Include="Views\ShellWindow.xaml.cs">
       <DependentUpon>ShellWindow.xaml</DependentUpon>
