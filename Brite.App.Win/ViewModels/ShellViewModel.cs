@@ -27,7 +27,7 @@ namespace Brite.App.Win.ViewModels
         public bool CanGoBack => _navigationService.CanGoBack;
         public bool CanGoForward => _navigationService.CanGoForward;
         public ReactiveCommand GoBackCommand { get; }
-        public ReactiveCommand GoForwardCommand { get; } // TODO: Test Navigation
+        public ReactiveCommand GoForwardCommand { get; } // TODO: Test Navigation -- notifychanged not working
         public ReactiveCommand GoToCommand { get; }
 
         // TODO: Implement overlay

@@ -44,9 +44,6 @@
     <Reference Include="DynamicData, Version=6.10.0.2604, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicData.6.10.0.2604\lib\net46\DynamicData.dll</HintPath>
     </Reference>
-    <Reference Include="FluentWPF, Version=0.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\FluentWPF.0.7.0\lib\net45\FluentWPF.dll</HintPath>
-    </Reference>
     <Reference Include="IronPython, Version=2.7.10.0, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
       <HintPath>..\packages\IronPython.2.7.10-alpha0\lib\net45\IronPython.dll</HintPath>
     </Reference>
@@ -135,7 +132,6 @@
     <Compile Include="Converters\SelectedItemToContentConverter.cs" />
     <Compile Include="Extensions\ReactiveObjectExtensions.cs" />
     <Compile Include="Helpers\ExpressionHelper.cs" />
-    <Compile Include="Helpers\WindowHelper.cs" />
     <Compile Include="Models\DisposableObject.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Services\ApplicationService.cs" />
@@ -150,6 +146,7 @@
     <Compile Include="Services\OverlayService.cs" />
     <Compile Include="Services\SchedulerService.cs" />
     <Compile Include="ViewModels\CloseableViewModel.cs" />
+    <Compile Include="ViewModels\DevicesPageViewModel.cs" />
     <Compile Include="ViewModels\ExceptionViewModel.cs" />
     <Compile Include="ViewModels\IExceptionViewModel.cs" />
     <Compile Include="Views\MessageDialog.cs" />

@@ -72,7 +72,7 @@
                                   Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type mah:HamburgerMenu}}, Path=ShowSelectionIndicator, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Rectangle x:Name="SelectionIndicator"
                                            HorizontalAlignment="Left"
-                                           Width="4"
+                                           Width="2"
                                            Height="{TemplateBinding Height}"
                                            Fill="{TemplateBinding Foreground}"
                                            Focusable="False"

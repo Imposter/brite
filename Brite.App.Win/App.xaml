@@ -10,9 +10,6 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
-                
-                <!-- FluentWPF -->
-                <ResourceDictionary Source="pack://application:,,,/FluentWPF;component/Styles/Button.xaml"></ResourceDictionary>
 
                 <!-- Local resources -->
                 <ResourceDictionary Source="Resources/Converters.xaml" />
