@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 
 namespace Brite.App.Win.ViewModels
 {
-    public class ExceptionViewModel : CloseableViewModel, IExceptionViewModel
+    public sealed class ExceptionViewModel : CloseableViewModel, IExceptionViewModel
     {
         private readonly IApplicationService _applicationService;
         private readonly Exception _exception;

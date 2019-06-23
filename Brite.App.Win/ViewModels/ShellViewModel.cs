@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using Brite.App.Win.Commands;
 using Brite.App.Win.Extensions;
 using Brite.App.Win.Services;
+using DynamicData;
 using MahApps.Metro.Controls;
 
 namespace Brite.App.Win.ViewModels
@@ -17,18 +19,36 @@ namespace Brite.App.Win.ViewModels
 
         public IEnumerable<IChildViewModel> Pages { get; }
 
-        // TODO: How do we create a control from a view model?
-        public IEnumerable<HamburgerMenuIconItem> MainPages => Pages.Where(p => p is IPageViewModel)
+        public int CurrentPageIndex
+        {
+            get => Pages.Where(p => p is IPageViewModel).IndexOf(CurrentPage);
+            set
+            {
+                if (value > -1)
+                    OnNavigateTo(value);
+            }
+        }
+
+        public int CurrentOptionPageIndex
+        {
+            get => Pages.Where(p => p is IOptionPageViewModel).IndexOf(CurrentPage);
+            set
+            {
+                if (value > -1)
+                    OnNavigateTo(value);
+            }
+        }
+
+        public IEnumerable<HamburgerMenuIconItem> MainPageItems => Pages.Where(p => p is IPageViewModel)
             .Select(p => new HamburgerMenuIconItem { Label = p.Title, Icon = p.Icon, Tag = p });
-        public IEnumerable<HamburgerMenuIconItem> OptionPages => Pages.Where(p => p is IOptionPageViewModel)
+        public IEnumerable<HamburgerMenuIconItem> OptionPageItems => Pages.Where(p => p is IOptionPageViewModel)
             .Select(p => new HamburgerMenuIconItem { Label = p.Title, Icon = p.Icon, Tag = p });
 
         public IChildViewModel CurrentPage { get; private set; }
         public bool CanGoBack => _navigationService.CanGoBack;
         public bool CanGoForward => _navigationService.CanGoForward;
         public ReactiveCommand GoBackCommand { get; }
-        public ReactiveCommand GoForwardCommand { get; } // TODO: Test Navigation -- notifychanged not working
-        public ReactiveCommand GoToCommand { get; }
+        public ReactiveCommand GoForwardCommand { get; }
 
         // TODO: Implement overlay
         public bool HasOverlay => Overlay != null;
@@ -36,10 +56,8 @@ namespace Brite.App.Win.ViewModels
         public BaseViewModel Overlay { get; private set; }
         public ReactiveCommand CloseOverlayCommand { get; }
 
-        // TODO: Pass application global properties through constructor? because we can't pass vars like this using AutoFac
         public ShellViewModel(string title, IEnumerable<IChildViewModel> pages, INavigationService navigationService, IOverlayService overlayService)
         {
-            // TODO: Temp
             Title = title;
 
             Pages = pages;
@@ -60,12 +78,10 @@ namespace Brite.App.Win.ViewModels
             GoForwardCommand.Subscribe(OnNavigateForward)
                 .DisposeWith(this);
 
-            GoToCommand = ReactiveCommand.Create()
-                .DisposeWith(this);
-            GoToCommand.Subscribe(OnNavigateTo)
-                .DisposeWith(this);
-
             // TODO: Overlay
+
+            // Default page
+            OnNavigateTo(0);
         }
 
         private void OnNavigateBack(object obj)
@@ -75,25 +91,23 @@ namespace Brite.App.Win.ViewModels
 
         private void OnNavigateForward(object obj)
         {
-            _navigationService.NavigateBack();
+            _navigationService.NavigateForward();
         }
 
-        private void OnNavigateTo(object obj)
+        private void OnNavigateTo(int index)
         {
-            if (obj is HamburgerMenuItem item)
-            {
-                _navigationService.NavigateTo((IChildViewModel) item.Tag);
-            }
+            _navigationService.NavigateTo(Pages.ElementAt(index));
         }
 
         private void OnNavigated(IChildViewModel page)
         {
             CurrentPage = page;
-            NotifyNavigated();
-        }
 
-        private void NotifyNavigated()
-        {
+            Debug.WriteLine("Navigated to " + CurrentPage);
+
+            this.RaisePropertyChanged(() => CurrentPageIndex);
+            this.RaisePropertyChanged(() => CurrentOptionPageIndex);
+
             this.RaisePropertyChanged(() => CurrentPage);
             this.RaisePropertyChanged(() => CanGoBack);
             this.RaisePropertyChanged(() => CanGoForward);

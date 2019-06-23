@@ -29,7 +29,8 @@ namespace Brite.App.Win.Services
         public void NavigateTo(IChildViewModel viewModel)
         {
             // Add current page to previous history
-            _previousPages.AddToFront(_currentPage);
+            if (_currentPage != null)
+                _previousPages.AddToFront(_currentPage);
 
             // Clear next history
             _nextPages.Clear();

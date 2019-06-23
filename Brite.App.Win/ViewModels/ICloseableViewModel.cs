@@ -9,9 +9,5 @@ namespace Brite.App.Win.ViewModels
         IObservable<Unit> Confirmed { get; }
         IObservable<Unit> Denied { get; }
         IObservable<Unit> Closed { get; } // On keyboard escape or after it is confirmed/denied
-
-        ReactiveCommand ConfirmCommand { get; }
-        ReactiveCommand DenyCommand { get; }
-        ReactiveCommand CancelCommand { get; }
     }
 }

@@ -22,10 +22,10 @@
                     Command="{Binding GoBackCommand}"
                     Content="{ico:Modern ArrowLeft, Width=16, Height=16}"
                     ToolTip="Navigate previous" />
-            <Button Command="{Binding GoForwardCommand}"
+            <!--<Button Command="{Binding GoForwardCommand}"
                     Visibility="{Binding Path=CanGoForward, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Content="{ico:Modern ArrowRight, Width=16, Height=16}"
-                    ToolTip="Navigate next" />
+                    ToolTip="Navigate next" />-->
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
 
@@ -54,13 +54,12 @@
 
     <mah:HamburgerMenu x:Name="HamburgerMenu"
                        PaneBackground="{StaticResource GrayBrush9}"
-                       ItemsSource="{Binding MainPages}"
-                       OptionsItemsSource="{Binding OptionPages}"
+                       ItemsSource="{Binding MainPageItems}"
+                       OptionsItemsSource="{Binding OptionPageItems}"
+                       SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}"
+                       SelectedOptionsIndex="{Binding CurrentOptionPageIndex, Mode=TwoWay}"
                        ItemTemplate="{StaticResource MenuItemTemplate}"
                        OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                       ItemCommand="{Binding GoToCommand}"
-                       ItemCommandParameter="{Binding ElementName=HamburgerMenu, Path=SelectedItem}"
-                       SelectedIndex="0"
                        Style="{StaticResource HamburgerMenuCreatorsStyle}"
                        VerticalScrollBarOnLeftSide="False"
                        DisplayMode="CompactInline">

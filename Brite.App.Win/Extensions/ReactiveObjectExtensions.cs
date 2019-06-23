@@ -10,7 +10,7 @@ namespace Brite.App.Win.Extensions
         public static void RaisePropertyChanged<TSender, T>(this TSender obj, Expression<Func<T>> expression)
             where TSender : IReactiveObject
         {
-            obj.RaisePropertyChanging(ExpressionHelper.Name(expression));
+            obj.RaisePropertyChanged(ExpressionHelper.Name(expression));
         }
     }
 }
