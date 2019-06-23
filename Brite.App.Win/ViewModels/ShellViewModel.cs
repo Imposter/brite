@@ -48,7 +48,6 @@ namespace Brite.App.Win.ViewModels
         public bool CanGoBack => _navigationService.CanGoBack;
         public bool CanGoForward => _navigationService.CanGoForward;
         public ReactiveCommand GoBackCommand { get; }
-        public ReactiveCommand GoForwardCommand { get; }
 
         // TODO: Implement overlay
         public bool HasOverlay => Overlay != null;
@@ -56,7 +55,7 @@ namespace Brite.App.Win.ViewModels
         public BaseViewModel Overlay { get; private set; }
         public ReactiveCommand CloseOverlayCommand { get; }
 
-        public ShellViewModel(string title, IEnumerable<IChildViewModel> pages, INavigationService navigationService, IOverlayService overlayService)
+        public ShellViewModel(string title, IOrderedEnumerable<IChildViewModel> pages, INavigationService navigationService, IOverlayService overlayService)
         {
             Title = title;
 
@@ -73,25 +72,16 @@ namespace Brite.App.Win.ViewModels
             GoBackCommand.Subscribe(OnNavigateBack)
                 .DisposeWith(this);
 
-            GoForwardCommand = ReactiveCommand.Create()
-                .DisposeWith(this);
-            GoForwardCommand.Subscribe(OnNavigateForward)
-                .DisposeWith(this);
-
             // TODO: Overlay
 
             // Default page
-            OnNavigateTo(0);
+            if (Pages.Any())
+                OnNavigateTo(0);
         }
 
         private void OnNavigateBack(object obj)
         {
             _navigationService.NavigateBack();
-        }
-
-        private void OnNavigateForward(object obj)
-        {
-            _navigationService.NavigateForward();
         }
 
         private void OnNavigateTo(int index)
@@ -102,8 +92,6 @@ namespace Brite.App.Win.ViewModels
         private void OnNavigated(IChildViewModel page)
         {
             CurrentPage = page;
-
-            Debug.WriteLine("Navigated to " + CurrentPage);
 
             this.RaisePropertyChanged(() => CurrentPageIndex);
             this.RaisePropertyChanged(() => CurrentOptionPageIndex);

@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
+﻿using System.Windows.Controls;
 using MahApps.Metro.IconPacks;
 
-namespace Brite.App.Win.ViewModels
+namespace Brite.App.Win.ViewModels.Pages
 {
     class DevicesPageViewModel : IPageViewModel
     {
-        // TODO: Add way of sorting by order
+        public int Order => 1;
         public string Title => "Devices";
         public Control Icon => new PackIconModern { Kind = PackIconModernKind.HardwareCpu };
 

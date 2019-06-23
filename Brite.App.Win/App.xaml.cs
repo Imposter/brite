@@ -39,27 +39,19 @@ namespace Brite.App.Win
         }
 
         // TODO: Update
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
-            await Log.InfoAsync("Starting");
-            await Log.InfoAsync("Dispatcher managed thread identifier = {0}", System.Threading.Thread.CurrentThread.ManagedThreadId);
+            // Get application title
+            var attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyTitleAttribute));
+            var assemblyTitleAttribute = attributes.SingleOrDefault() as AssemblyTitleAttribute;
 
-            await Log.InfoAsync("WPF rendering capability (tier) = {0}", RenderCapability.Tier / 0x10000);
-            RenderCapability.TierChanged += async (s, a) => await Log.InfoAsync("WPF rendering capability (tier) = {0}", RenderCapability.Tier / 0x10000);
-
-            base.OnStartup(e);
-
-            Bootstrapper.Initialize(Assembly.GetExecutingAssembly().GetName().Name);
+            // Initialize bootstrapper
+            Bootstrapper.Initialize(assemblyTitleAttribute?.Title);
 
             _messageService = Bootstrapper.Resolve<IMessageService>();
             _schedulerService = Bootstrapper.Resolve<ISchedulerService>();
 
-            var window = new ShellWindow(_schedulerService, _messageService)
-            {
-
-                // The window has to be created before the root visual - all to do with the idling service initialising correctly...
-                DataContext = Bootstrapper.RootVisual
-            };
+            var window = new ShellWindow(_schedulerService, _messageService) { DataContext = Bootstrapper.RootVisual };
 
             // TODO: Cancel event, only shutdown on NotifyIcon exit
             window.Closed += (s, a) =>
@@ -74,7 +66,7 @@ namespace Brite.App.Win
 
             window.Show();
 
-            await Log.InfoAsync("Started");
+            base.OnStartup(e);
         }
 
         private async void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs args)

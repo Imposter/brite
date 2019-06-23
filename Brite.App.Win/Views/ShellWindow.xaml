@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="clr-namespace:Brite.App.Win.Views"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:viewModels="clr-namespace:Brite.App.Win.ViewModels"
@@ -20,26 +19,11 @@
         <mah:WindowCommands ShowSeparators="False">
             <Button Visibility="{Binding Path=CanGoBack, Converter={StaticResource BooleanToVisibilityConverter}}"
                     Command="{Binding GoBackCommand}"
-                    Content="{ico:Modern ArrowLeft, Width=16, Height=16}"
+                    Content="{ico:Modern ArrowLeft, Width=12, Height=12}"
+                    Margin="8, 0, 8, 0"
                     ToolTip="Navigate previous" />
-            <!--<Button Command="{Binding GoForwardCommand}"
-                    Visibility="{Binding Path=CanGoForward, Converter={StaticResource BooleanToVisibilityConverter}}"
-                    Content="{ico:Modern ArrowRight, Width=16, Height=16}"
-                    ToolTip="Navigate next" />-->
         </mah:WindowCommands>
     </mah:MetroWindow.LeftWindowCommands>
-
-    <!-- Right commands -->
-    <!--<mah:MetroWindow.RightWindowCommands>
-        <mah:WindowCommands>
-            <Button Command="{Binding OpenSettings}"
-                    Content="{ico:Modern Settings, Width=16, Height=16}"
-                    ToolTip="Settings" />
-            <Button Command="{Binding CheckForUpdates}"
-                    Content="{ico:Modern Download, Width=16, Height=16}"
-                    ToolTip="Check for updates" />
-        </mah:WindowCommands>
-    </mah:MetroWindow.RightWindowCommands>-->
 
     <mah:MetroWindow.Flyouts>
         <mah:FlyoutsControl>
@@ -52,8 +36,7 @@
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
 
-    <mah:HamburgerMenu x:Name="HamburgerMenu"
-                       PaneBackground="{StaticResource GrayBrush9}"
+    <mah:HamburgerMenu PaneBackground="{StaticResource GrayBrush9}"
                        ItemsSource="{Binding MainPageItems}"
                        OptionsItemsSource="{Binding OptionPageItems}"
                        SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}"

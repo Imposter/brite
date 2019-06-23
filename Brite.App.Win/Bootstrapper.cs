@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Core;
+using Autofac.Extras.Ordering;
 using Brite.App.Win.Services;
 using Brite.App.Win.ViewModels;
 
@@ -43,13 +44,21 @@ namespace Brite.App.Win
             var builder = new ContainerBuilder();
             var assemblies = new[] { Assembly.GetExecutingAssembly() };
 
+            // Register services
             builder.RegisterAssemblyTypes(assemblies)
                   .Where(t => typeof(IService).IsAssignableFrom(t))
                   .SingleInstance()
                   .AsImplementedInterfaces();
 
+            // Register all non-transient types
             builder.RegisterAssemblyTypes(assemblies)
                 .Where(t => typeof(IViewModel).IsAssignableFrom(t) && !typeof(ITransientViewModel).IsAssignableFrom(t))
+                .AsImplementedInterfaces();
+
+            // Register in-order types
+            builder.RegisterAssemblyTypes(assemblies)
+                .Where(t => typeof(IChildViewModel).IsAssignableFrom(t))
+                .OrderBy(t => ((IChildViewModel)t).Order)
                 .AsImplementedInterfaces();
 
             // Several view model instances are transitory and created on the fly, if these are tracked by the container then they
@@ -59,6 +68,8 @@ namespace Brite.App.Win
                 .Where(t => typeof(ITransientViewModel).IsAssignableFrom(t))
                 .AsImplementedInterfaces()
                 .ExternallyOwned();
+
+            builder.RegisterSource(new OrderedRegistrationSource());
 
             _rootScope = builder.Build();
         }
