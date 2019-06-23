@@ -7,6 +7,7 @@
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:ico="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:viewModels="clr-namespace:Brite.App.Win.ViewModels"
+    xmlns:svgc="http://sharpvectors.codeplex.com/svgc/"
     mc:Ignorable="d"
     Title="{Binding Title}"
     Width="1280"
@@ -36,39 +37,55 @@
         </mah:FlyoutsControl>
     </mah:MetroWindow.Flyouts>
 
-    <mah:HamburgerMenu PaneBackground="{StaticResource GrayBrush9}"
-                       ItemsSource="{Binding MainPageItems}"
-                       OptionsItemsSource="{Binding OptionPageItems}"
-                       SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}"
-                       SelectedOptionsIndex="{Binding CurrentOptionPageIndex, Mode=TwoWay}"
-                       ItemTemplate="{StaticResource MenuItemTemplate}"
-                       OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                       Style="{StaticResource HamburgerMenuCreatorsStyle}"
-                       VerticalScrollBarOnLeftSide="False"
-                       DisplayMode="CompactInline">
+    <Grid>
+        <Image Source="{svgc:SvgImage Source=../Assets/Images/Mesh.svg}" Stretch="None" HorizontalAlignment="Right"
+               VerticalAlignment="Bottom" Opacity="0.5" />
+        <Rectangle>
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1" Opacity="0.5">
+                    <GradientStop Color="Transparent" Offset="0.0" />
+                    <GradientStop Color="{StaticResource Gray10}" Offset="0.75" />
+                    <GradientStop Color="{StaticResource Gray5}" Offset="1" />
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+        <mah:HamburgerMenu ItemsSource="{Binding MainPageItems}"
+                           OptionsItemsSource="{Binding OptionPageItems}"
+                           SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}"
+                           SelectedOptionsIndex="{Binding CurrentOptionPageIndex, Mode=TwoWay}"
+                           ItemTemplate="{StaticResource MenuItemTemplate}"
+                           OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+                           Style="{StaticResource HamburgerMenuCreatorsStyle}"
+                           VerticalScrollBarOnLeftSide="False"
+                           DisplayMode="CompactInline">
 
-        <!-- Content -->
-        <mah:HamburgerMenu.Content>
-            <MultiBinding Converter="{StaticResource SelectedItemToContentConverter}">
-                <Binding Mode="OneWay"
-                         Path="SelectedItem"
-                         RelativeSource="{RelativeSource Self}" />
-                <Binding Mode="OneWay"
-                         Path="SelectedOptionsItem"
-                         RelativeSource="{RelativeSource Self}" />
-            </MultiBinding>
-        </mah:HamburgerMenu.Content>
+            <mah:HamburgerMenu.PaneBackground>
+                <SolidColorBrush Color="LightGray" Opacity="0.8" />
+            </mah:HamburgerMenu.PaneBackground>
 
-        <!-- Content template -->
-        <mah:HamburgerMenu.ContentTemplate>
-            <DataTemplate DataType="{x:Type mah:HamburgerMenuItem}">
-                <ContentControl Content="{Binding Tag}"
-                                Margin="4"
-                                Focusable="False"
-                                Foreground="{DynamicResource BlackBrush}" />
-            </DataTemplate>
-        </mah:HamburgerMenu.ContentTemplate>
+            <!-- Content -->
+            <mah:HamburgerMenu.Content>
+                <MultiBinding Converter="{StaticResource SelectedItemToContentConverter}">
+                    <Binding Mode="OneWay"
+                             Path="SelectedItem"
+                             RelativeSource="{RelativeSource Self}" />
+                    <Binding Mode="OneWay"
+                             Path="SelectedOptionsItem"
+                             RelativeSource="{RelativeSource Self}" />
+                </MultiBinding>
+            </mah:HamburgerMenu.Content>
 
-    </mah:HamburgerMenu>
+            <!-- Content template -->
+            <mah:HamburgerMenu.ContentTemplate>
+                <DataTemplate DataType="{x:Type mah:HamburgerMenuItem}">
+                    <mah:TransitioningContentControl Content="{Binding Tag}"
+                                                     Margin="4"
+                                                     Focusable="False"
+                                                     Foreground="{DynamicResource BlackBrush}" />
+                </DataTemplate>
+            </mah:HamburgerMenu.ContentTemplate>
+
+        </mah:HamburgerMenu>
+    </Grid>
 
 </mah:MetroWindow>

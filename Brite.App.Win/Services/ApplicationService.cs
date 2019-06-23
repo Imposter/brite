@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 
 namespace Brite.App.Win.Services
@@ -38,13 +39,12 @@ namespace Brite.App.Win.Services
 
         public void OpenFolder(string folder)
         {
-            System.Diagnostics.Process.Start("explorer.exe", folder);
+            Process.Start("explorer.exe", folder);
         }
 
         private static string GetLogFolder()
         {
-            // TODO: Use registry or a config file
-            throw new NotImplementedException();
+            return Path.Combine(Environment.CurrentDirectory, "Logs");
         }
     }
 }

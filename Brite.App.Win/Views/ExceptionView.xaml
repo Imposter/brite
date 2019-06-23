@@ -55,7 +55,6 @@
                             Margin="0,0,5,5"
                             Command="{Binding Path=CopyDetailsCommand, Mode=OneWay}" />
 
-                    <!-- TODO: Implement -->
                     <Button Content="Open Log Folder"
                             Margin="0,0,0,5"
                             Command="{Binding Path=OpenLogFolderCommand, Mode=OneWay}" />

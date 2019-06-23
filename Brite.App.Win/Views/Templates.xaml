@@ -5,6 +5,7 @@
 
         <ResourceDictionary Source="ExceptionView.xaml"></ResourceDictionary>
         <ResourceDictionary Source="Pages/HomePage.xaml"></ResourceDictionary>
+        <ResourceDictionary Source="Pages/DevicesPage.xaml"></ResourceDictionary>
 
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

@@ -102,6 +102,12 @@ namespace Brite.Win.Sys.Service
                 await _briteServer.StopAsync();
         }
 
+        protected override void OnShutdown()
+        {
+            if (_running)
+                OnStop();
+        }
+
         private async void ChangeThreadProcess()
         {
             while (_running)

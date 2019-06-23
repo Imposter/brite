@@ -55,15 +55,23 @@ namespace Brite.App.Win
 
             // Register in-order types
             builder.RegisterAssemblyTypes(assemblies)
-                .Where(t => typeof(IChildViewModel).IsAssignableFrom(t))
+                .Where(t => typeof(IChildViewModel).IsAssignableFrom(t) && !typeof(ITransientViewModel).IsAssignableFrom(t))
                 .OrderBy(t => ((IChildViewModel)t).Order)
                 .AsImplementedInterfaces();
 
             // Several view model instances are transitory and created on the fly, if these are tracked by the container then they
             // won't be disposed of in a timely manner
             builder.RegisterAssemblyTypes(assemblies)
+                .Where(t => typeof(IChildViewModel).IsAssignableFrom(t))
+                .Where(t => typeof(ITransientViewModel).IsAssignableFrom(t))
+                .OrderBy(t => ((IChildViewModel)t).Order)
+                .AsImplementedInterfaces()
+                .ExternallyOwned();
+
+            builder.RegisterAssemblyTypes(assemblies)
                 .Where(t => typeof(IViewModel).IsAssignableFrom(t))
                 .Where(t => typeof(ITransientViewModel).IsAssignableFrom(t))
+                .Where(t => !typeof(IChildViewModel).IsAssignableFrom(t))
                 .AsImplementedInterfaces()
                 .ExternallyOwned();
 

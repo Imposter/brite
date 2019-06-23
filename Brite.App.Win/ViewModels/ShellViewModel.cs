@@ -58,6 +58,7 @@ namespace Brite.App.Win.ViewModels
                 .Subscribe(OnNavigated)
                 .DisposeWith(this);
 
+            // TODO: Update our commands to look like this? https://dzone.com/articles/the-mvvm-pattern-design-time-data
             GoBackCommand = ReactiveCommand.Create()
                 .DisposeWith(this);
             GoBackCommand.Subscribe(OnNavigateBack)

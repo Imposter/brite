@@ -14,6 +14,7 @@ namespace Brite.App.Win.ViewModels
         public string Message => _exception.ToString();
 
         public ReactiveCommand CopyDetailsCommand { get; }
+        public ReactiveCommand OpenLogFolderCommand { get; }
         public ReactiveCommand ExitCommand { get; }
         public ReactiveCommand RestartCommand { get; }
 
@@ -26,6 +27,12 @@ namespace Brite.App.Win.ViewModels
                 .DisposeWith(this);
 
             CopyDetailsCommand.Subscribe(o => CopyDetails())
+                .DisposeWith(this);
+
+            OpenLogFolderCommand = ReactiveCommand.Create()
+                .DisposeWith(this);
+
+            OpenLogFolderCommand.Subscribe(o => OpenLogFolder())
                 .DisposeWith(this);
 
             ExitCommand = ReactiveCommand.Create()
@@ -44,6 +51,11 @@ namespace Brite.App.Win.ViewModels
         private void CopyDetails()
         {
             _applicationService.CopyToClipboard(_exception.ToString());
+        }
+
+        private void OpenLogFolder()
+        {
+            _applicationService.OpenFolder(_applicationService.LogFolder);
         }
 
         private void Exit()
